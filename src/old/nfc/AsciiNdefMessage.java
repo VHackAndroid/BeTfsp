@@ -1,4 +1,4 @@
-package nfc.pairing;
+package old.nfc;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

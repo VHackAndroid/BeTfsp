@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package nfc.pairing.record;
+package old.nfc;
 
 import android.app.Activity;
 import android.view.LayoutInflater;

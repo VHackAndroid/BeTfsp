@@ -13,15 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package nfc.pairing;
+package old.nfc;
 
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 
-import nfc.pairing.record.*;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.vub.at.nfcpoker.communication.*;
 
 /**
  * Utility class for creating {@link ParsedNdefMessage}s.

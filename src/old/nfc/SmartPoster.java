@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nfc.pairing.record;
+package old.nfc;
 
 import android.app.Activity;
 import android.nfc.FormatException;
@@ -26,15 +26,17 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 import nfc.pairing.*;
-import nfc.pairing.record.*;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+
+import edu.vub.at.nfcpoker.communication.*;
 
 /**
  * A representation of an NFC Forum "Smart Poster".

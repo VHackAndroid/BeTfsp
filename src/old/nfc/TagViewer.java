@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nfc.pairing;
+package old.nfc;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -28,9 +28,10 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import nfc.pairing.record.*;
 
 import java.util.List;
+
+import edu.vub.at.nfcpoker.communication.*;
 
 /**
  * An {@link Activity} which handles a broadcast of a new tag that the device

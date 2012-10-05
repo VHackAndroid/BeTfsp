@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nfc.pairing;
+package old.nfc;
 
 /**
  * This class provides a list of fake NFC Ndef format Tags.
