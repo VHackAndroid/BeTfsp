@@ -16,3 +16,6 @@ gen/
 
 # Local configuration file (sdk path, etc)
 local.properties
+
+/res/raw/.DS_Store
+.DS_Store
