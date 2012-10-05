@@ -1,7 +1,11 @@
-package edu.vub.at.nfcpoker;
+package edu.vub.at.nfcpoker.ui;
 
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
+
+import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.R.layout;
+import edu.vub.at.nfcpoker.R.menu;
 
 import nfc.pairing.AsciiNdefMessage;
 import android.nfc.NfcAdapter;
@@ -47,14 +51,6 @@ public class Splash extends Activity {
         intent.putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES, AsciiNdefMessage.CreateNdefMessage(UUID));
         startActivity(intent);*/
         
-    	// Create a new ImageView
-        ImageView imageView = new ImageView(this);
-        // Set the background color to white
-        imageView.setBackgroundColor(Color.WHITE);
-        // Get a drawable from the parsed SVG and set it as the drawable for the ImageView
-        imageView.setImageDrawable(getResources().getDrawable(R.drawable.clubs_10c));
-        // Set the ImageView as the content view for the Activity
-        setContentView(imageView);
     }
 
     @Override
