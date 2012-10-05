@@ -4,5 +4,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_splash">Splash</string>
+    <string name="title_activity_test_comm_lib">TestCommLibActivity</string>
 
 </resources>
