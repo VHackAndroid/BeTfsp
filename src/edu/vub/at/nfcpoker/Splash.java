@@ -1,20 +1,64 @@
 package edu.vub.at.nfcpoker;
 
+import java.io.IOException;
+
+import edu.vub.at.commlib.CommLib;
+import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.commlib.DiscoveryListener;
+import edu.vub.at.nfcpoker.comm.PokerServer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.Toast;
 
 public class Splash extends Activity {
 
-    @Override
+    public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
+
+		@Override
+		protected CommLibConnectionInfo doInBackground(Void... arg0) {
+			try {
+				return CommLib.discover(PokerServer.class);
+			} catch (IOException e) {
+				Log.d("Discovery", "Could not start discovery", e);
+				return null;
+			}
+		}
+
+		@Override
+		protected void onPostExecute(CommLibConnectionInfo result) {
+			super.onPostExecute(result);
+			if (result != null) {
+				Intent i = new Intent(Splash.this, TestCommLibActivity.class);
+				i.putExtra("ip", result.getAddress());
+				i.putExtra("port", result.getPort());
+				startActivity(i);
+			} else {
+				Toast.makeText(Splash.this, "Could not discover hosts", Toast.LENGTH_SHORT).show();
+			}
+		}
+
+	}
+
+	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        finish();
-        final Intent i = new Intent(this, TestCommLibActivity.class);
-        i.putExtra("ip", "192.168.1.135");
-		startActivity(i);
+        
+        Button discover = (Button) findViewById(R.id.discover);
+        discover.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				new DiscoveryAsyncTask().execute();
+			}
+		});
     }
 
     @Override
