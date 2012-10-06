@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import android.util.Log;
+
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -69,6 +71,10 @@ public class CommLib {
 
 	public static void resolveFuture(UUID futureId, Object futureValue) {
 		Future f = futures.remove(futureId);
+		if (f == null) {
+			Log.w("wePoker", "Future null!");
+			return;
+		}
 		f.resolve(futureValue);	
 	}
 }
