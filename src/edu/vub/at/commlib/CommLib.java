@@ -17,11 +17,10 @@ public class CommLib {
 		final String targetClass = klass.getCanonicalName();
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
-		k.register(String.class);
-		k.register(HashMap.class);
 		k.register(CommLibConnectionInfo.class);
 		
-		DatagramSocket ds = new DatagramSocket(54333);
+		DatagramSocket ds = new DatagramSocket(54333, InetAddress.getByName("192.168.1.255"));
+		ds.setBroadcast(true);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
 		while (true) {
 			ds.receive(dp);
@@ -35,14 +34,13 @@ public class CommLib {
 	public static void export(CommLibConnectionInfo clci) throws IOException {
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
-		k.register(String.class);
-		k.register(HashMap.class);
 		k.register(CommLibConnectionInfo.class);
 		Output o = new Output(1024);
 		k.writeObject(o, clci);
 		final byte[] buf = o.toBytes();
 		
 		DatagramSocket ds = new DatagramSocket();
+		ds.setBroadcast(true);
 		DatagramPacket dp = new DatagramPacket(buf, buf.length);
 		ds.connect(new InetSocketAddress(InetAddress.getByName("192.168.1.255"), 54333));
 		while (true) {

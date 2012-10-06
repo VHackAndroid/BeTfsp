@@ -6,6 +6,8 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.commlib.DiscoveryListener;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiManager.MulticastLock;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -23,11 +25,16 @@ public class Splash extends Activity {
 
 		@Override
 		protected CommLibConnectionInfo doInBackground(Void... arg0) {
+			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+			MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
+			ml.acquire();
 			try {
 				return CommLib.discover(PokerServer.class);
 			} catch (IOException e) {
 				Log.d("Discovery", "Could not start discovery", e);
 				return null;
+			} finally {
+				ml.release();
 			}
 		}
 
@@ -37,7 +44,7 @@ public class Splash extends Activity {
 			if (result != null) {
 				Intent i = new Intent(Splash.this, TestCommLibActivity.class);
 				i.putExtra("ip", result.getAddress());
-				i.putExtra("port", result.getPort());
+				i.putExtra("port", Integer.parseInt(result.getPort()));
 				startActivity(i);
 			} else {
 				Toast.makeText(Splash.this, "Could not discover hosts", Toast.LENGTH_SHORT).show();

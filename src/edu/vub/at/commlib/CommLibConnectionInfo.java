@@ -1,25 +1,24 @@
 package edu.vub.at.commlib;
 
-import java.util.HashMap;
+import java.util.Map;
 
 public class CommLibConnectionInfo {
 	public String serverType_;
-	public HashMap<String, String> extra_;
-	
+	public String[] extra_;
 	public CommLibConnectionInfo() {
 		// Only for Kryo
 	}
 	
-	CommLibConnectionInfo(String serverType, HashMap<String, String> extra) {
+	CommLibConnectionInfo(String serverType, String[] extra) {
 		serverType_ = serverType;
 		extra_  = extra;
 	}
 
 	public String getAddress() {
-		return extra_.get("address");
+		return extra_[0];
 	}
 
 	public String getPort() {
-		return extra_.get("port");
+		return extra_[1];
 	}
 }
