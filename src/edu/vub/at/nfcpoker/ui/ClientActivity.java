@@ -1,16 +1,26 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
+import edu.vub.at.commlib.CommLib;
+import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
+import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
+import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +49,7 @@ import android.widget.ViewFlipper;
 public class ClientActivity extends Activity implements OnClickListener{
 
 	// Game state
-	public static GameState GAME_STATE = GameState.INIT;
+	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentBet = 0;
 	private static int currentMoney = 0;
 	
@@ -62,9 +72,9 @@ public class ClientActivity extends Activity implements OnClickListener{
     
     
 	// Enums
-	public enum GameState {
-	    INIT, NFCPAIRING, HOLE, HOLE_NEXT, FLOP, FLOP_NEXT, TURN, TURN_NEXT, RIVER, RIVER_NEXT
-	}
+//	public enum GameState {
+//	    INIT, NFCPAIRING, HOLE, HOLE_NEXT, FLOP, FLOP_NEXT, TURN, TURN_NEXT, RIVER, RIVER_NEXT
+//	}
 	
     @Override
     @SuppressWarnings("unused")
@@ -162,6 +172,76 @@ public class ClientActivity extends Activity implements OnClickListener{
         card2.setPages(mPages2);
         */
         
+        listenToGameServer();
+    }
+    
+    private void listenToGameServer() {
+    	final TimerTask tt = new TimerTask() {
+    		public void run() {
+    			try {
+    				Log.v("AMBIENTPOKER", "Looking for server...");
+    				CommLibConnectionInfo clci = CommLib.discover(PokerServer.class);
+    				Log.v("AMBIENTPOKER", "Discovered server at " + clci.getAddress());
+    				Client c = clci.connect(new Listener() {
+    					@Override
+    					public void received(Connection c, Object m) {
+    						super.received(c, m);
+					
+    						Log.v("AMBIENTPOKER", "Received message " + m.toString());
+					
+    						if (m instanceof GameState) {
+    							GameState newGameState = (GameState) m;
+    							switch (newGameState) {
+    							case STOPPED:
+    								Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
+    								break;
+    							case WAITING_FOR_PLAYERS:
+    								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+    								break;
+    							case PREFLOP:
+    								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
+    								break;
+    							case FLOP:
+    								Log.v("AMBIENTPOKER", "Game state changed to FLOP");
+    								break;
+    							case TURN:
+    								Log.v("AMBIENTPOKER", "Game state changed to TURN");
+    								break;
+    							case RIVER:
+    								Log.v("AMBIENTPOKER", "Game state changed to RIVER");
+    								break;
+    							case END_OF_ROUND:
+    								Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
+    								break;
+    							}
+    						}
+    						
+    						if (m instanceof ReceivePublicCards) {
+    							ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
+    							Log.v("AMBIENTPOKER", "Received public cards: ");
+    							Card[] cards = newPublicCards.cards;
+    							for (int i = 0; i < cards.length; i++) {
+    								Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
+    							}
+    						}
+					
+    						if (m instanceof ReceiveHoleCardsMessage) {
+    							ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
+    							Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+    						}
+						
+    					}
+    				});
+    			} catch (IOException e) {
+    				Log.e("AMBIENTPOKER", "Could not discover server: ");
+    				e.printStackTrace();
+    			}
+    		}
+    	};
+    	
+    	Timer timer = new Timer();
+    	timer.schedule(tt, 1000);
+    		
     }
 
     
@@ -211,21 +291,23 @@ public class ClientActivity extends Activity implements OnClickListener{
     }
     
     private boolean canViewCards() {
-    	return ((GAME_STATE == GameState.HOLE) ||
-    			(GAME_STATE == GameState.HOLE_NEXT) ||
-    			(GAME_STATE == GameState.FLOP) ||
-    			(GAME_STATE == GameState.FLOP_NEXT) ||
-    			(GAME_STATE == GameState.TURN) ||
-    			(GAME_STATE == GameState.TURN_NEXT) ||
-    			(GAME_STATE == GameState.RIVER) ||
-    	    	(GAME_STATE == GameState.RIVER_NEXT));
+//    	return ((GAME_STATE == GameState.HOLE) ||
+//    			(GAME_STATE == GameState.HOLE_NEXT) ||
+//    			(GAME_STATE == GameState.FLOP) ||
+//    			(GAME_STATE == GameState.FLOP_NEXT) ||
+//    			(GAME_STATE == GameState.TURN) ||
+//    			(GAME_STATE == GameState.TURN_NEXT) ||
+//    			(GAME_STATE == GameState.RIVER) ||
+//    	    	(GAME_STATE == GameState.RIVER_NEXT));
+    	return true;
     }
     
     private boolean canBet() {
-    	return ((GAME_STATE == GameState.HOLE) ||
-    			(GAME_STATE == GameState.FLOP) ||
-    			(GAME_STATE == GameState.TURN) ||
-    			(GAME_STATE == GameState.RIVER));
+//    	return ((GAME_STATE == GameState.HOLE) ||
+//    			(GAME_STATE == GameState.FLOP) ||
+//    			(GAME_STATE == GameState.TURN) ||
+//    			(GAME_STATE == GameState.RIVER));
+    	return true;
     }
     
     // Interactivity
