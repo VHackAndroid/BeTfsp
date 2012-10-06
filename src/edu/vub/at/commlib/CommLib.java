@@ -6,6 +6,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -15,6 +17,7 @@ public class CommLib {
 
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
+	private static Map<UUID, Future> futures = new HashMap<UUID, Future>();
 
 	public static CommLibConnectionInfo discover(Class<?> klass) throws IOException {
 		final String targetClass = klass.getCanonicalName();
@@ -54,5 +57,16 @@ public class CommLib {
 			} catch (InterruptedException e) {
 			}
 		}
+	}
+	
+	public static Future createFuture() {
+		Future f = new Future(null);
+		futures.put(f.getFutureId(), f);
+		return f;
+	}
+
+	public static void resolveFuture(UUID futureId, Object futureValue) {
+		Future f = futures.remove(futureId);
+		f.resolve(futureValue);	
 	}
 }

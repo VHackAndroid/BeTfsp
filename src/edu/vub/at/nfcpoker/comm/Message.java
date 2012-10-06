@@ -82,8 +82,8 @@ public interface Message {
 	}
 	
 	public class FutureMessage extends TimestampedMessage {
-		UUID futureId;
-		Object futureValue;
+		public UUID futureId;
+		public Object futureValue;
 		
 		public FutureMessage(UUID futureId_, Object futureValue_) {
 			futureId = futureId_;
