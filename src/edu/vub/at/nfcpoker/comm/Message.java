@@ -67,7 +67,7 @@ public interface Message {
 		}
 	}
 	
-	public class ReceiveHoleCardsMessage extends TimestampedMessage {
+	public static class ReceiveHoleCardsMessage extends TimestampedMessage {
 		public Card card1, card2;
 		
 		public ReceiveHoleCardsMessage(Card one, Card two) {
@@ -84,7 +84,7 @@ public interface Message {
 		}
 	}
 	
-	public class ReceivePublicCards extends TimestampedMessage {
+	public static class ReceivePublicCards extends TimestampedMessage {
 		public Card[] cards;
 		
 		public ReceivePublicCards(Card[] cards_) {
@@ -105,7 +105,7 @@ public interface Message {
 		}
 	}
 	
-	public class FutureMessage extends TimestampedMessage {
+	public static class FutureMessage extends TimestampedMessage {
 		public UUID futureId;
 		public Object futureValue;
 		
@@ -123,7 +123,7 @@ public interface Message {
 		}
 	}
 	
-	public class RequestClientActionFutureMessage extends TimestampedMessage {
+	public static class RequestClientActionFutureMessage extends TimestampedMessage {
 		public UUID futureId;
 		
 		public RequestClientActionFutureMessage(Future<?> f) {
@@ -139,7 +139,7 @@ public interface Message {
 		}
 	}
 
-	public class ClientActionMessage extends TimestampedMessage {
+	public static class ClientActionMessage extends TimestampedMessage {
 		
 		public int userId;
 		public ClientAction action;
