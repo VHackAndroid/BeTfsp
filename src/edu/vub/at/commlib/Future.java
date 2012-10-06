@@ -7,6 +7,10 @@ public class Future<T> {
 		void resolve(T value);
 	}
 	
+	public Future() {
+		
+	}
+	
 	public Future(FutureListener<T> fl) {
 		listener = fl;
 	}
@@ -15,13 +19,13 @@ public class Future<T> {
 	FutureListener<T> listener;
 	T value;
 	
-	void resolve(T value) {
+	public void resolve(T value) {
 		this.value = value;
 		if (listener != null)
 			listener.resolve(value);
 	}
 	
-	synchronized T get() {
+	public synchronized T get() {
 		setFutureListener(new FutureListener<T>() {
 			@Override
 			public void resolve(T value) {
@@ -38,11 +42,11 @@ public class Future<T> {
 		return value;
 	}
 	
-	void setFutureListener(FutureListener<T> fl) {
+	public void setFutureListener(FutureListener<T> fl) {
 		listener = fl;
 	}
 	
-	UUID getFutureId() {
+	public UUID getFutureId() {
 		return id;
 	}
 }
