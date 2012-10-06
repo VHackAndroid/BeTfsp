@@ -1,35 +1,30 @@
 package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.NavigableSet;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.Vector;
+
+import android.util.Log;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 
-import android.app.Activity;
-import android.util.Log;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.commlib.FoldingClient;
 import edu.vub.at.commlib.Future;
 import edu.vub.at.commlib.UUIDSerializer;
 import edu.vub.at.nfcpoker.comm.Message;
-import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
-import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
+import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
 
 public class ConcretePokerServer extends PokerServer  {
@@ -72,6 +67,7 @@ public class ConcretePokerServer extends PokerServer  {
 						super.received(c, msg);
 						if (msg instanceof FutureMessage) {
 							FutureMessage fm = (FutureMessage) msg;
+							Log.d("PokerServer", "Resolving future " + fm.futureId + "(" + CommLib.futures.get(fm.futureId) + ") with value " + fm.futureValue);
 							CommLib.resolveFuture(fm.futureId, fm.futureValue);
 						}
 					}
@@ -123,6 +119,10 @@ public class ConcretePokerServer extends PokerServer  {
 				for (Integer i : clientsInGame.keySet()) {
 					if (clientsInGame.get(i) == c) {
 						clientsInGame.remove(i);
+						Future<ClientAction> fut = actionFutures.get(i);
+						if (fut != null && ! fut.isResolved()) 
+							fut.resolve(new ClientAction(Message.ClientActionType.Fold, 0));
+						return;
 					}
 				}
 			}
@@ -130,6 +130,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 		public TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
 		public TreeMap<Integer, Connection> clientsInGame = new TreeMap<Integer, Connection>();
+		public TreeMap<Integer, Future<ClientAction>> actionFutures = new TreeMap<Integer, Future<ClientAction>>();  
 		public GameState gameState;
 			
 		public void run() {
@@ -137,6 +138,7 @@ public class ConcretePokerServer extends PokerServer  {
 			while (true) {
 				gui.resetCards();
 				synchronized(this) {
+					actionFutures.clear();
 					clientsInGame.putAll(gameLoop.newClients);
 					newClients.clear();
 					for (Integer i : clientsInGame.keySet()) {
@@ -157,7 +159,6 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				Deck deck = new Deck();
 				
-				Vector<Future<ClientAction>> actionFutures = new Vector<Future<ClientAction>>();  
 				// hole cards
 				newState(GameState.PREFLOP);
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
@@ -167,32 +168,32 @@ public class ConcretePokerServer extends PokerServer  {
 					Connection c = clientsInGame.get(clientNum);
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
-				createActionFutures(actionFutures);
-				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				createActionFutures();
+				roundTable();
 				
 				// flop cards
 				Card[] flop = deck.drawCards(3);
 				gui.revealCards(flop);
 				newState(GameState.FLOP);
 				broadcast(new ReceivePublicCards(flop));
-				createActionFutures(actionFutures);
-				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				createActionFutures();
+				roundTable();
 
 				// turn cards
 				Card[] turn = deck.drawCards(1);
 				gui.revealCards(turn);
 				newState(GameState.TURN);
 				broadcast(new ReceivePublicCards(turn));
-				createActionFutures(actionFutures);
-				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				createActionFutures();
+				roundTable();
 				
 				// river cards
 				Card[] river = deck.drawCards(1);
 				gui.revealCards(river);
 				newState(GameState.RIVER);
 				broadcast(new ReceivePublicCards(river));
-				createActionFutures(actionFutures);
-				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				createActionFutures();
+				roundTable();
 				
 				// results
 				newState(GameState.END_OF_ROUND);
@@ -206,27 +207,32 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 
-		public void createActionFutures(Vector<Future<ClientAction>> actionFutures) {
-			Iterator<Future<ClientAction>> it = ((Vector<Future<ClientAction>>) actionFutures.clone()).iterator();
-			actionFutures.clear();
+		public void createActionFutures() {
 			for (Integer i : clientsInGame.navigableKeySet()) {
-				Future<ClientAction> oldFut = it.hasNext() ? it.next() : null;
-				ClientAction oldAction = oldFut != null ? oldFut.get() : null;
-				if (oldFut == null || oldAction != null && oldAction.type != ClientActionType.Fold) {
-					Future<ClientAction> fut = new Future<ClientAction>();
-					actionFutures.add(fut);
-					clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut));								
+				Future<ClientAction> oldFut = actionFutures.get(i);
+				if (oldFut != null && oldFut.isResolved() && oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
+					actionFutures.put(i, oldFut);
 				} else {
-					actionFutures.add(oldFut);
+					Future<ClientAction> fut = CommLib.createFuture();
+					actionFutures.put(i, fut);
+					Log.d("PokerServer", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
+					clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut));
+					if (oldFut != null && !oldFut.isResolved())
+						oldFut.setFutureListener(null);
 				}
 			}
 		}
 
-		public void roundTable(Vector<Future<ClientAction>> actionFutures, NavigableSet<Integer> navigableSet) {
-			Iterator<Integer> it = clientsInGame.navigableKeySet().iterator();
-			for (Future<ClientAction> fut: actionFutures) {
+		public void roundTable() {
+			TreeMap<Integer, Future<ClientAction>> clonedFutures;
+			synchronized (this) {
+				clonedFutures = (TreeMap<Integer, Future<ClientAction>>) actionFutures.clone(); 
+			}
+			
+			for (Integer i: clonedFutures.navigableKeySet()) {
+				Future<ClientAction> fut = clonedFutures.get(i);
 				ClientAction ca = fut.get();
-				broadcast(new ClientActionMessage(ca, it.next()));
+				broadcast(new ClientActionMessage(ca, i));
 				switch (ca.type) { // todo
 				case RaiseTo:
 					break;

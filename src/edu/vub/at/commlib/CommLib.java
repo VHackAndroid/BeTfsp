@@ -17,7 +17,7 @@ public class CommLib {
 
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
-	private static Map<UUID, Future> futures = new HashMap<UUID, Future>();
+	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
 
 	public static CommLibConnectionInfo discover(Class<?> klass) throws IOException {
 		final String targetClass = klass.getCanonicalName();

@@ -40,6 +40,7 @@ import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
+import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
@@ -229,7 +230,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		});
 		
         
-        incrementBetAmount(0);
         updateBetAmount(0);
         
         listenToGameServer();
@@ -258,7 +258,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 
 	private void disableActions() {
-		clearPendingFuture();
 		runOnUiThread(new Runnable() {
 			
 			@Override
@@ -294,8 +293,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 					
     						Log.v("AMBIENTPOKER", "Received message " + m.toString());
 					
-    						if (m instanceof GameState) {
-    							GameState newGameState = (GameState) m;
+    						if (m instanceof StateChangeMessage) {
+    							StateChangeMessage scm = (StateChangeMessage) m;
+    							GameState newGameState = scm.newState;
     							disableActions();
     							switch (newGameState) {
     							case STOPPED:
@@ -309,7 +309,6 @@ public class ClientActivity extends Activity implements OnClickListener {
     							case PREFLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
     								showCards();
-    								clearPendingFuture();
     								break;
     							case FLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to FLOP");
@@ -366,6 +365,7 @@ public class ClientActivity extends Activity implements OnClickListener {
     						if (m instanceof RequestClientActionFutureMessage) {
     							final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
     							pendingFuture = rcafm.futureId;
+    							Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
     							enableActions();
     						}
     					}

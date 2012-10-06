@@ -21,8 +21,14 @@ public class Future<T> {
 	
 	public void resolve(T value) {
 		this.value = value;
-		if (listener != null)
+		if (listener != null) {
 			listener.resolve(value);
+			listener = null;
+		}
+	}
+	
+	public boolean isResolved() {
+		return value != null;
 	}
 	
 	public synchronized T get() {
@@ -50,5 +56,9 @@ public class Future<T> {
 	
 	public UUID getFutureId() {
 		return id;
+	}
+
+	public T unsafeGet() {
+		return value;
 	}
 }
