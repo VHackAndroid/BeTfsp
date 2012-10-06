@@ -14,6 +14,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
@@ -51,6 +52,16 @@ public class ConcretePokerServer extends PokerServer  {
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
 					}
+					
+					@Override
+					public void received(Connection c, Object msg) {
+						super.received(c, msg);
+						if (msg instanceof FutureMessage) {
+							
+						}
+					}
+					
+					@Override
 					public void disconnected(Connection c) {
 						super.disconnected(c);
 						Log.d("PokerServer", "Client disconnected: " + c.getRemoteAddressTCP());
@@ -125,7 +136,6 @@ public class ConcretePokerServer extends PokerServer  {
 				}
 				
 				Deck deck = new Deck();
-				Card[] commonCards = deck.drawCards(5);
 				
 				// hole cards
 				newState(GameState.PREFLOP);
@@ -150,7 +160,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 				// river cards
 				Card[] river = deck.drawCards(1);
-				broadcast(new ReceivePublicCards(turn));
+				broadcast(new ReceivePublicCards(river));
 				newState(GameState.RIVER);
 
 				// results
