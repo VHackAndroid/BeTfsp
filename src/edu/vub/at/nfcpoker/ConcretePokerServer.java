@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.Vector;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -18,6 +19,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.commlib.FoldingClient;
 import edu.vub.at.commlib.Future;
+import edu.vub.at.commlib.UUIDSerializer;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.PokerServer;
@@ -54,6 +56,7 @@ public class ConcretePokerServer extends PokerServer  {
 				Server s = new Server();
 				Kryo k = s.getKryo();
 				k.setRegistrationRequired(false);
+				k.register(UUID.class, new UUIDSerializer());
 				s.bind(CommLib.SERVER_PORT);
 				s.start();
 				s.addListener(new Listener() {
@@ -262,6 +265,4 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 	}
-
-
 }

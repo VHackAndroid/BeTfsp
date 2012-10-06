@@ -1,10 +1,10 @@
 package edu.vub.at.commlib;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.UUID;
 
+import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Client;
-import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 public class CommLibConnectionInfo {
@@ -34,7 +34,9 @@ public class CommLibConnectionInfo {
 	public static Client connect(String ipAddress, int port, Listener listener) throws IOException {
 		Client ret = new Client();
 		ret.start();
-		ret.getKryo().setRegistrationRequired(false);
+		Kryo k = ret.getKryo();
+		k.setRegistrationRequired(false);
+		k.register(UUID.class, new UUIDSerializer());
 		if (listener != null)
 			ret.addListener(listener);
 		ret.connect(5000, ipAddress, port);

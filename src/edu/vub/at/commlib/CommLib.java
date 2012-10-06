@@ -24,6 +24,7 @@ public class CommLib {
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
+		k.register(UUID.class, new UUIDSerializer());
 		
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("192.168.1.255"));
 		ds.setBroadcast(true);
@@ -42,6 +43,7 @@ public class CommLib {
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
+		k.register(UUID.class, new UUIDSerializer());
 		Output o = new Output(1024);
 		k.writeObject(o, clci);
 		final byte[] buf = o.toBytes();
