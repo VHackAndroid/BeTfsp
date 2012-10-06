@@ -204,12 +204,12 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 
 		public void createActionFutures(Vector<Future<ClientAction>> actionFutures) {
-			Iterator<Future<ClientAction>> it = ((Set<Future<ClientAction>>) actionFutures.clone()).iterator();
+			Iterator<Future<ClientAction>> it = ((Vector<Future<ClientAction>>) actionFutures.clone()).iterator();
 			actionFutures.clear();
 			for (Integer i : clientsInGame.navigableKeySet()) {
 				Future<ClientAction> oldFut = it.hasNext() ? it.next() : null;
 				ClientAction oldAction = oldFut != null ? oldFut.get() : null;
-				if (oldAction != null && oldAction.type != ClientActionType.Fold) {
+				if (oldFut == null || oldAction != null && oldAction.type != ClientActionType.Fold) {
 					Future<ClientAction> fut = new Future<ClientAction>();
 					actionFutures.add(fut);
 					clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut));								
