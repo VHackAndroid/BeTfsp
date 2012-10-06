@@ -1,34 +1,20 @@
 package edu.vub.at.nfcpoker.ui;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.tekle.oss.android.animation.AnimationFactory;
-import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
-
-import mobisocial.nfc.Nfc;
-import mobisocial.nfc.addon.BluetoothConnector;
-import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -122,18 +108,6 @@ public class ClientActivity extends Activity {
             }
         });
 
-        final ViewFlipper viewFlipper1 = (ViewFlipper) findViewById(R.id.viewFlipper1);
-        final ImageButton btn = (ImageButton) findViewById(R.id.Card1Front);
-        // TODO EGB CHANGE THIS FOR THE CARDS THAT THE SERVER SENDS YOU
-        short x = 3;
-        Card c = new Card(x,(short) (x+1));
-        int id = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
-        btn.setImageResource(id);
-        AnimationFactory.flipTransition(viewFlipper1, FlipDirection.LEFT_RIGHT);
-        
-        final ViewFlipper viewFlipper2 = (ViewFlipper) findViewById(R.id.viewFlipper2);
-        AnimationFactory.flipTransition(viewFlipper2, FlipDirection.LEFT_RIGHT);
-
         
         /*
         ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
@@ -155,6 +129,7 @@ public class ClientActivity extends Activity {
     }
     
     private void listenToGameServer() {
+    	final ClientActivity theActivity = this;
     	final TimerTask tt = new TimerTask() {
     		public void run() {
     			try {
@@ -176,6 +151,7 @@ public class ClientActivity extends Activity {
     								break;
     							case WAITING_FOR_PLAYERS:
     								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+    								Toast.makeText(theActivity, "Waiting for players", 3000);
     								break;
     							case PREFLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
@@ -202,13 +178,19 @@ public class ClientActivity extends Activity {
     							for (int i = 0; i < cards.length; i++) {
     								Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
     							}
+    							
     						}
 					
     						if (m instanceof ReceiveHoleCardsMessage) {
-    							ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
+    							final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
     							Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+    							theActivity.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										updateHandGui(newHoleCards);
+									}
+								});
     						}
-						
     					}
     				});
     			} catch (IOException e) {
@@ -221,6 +203,20 @@ public class ClientActivity extends Activity {
     	Timer timer = new Timer();
     	timer.schedule(tt, 1000);
     		
+    }
+    
+    private void updateHandGui(ReceiveHoleCardsMessage cards) {
+    	final ViewFlipper viewFlipper1 = (ViewFlipper) findViewById(R.id.viewFlipper1);
+    	final ImageButton btn1 = (ImageButton) findViewById(R.id.Card1Front);
+        int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
+        btn1.setImageResource(id1);
+        AnimationFactory.flipTransition(viewFlipper1, FlipDirection.LEFT_RIGHT);
+        
+        final ViewFlipper viewFlipper2 = (ViewFlipper) findViewById(R.id.viewFlipper2);
+    	final ImageButton btn2 = (ImageButton) findViewById(R.id.Card2Front);
+        int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card2.toString(), null, null);
+        btn2.setImageResource(id2);
+        AnimationFactory.flipTransition(viewFlipper2, FlipDirection.LEFT_RIGHT);
     }
 
     
