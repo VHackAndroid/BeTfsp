@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".ui.Splash"
-            android:label="@string/title_activity_splash" >
+            android:label="@string/title_activity_splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -26,7 +26,8 @@
         </activity>
         <activity
             android:name=".ui.ClientActivity"
-            android:label="@string/title_activity_splash" >
+            android:label="@string/title_activity_splash"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
