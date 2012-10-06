@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tablet_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="#2c672e"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/players_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:gravity="top|center_horizontal"
+        android:minHeight="50dp" >
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|center_vertical"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/imageButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingLeft="2dip"
+            android:paddingRight="4dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+        <ImageButton
+            android:id="@+id/imageButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingLeft="4dip"
+            android:paddingRight="2dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+        <ImageButton
+            android:id="@+id/ImageButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingLeft="4dip"
+            android:paddingRight="2dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+        <ImageButton
+            android:id="@+id/ImageButton4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingLeft="4dip"
+            android:paddingRight="2dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+        <ImageButton
+            android:id="@+id/ImageButton5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:paddingLeft="4dip"
+            android:paddingRight="2dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/log"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="200dp"
+        android:layout_marginRight="200dp"
+        android:layout_marginTop="20dp"
+        android:background="#206020"
+        android:focusable="false"
+        android:lines="5"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#ffffff" />
+
+    <LinearLayout
+        android:id="@+id/players_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:gravity="bottom|center_horizontal"
+        android:minHeight="50dp" >
+
+    </LinearLayout>
+
+</LinearLayout>

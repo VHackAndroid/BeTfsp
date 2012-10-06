@@ -6,8 +6,10 @@
     <uses-sdk
         android:minSdkVersion="15"
         android:targetSdkVersion="15" />
-    
-    <uses-feature android:name="android.hardware.nfc" android:required="true" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.NFC" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -26,6 +28,7 @@
             android:label="@string/title_activity_splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,6 +36,10 @@
             android:name=".ui.ClientActivity"
             android:screenOrientation="portrait"
 						android:label="@string/title_activity_client">
+        </activity>
+        <activity
+            android:name=".ui.ServerActivity"
+            android:label="@string/title_activity_server" >
         </activity>
     </application>
 
