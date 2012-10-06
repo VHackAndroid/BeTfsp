@@ -10,25 +10,25 @@ public class Deck {
 
 	public Deck() {
 		cards = new ArrayList<Card>();
-		int index_1, index_2;
-		Random generator = new Random();
-		Card temp;
 
-		for (short a=0; a<=3; a++) {
-			for (short b=0; b<=12; b++) {
-			   cards.add( new Card(a,b) );
+		for (short suit=0; suit<=3; suit++) {
+			for (short rank=0; rank<=12; rank++) {
+			   cards.add(new Card(suit,rank));
 			 }
 		}
 
-		int size = cards.size() -1;
+		shuffle();
+	}
 
-		for (short i=0; i<100; i++) {
-			index_1 = generator.nextInt( size );
-			index_2 = generator.nextInt( size );
+	public void shuffle() {
+		Random generator = new Random();
 
-			temp = (Card) cards.get( index_2 );
-			cards.set( index_2 , cards.get( index_1 ) );
-			cards.set( index_1, temp );
+		for (int idx = cards.size() - 1; idx > 0; idx--) {
+			int victim = generator.nextInt(idx + 1);
+
+			Card temp = (Card) cards.get(victim);
+			cards.set(victim , cards.get(idx));
+			cards.set(idx, temp);
 		}
 	}
 
