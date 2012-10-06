@@ -55,10 +55,10 @@ public class ClientActivity extends Activity implements OnClickListener{
 	private static final int[] DEFAULT_CARDS = new int[] { R.drawable.backside, R.drawable.backside };
 	
     // Interactivity
+    public static boolean incognitoMode;
     private static final boolean useIncognitoMode = true;
     private static final boolean useIncognitoLight = false;
     private static final boolean useIncognitoProxmity = true;
-    private boolean incognitoMode;
     private long incognitoLight;
     private long incognitoProximity;
     private Timer incognitoDelay;
@@ -157,12 +157,12 @@ public class ClientActivity extends Activity implements OnClickListener{
         mCardView1 = (CurlView) findViewById(R.id.Card1);
         mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView1.setCurrentIndex(0);
-        mCardView1.setBackgroundColor(POKER_GREEN);
+        //mCardView1.setBackgroundColor(POKER_GREEN);
         
         mCardView2 = (CurlView) findViewById(R.id.Card2);
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
-        mCardView2.setBackgroundColor(POKER_GREEN);        
+        //mCardView2.setBackgroundColor(POKER_GREEN);        
         
         incrementBetAmount(0);
         listenToGameServer();
@@ -170,13 +170,19 @@ public class ClientActivity extends Activity implements OnClickListener{
     
     private void listenToGameServer() {
     	final ClientActivity theActivity = this;
-    	final TimerTask tt = new TimerTask() {
+    	final String ip = getIntent().getStringExtra("ip");
+    	final int port = getIntent().getIntExtra("port", 0);
+    	final Thread tt = new Thread() {
     		public void run() {
     			try {
-    				Log.v("AMBIENTPOKER", "Looking for server...");
-    				CommLibConnectionInfo clci = CommLib.discover(PokerServer.class);
-    				Log.v("AMBIENTPOKER", "Discovered server at " + clci.getAddress());
-    				Client c = clci.connect(new Listener() {
+    				Log.v("AMBIENTPOKER", "Discovered server at " + ip);
+    				Client c = CommLibConnectionInfo.connect(ip, port, new Listener() {
+    					@Override
+    					public void connected(Connection arg0) {
+    						super.connected(arg0);
+    						Log.d("AMBIENTPOKER","Connected to server!");
+    					}
+    					
     					@Override
     					public void received(Connection c, Object m) {
     						super.received(c, m);
@@ -240,8 +246,7 @@ public class ClientActivity extends Activity implements OnClickListener{
     		}
     	};
     	
-    	Timer timer = new Timer();
-    	timer.schedule(tt, 1000);
+    	tt.start();
     		
     }
     
@@ -399,13 +404,15 @@ public class ClientActivity extends Activity implements OnClickListener{
     // UI
     private void showCards() {
     	if (canViewCards()) {
-    		
+            mCardView1.setCurrentIndex(1);
+            mCardView2.setCurrentIndex(1);
     	}
     }
     
     private void hideCards() {
     	if (canViewCards()) {
-    		
+            mCardView1.setCurrentIndex(0);
+            mCardView2.setCurrentIndex(0);
     	}
     }
 
