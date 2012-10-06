@@ -6,6 +6,7 @@ import edu.vub.at.nfcpoker.R.menu;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.widget.TextView;
 
 public class ServerActivity extends Activity {
 
@@ -13,6 +14,7 @@ public class ServerActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server);
+        TextView log = (TextView) findViewById(R.id.log);
     }
 
     @Override
