@@ -13,6 +13,11 @@ import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ClientActivity extends Activity {
@@ -30,6 +35,7 @@ public class ClientActivity extends Activity {
 	
 	// Game state
 	public static GameState GAME_STATE;
+	private int currentBet;
 	
 	// Enums
 	public enum GameState {
@@ -43,6 +49,9 @@ public class ClientActivity extends Activity {
         setContentView(R.layout.client);
         
         // Settings
+        
+        // Game state
+        currentBet = 0;
         GAME_STATE = GameState.INIT;
         
         // Interactivity
@@ -76,9 +85,46 @@ public class ClientActivity extends Activity {
         /*final Intent intent = new Intent(NfcAdapter.ACTION_TAG_DISCOVERED);
         intent.putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES, AsciiNdefMessage.CreateNdefMessage(UUID));
         startActivity(intent);*/
-        
+        final ImageButton buttonAddBlack = (ImageButton) findViewById(R.id.AddBlack);
+        buttonAddBlack.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	incrementBetAmount(100);
+            }
+        });
+        final ImageButton buttonAddGreen = (ImageButton) findViewById(R.id.AddGreen);
+        buttonAddGreen.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	incrementBetAmount(25);
+            }
+        });
+        final ImageButton buttonAddBlue = (ImageButton) findViewById(R.id.AddBlue);
+        buttonAddBlue.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	incrementBetAmount(10);
+            }
+        });
+        final ImageButton buttonAddRed = (ImageButton) findViewById(R.id.AddRed);
+        buttonAddRed.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	incrementBetAmount(5);
+            }
+        });
+        final ImageButton buttonAddWhite = (ImageButton) findViewById(R.id.AddWhite);
+        buttonAddWhite.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+            	incrementBetAmount(1);
+            }
+        });        
     }
 
+    // Game
+    private void incrementBetAmount(int value) {
+    	currentBet += value;
+        final EditText textCurrentBet = (EditText) findViewById(R.id.currentBet);
+        textCurrentBet.setText(currentBet);
+    }
+    
+    // Interactivity
     SensorEventListener incognitoSensorEventListener = new SensorEventListener() {
     	@Override
     	public void onAccuracyChanged(Sensor sensor, int accuracy) {
