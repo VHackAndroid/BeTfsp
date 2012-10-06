@@ -10,11 +10,18 @@ import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
 import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
+import edu.vub.at.nfcpoker.ui.tools.PageProvider;
+import fi.harism.curl.CurlPage;
+import fi.harism.curl.CurlView;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -24,9 +31,12 @@ import android.os.Bundle;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -37,6 +47,13 @@ public class ClientActivity extends Activity {
 	public static GameState GAME_STATE = GameState.INIT;
 	private static int currentBet = 0;
 	private static int currentMoney = 0;
+	
+	// UI
+	private CurlView mCardView1;
+	private CurlView mCardView2;
+	
+	//private int POKER_GREEN = Color.rgb(44, 103, 46);
+	public static final int POKER_GREEN = 0xFF2C672E;
 	
     // Interactivity
     private static final boolean useIncognitoMode = true;
@@ -106,12 +123,6 @@ public class ClientActivity extends Activity {
             }
         });
 
-        final ViewFlipper viewFlipper1 = (ViewFlipper) findViewById(R.id.viewFlipper1);
-        AnimationFactory.flipTransition(viewFlipper1, FlipDirection.LEFT_RIGHT);
-        
-        final ViewFlipper viewFlipper2 = (ViewFlipper) findViewById(R.id.viewFlipper2);
-        AnimationFactory.flipTransition(viewFlipper2, FlipDirection.LEFT_RIGHT);
-
         /*
         ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
 		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
@@ -128,8 +139,17 @@ public class ClientActivity extends Activity {
         card2.setPages(mPages2);
         */
         
-    }
+        mCardView1 = (CurlView) findViewById(R.id.Card1);
+        mCardView1.setPageProvider(new PageProvider(this));
+        mCardView1.setCurrentIndex(0);
+        mCardView1.setBackgroundColor(POKER_GREEN);
 
+        mCardView2 = (CurlView) findViewById(R.id.Card2);
+        mCardView2.setPageProvider(new PageProvider(this));
+        mCardView2.setCurrentIndex(0);
+        mCardView2.setBackgroundColor(POKER_GREEN);
+        
+    }
     
     @Override
     protected void onResume()
@@ -159,6 +179,8 @@ public class ClientActivity extends Activity {
 		        }
 	        }
         }
+        mCardView1.onResume();
+        mCardView2.onResume();
         super.onResume();
     }
     
@@ -166,9 +188,20 @@ public class ClientActivity extends Activity {
     protected void onPause()
     {
     	sensorManager.unregisterListener(incognitoSensorEventListener);
+        mCardView1.onPause();
+        mCardView2.onPause();
         super.onPause();
     }
 
+    /*
+    // UI
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
+        int myWidth = (int) (parentHeight * 0.5);
+        super.onMeasure(MeasureSpec.makeMeasureSpec(myWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
+    }*/
+    
     // Game
     private void incrementBetAmount(int value) {
     	currentBet += value;
@@ -268,3 +301,5 @@ public class ClientActivity extends Activity {
     	}
     }
 }
+
+	
