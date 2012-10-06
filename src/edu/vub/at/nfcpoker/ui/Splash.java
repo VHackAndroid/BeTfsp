@@ -69,9 +69,6 @@ public class Splash extends ThingActivity<TableThing> {
 		}
 	}
 
-	// TO BE CONFIGURED (TODO)
-	public static boolean IS_SERVER = true;
-	public static boolean IS_LODE = false;
 
 	// Connectivity state
 	public static String UUID;
@@ -108,6 +105,8 @@ public class Splash extends ThingActivity<TableThing> {
 		});
 
 		if (IS_LODE) {
+			startServer();
+			return;
 			//Intent intent = new Intent(this, ClientActivity.class);
 			//startActivity(intent);
 			//updateWatchTimeout(System.currentTimeMillis(), 100000);
