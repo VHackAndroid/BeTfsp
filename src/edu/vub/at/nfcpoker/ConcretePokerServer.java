@@ -49,6 +49,11 @@ public class ConcretePokerServer extends PokerServer  {
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
 					}
+					public void disconnected(Connection c) {
+						super.disconnected(c);
+						Log.d("PokerServer", "Client disconnected: " + c.getRemoteAddressTCP());
+						gameLoop.removeClient(c);
+					}
 				});
 			} catch (IOException e) {
 				Log.e("PokerServer", "Server thread crashed", e);
@@ -58,7 +63,7 @@ public class ConcretePokerServer extends PokerServer  {
 	
 	int nextClientID = 0;
 	public enum GameState {
-		WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
+		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 	};
 	
 
@@ -76,7 +81,19 @@ public class ConcretePokerServer extends PokerServer  {
 	class GameLoop implements Runnable {
 		
 		public GameLoop() {
-			gameState = GameState.WAITING_FOR_PLAYERS;
+			gameState = GameState.STOPPED;
+		}
+
+		// todo: what if client disconnects before next round?
+		public void removeClient(Connection c) {
+			Log.d("PokerServer", "Client disconnected: " + c);
+			synchronized(this) {
+				for (Integer i : clientsInGame.keySet()) {
+					if (clientsInGame.get(i) == c) {
+						clientsInGame.remove(i);
+					}
+				}
+			}
 		}
 
 		public TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
@@ -84,10 +101,25 @@ public class ConcretePokerServer extends PokerServer  {
 		public GameState gameState;
 			
 		public void run() {
+			gameState = GameState.PREFLOP;
 			while (true) {
 				synchronized(this) {
-					gameLoop.clientsInGame.putAll(gameLoop.newClients);
-					gameLoop.newClients.clear();
+					clientsInGame.putAll(gameLoop.newClients);
+					newClients.clear();
+					for (Integer i : clientsInGame.keySet()) {
+						if (clientsInGame.get(i) == null)
+							clientsInGame.remove(i);
+					}
+					if (clientsInGame.size() < 2) {
+						try {
+							Log.d("PokerServer", "# of clients < 2, changing state to stopped");
+							broadcast(new StateChangeMessage(GameState.WAITING_FOR_PLAYERS));
+							this.wait();
+						} catch (InterruptedException e) {
+							Log.wtf("PokerServer", "Thread was interrupted");
+						}
+					}
+					//todo what if clientsInGame.size drops below two?
 				}
 				
 				Deck deck = new Deck();
@@ -128,7 +160,8 @@ public class ConcretePokerServer extends PokerServer  {
 		
 		private void broadcast(Message m) {
 			for (Connection c : clientsInGame.values())
-				c.sendTCP(m);
+				if (c != null)
+					c.sendTCP(m);
 		}
 
 		public void addClient(Connection c) {
@@ -136,9 +169,12 @@ public class ConcretePokerServer extends PokerServer  {
 			synchronized(this) {
 				newClients.put(nextClientID++, c);
 			}
-			if (newClients.size() >= 2 && gameState == GameState.WAITING_FOR_PLAYERS) {
-				Log.d("PokerServer", "Two or more clients connected, game can start");
-				new Thread(this).start();
+			if (newClients.size() >= 2)
+				if (gameState == GameState.STOPPED) {
+					Log.d("PokerServer", "Two or more clients connected, game can start");
+					new Thread(this).start();
+			} else if (gameState == GameState.WAITING_FOR_PLAYERS) {
+				synchronized(this) { this.notifyAll(); }
 			}
 		}
 	};
