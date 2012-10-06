@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="fill_parent"
+    android:background="#2c672e"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -10,7 +11,19 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/Card1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:paddingLeft="2dip"
+            android:paddingRight="4dip"
+            android:paddingTop="4dip"
+            android:scaleType="fitXY"
+            android:src="@drawable/backside" />
+
+        <ImageButton
+            android:id="@+id/Card2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -21,17 +34,114 @@
             android:scaleType="fitXY"
             android:src="@drawable/backside" />
 
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/Chips"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:scaleType="fitCenter"
+        android:src="@drawable/chips" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
         <ImageButton
-            android:id="@+id/imageButton1"
+            android:id="@+id/AddBlack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:baselineAlignBottom="true"
+            android:paddingLeft="4dip"
+            android:paddingRight="2dip"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_add" />
+
+        <ImageButton
+            android:id="@+id/AddBlue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:paddingLeft="2dip"
+            android:paddingRight="2dip"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_add" />
+
+        <ImageButton
+            android:id="@+id/AddWhite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:paddingLeft="2dip"
+            android:paddingRight="2dip"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_add" />
+
+        <ImageButton
+            android:id="@+id/AddRed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@null"
+            android:paddingLeft="2dip"
+            android:paddingRight="2dip"
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_add" />
+
+        <ImageButton
+            android:id="@+id/AddGreen"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@null"
             android:paddingLeft="2dip"
             android:paddingRight="4dip"
-            android:paddingTop="4dip"
-            android:scaleType="fitXY"
-            android:src="@drawable/backside" />
+            android:scaleType="fitCenter"
+            android:src="@android:drawable/ic_menu_add" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <EditText
+            android:id="@+id/currentBet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="5"
+            android:inputType="numberSigned" >
+        </EditText>
+
+        <Button
+            android:id="@+id/Bet"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Bet" />
+
+        <Button
+            android:id="@+id/Check"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Check" />
+
+        <Button
+            android:id="@+id/Fold"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Fold" />
 
     </LinearLayout>
 
