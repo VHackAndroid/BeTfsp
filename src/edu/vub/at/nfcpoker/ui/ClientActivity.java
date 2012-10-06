@@ -68,6 +68,9 @@ public class ClientActivity extends Activity implements OnClickListener {
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
     private GestureDetector gestureDetector;
     View.OnTouchListener gestureListener;
+	private Button bet;
+	private Button check;
+	private Button fold;
     
     
 	// Enums
@@ -161,6 +164,10 @@ public class ClientActivity extends Activity implements OnClickListener {
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
         //mCardView2.setBackgroundColor(POKER_GREEN);        
+		bet = (Button) findViewById(R.id.Bet);
+		check = (Button) findViewById(R.id.Check);
+		fold = (Button) findViewById(R.id.Fold);
+       
         
         incrementBetAmount(0);
         listenToGameServer();
@@ -195,10 +202,14 @@ public class ClientActivity extends Activity implements OnClickListener {
     								break;
     							case WAITING_FOR_PLAYERS:
     								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
-    								Toast.makeText(theActivity, "Waiting for players", 3000);
+    								Toast.makeText(theActivity, "Waiting for players", Toast.LENGTH_SHORT).show();
+    								disableActions();
+    								hideCards();
     								break;
     							case PREFLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
+    								enableActions();
+    								showCards();
     								break;
     							case FLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to FLOP");
@@ -236,6 +247,30 @@ public class ClientActivity extends Activity implements OnClickListener {
 								});
     						}
     					}
+
+						private void enableActions() {
+							theActivity.runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									bet.setEnabled(true);
+									check.setEnabled(true);
+									fold.setEnabled(true);
+								}
+							});						
+						}
+
+						private void disableActions() {
+							theActivity.runOnUiThread(new Runnable() {
+								
+								@Override
+								public void run() {
+									bet.setEnabled(false);
+									check.setEnabled(false);
+									fold.setEnabled(false);
+								}
+							});
+						}
     				});
     			} catch (IOException e) {
     				Log.e("AMBIENTPOKER", "Could not discover server: ");
