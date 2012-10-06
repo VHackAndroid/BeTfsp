@@ -6,6 +6,10 @@ import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import android.os.Bundle;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
@@ -40,6 +44,9 @@ public class ServerActivity extends Activity {
 					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 					ib.setImageResource(cardToResourceID(c));
+					ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
+					anim.setDuration(1000);
+					anim.start();
 				}
 			}
 
@@ -57,8 +64,23 @@ public class ServerActivity extends Activity {
 			public void run() {
 				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 				for (int i = 0; i < 5; i++) {
-					ImageButton ib = (ImageButton) ll.getChildAt(i);
-					ib.setImageResource(R.drawable.backside);
+					final ImageButton ib = (ImageButton) ll.getChildAt(i);
+					ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
+					ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
+					animX.setDuration(500); animY.setDuration(500);
+					final AnimatorSet scalers = new AnimatorSet();
+					scalers.play(animX).with(animY);
+					scalers.addListener(new AnimatorListenerAdapter() {
+
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							ib.setScaleX(1.f);
+							ib.setScaleY(1.f);
+							ib.setImageResource(R.drawable.backside);
+						}
+
+					});
+					scalers.start();
 				}
 			}
 		});
