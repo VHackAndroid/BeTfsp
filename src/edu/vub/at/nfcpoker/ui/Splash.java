@@ -110,7 +110,7 @@ public class Splash extends ThingActivity<TableThing> {
 		if (IS_LODE) {
 			//Intent intent = new Intent(this, ClientActivity.class);
 			//startActivity(intent);
-			updateWatchTimeout(System.currentTimeMillis(), 100000);
+			//updateWatchTimeout(System.currentTimeMillis(), 100000);
 		} else {
 			Button server = (Button) findViewById(R.id.server);
 			if (server != null)
@@ -187,7 +187,6 @@ public class Splash extends ThingActivity<TableThing> {
 		nfcButton.setEnabled(true);
 		lastScannedTag_ = tableThing;
 		((Button) findViewById(R.id.discover)).setEnabled(true);
-		((Button) findViewById(R.id.beamInviteButton)).setEnabled(true);
 		startClient();
 	}
 
@@ -198,7 +197,6 @@ public class Splash extends ThingActivity<TableThing> {
 		nfcButton.setEnabled(true);
 		lastScannedTag_ = r;
 		((Button) findViewById(R.id.discover)).setEnabled(false);
-		((Button) findViewById(R.id.beamInviteButton)).setEnabled(false);
 	}
 
 	protected void startServer() {
