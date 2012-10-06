@@ -9,7 +9,7 @@ public class CommLibConnectionInfo {
 		// Only for Kryo
 	}
 	
-	CommLibConnectionInfo(String serverType, String[] extra) {
+	public CommLibConnectionInfo(String serverType, String[] extra) {
 		serverType_ = serverType;
 		extra_  = extra;
 	}
