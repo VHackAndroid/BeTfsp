@@ -29,6 +29,7 @@ public class CommLib {
 			ds.receive(dp);
 			CommLibConnectionInfo clci = k.readObject(new Input(dp.getData()), CommLibConnectionInfo.class);
 			if (clci.serverType_.equals(targetClass)) {
+				ds.close();
 				return clci;
 			}
 		}
