@@ -101,7 +101,7 @@ public interface Message {
 			for (int i = 1; i < cards.length; i++)
 				cardsStr.append(", ").append(cards[i].toString());
 			
-			return super.toString() + cardsStr.toString();
+			return super.toString() + cardsStr.toString() + "]";
 		}
 	}
 	
