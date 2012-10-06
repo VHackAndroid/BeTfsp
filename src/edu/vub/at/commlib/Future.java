@@ -26,6 +26,8 @@ public class Future<T> {
 	}
 	
 	public synchronized T get() {
+		if (value != null)
+			return value;
 		setFutureListener(new FutureListener<T>() {
 			@Override
 			public void resolve(T value) {

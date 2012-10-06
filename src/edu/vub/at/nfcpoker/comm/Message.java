@@ -3,16 +3,30 @@ package edu.vub.at.nfcpoker.comm;
 import java.util.Date;
 import java.util.UUID;
 
+import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 
 public interface Message {
 
+	enum ClientActionType { CallAt, RaiseTo, Fold, Check };
 
-
-
-
-
+	public static final class ClientAction {
+		public ClientActionType type;
+		public int extra;
+		
+		public ClientAction(ClientActionType type) {
+			this(type, 0);
+		}
+		public ClientAction(ClientActionType type, int extra) {
+			this.type = type;
+			this.extra = extra;
+		}
+		
+		// for kryo
+		public ClientAction() {}
+				
+	}
 
 	public static abstract class TimestampedMessage implements Message {
 		public long timestamp;
@@ -90,12 +104,28 @@ public interface Message {
 			futureValue = futureValue_;
 		}
 
-		//kryo
+		// kryo
 		public FutureMessage() {}
 
 		@Override
 		public String toString() {
 			return super.toString() + ": Resolve " + futureId + " with " + futureValue;
+		}
+	}
+	
+	public class RequestClientActionFutureMessage extends TimestampedMessage {
+		public UUID futureId;
+		
+		public RequestClientActionFutureMessage(Future<?> f) {
+			futureId = f.getFutureId();
+		}
+		
+		// kryo
+		public RequestClientActionFutureMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Future message for " + futureId;
 		}
 	}
 }
