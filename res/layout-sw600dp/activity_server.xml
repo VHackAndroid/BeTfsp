@@ -75,12 +75,13 @@
         android:id="@+id/log"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="200dp"
+        android:layout_marginRight="200dp"
         android:layout_marginTop="20dp"
         android:focusable="false"
         android:lines="5"
-        android:paddingLeft="200dp"
-        android:paddingRight="200dp"
         android:text="Medium Text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#ffffff" />
 
 </LinearLayout>

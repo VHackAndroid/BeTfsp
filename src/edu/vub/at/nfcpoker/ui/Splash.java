@@ -90,7 +90,7 @@ public class Splash extends Activity {
     }
 
     protected void startServer() {
-		Intent i = new Intent(this, ClientActivity.class);
+		Intent i = new Intent(this, ServerActivity.class);
 		startActivity(i);
 		finish();
 	}
