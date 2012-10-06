@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.tekle.oss.android.animation.AnimationFactory;
+import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
+
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
 import edu.vub.at.nfcpoker.R;
@@ -26,6 +29,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 public class ClientActivity extends Activity {
 
@@ -102,6 +106,13 @@ public class ClientActivity extends Activity {
             }
         });
 
+        final ViewFlipper viewFlipper1 = (ViewFlipper) findViewById(R.id.viewFlipper1);
+        AnimationFactory.flipTransition(viewFlipper1, FlipDirection.LEFT_RIGHT);
+        
+        final ViewFlipper viewFlipper2 = (ViewFlipper) findViewById(R.id.viewFlipper2);
+        AnimationFactory.flipTransition(viewFlipper2, FlipDirection.LEFT_RIGHT);
+
+        /*
         ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
 		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
 		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
@@ -115,6 +126,7 @@ public class ClientActivity extends Activity {
 		
         final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
         card2.setPages(mPages2);
+        */
         
     }
 
