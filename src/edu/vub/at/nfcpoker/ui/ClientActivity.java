@@ -1,5 +1,8 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
 import edu.vub.at.nfcpoker.R;
@@ -32,6 +35,7 @@ public class ClientActivity extends Activity {
     private boolean incognitoMode;
     private long incognitoLight;
     private long incognitoProximity;
+    private Timer incognitoDelay;
 	
 	// Game state
 	public static GameState GAME_STATE;
@@ -59,6 +63,7 @@ public class ClientActivity extends Activity {
 	        incognitoMode = false;
 	        incognitoLight = -1;
 	        incognitoProximity = -1;
+	        incognitoDelay = new Timer();
 	        SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 
 	        if (useIncognitoLight) {
@@ -154,14 +159,24 @@ public class ClientActivity extends Activity {
     			}
     		}
     		if ((incognitoLight != 0) && (incognitoProximity != 0)) {
-				incognitoMode = true;
-    			runOnUiThread(new Runnable() {
-    	            @Override
-    	            public void run() {
-    	            	Toast.makeText(ClientActivity.this, "INCOGNITO ENABLED", Toast.LENGTH_SHORT).show();
-    	            }
-    	        });
+    			if (!incognitoMode) {
+    				incognitoMode = true;
+    				incognitoDelay = new Timer();
+    				incognitoDelay.schedule(new TimerTask() {
+    					public void run() {
+    						runOnUiThread(new Runnable() {
+    							@Override
+    							public void run() {
+    								Toast.makeText(ClientActivity.this, "INCOGNITO ENABLED", Toast.LENGTH_SHORT).show();
+    							}
+    						});
+    					}}, 750);
+    			}
     		} else {
+    			if (incognitoDelay != null) {
+    				incognitoDelay.cancel();
+    				incognitoDelay = null;
+    			}
 				if (incognitoMode) {
 					incognitoMode = false;
 	    			runOnUiThread(new Runnable() {
