@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.ui.ClientActivity;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -290,7 +291,7 @@ public class PageCurlView extends View {
 		
 		// Create our edge paint
 		mCurlEdgePaint = new Paint();
-		mCurlEdgePaint.setColor(Color.WHITE);
+		mCurlEdgePaint.setColor(ClientActivity.POKER_GREEN); // Lode
 		mCurlEdgePaint.setAntiAlias(true);
 		mCurlEdgePaint.setStyle(Paint.Style.FILL);
 		mCurlEdgePaint.setShadowLayer(10, -5, 5, 0x99000000);
