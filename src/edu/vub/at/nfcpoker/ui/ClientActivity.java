@@ -1,13 +1,17 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -97,6 +101,24 @@ public class ClientActivity extends Activity {
             	if (canBet()) incrementBetAmount(1);
             }
         });
+
+        ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
+		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
+
+        final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
+        card1.setPages(mPages1);
+
+        ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
+        mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+        mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
+		
+        final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
+        card2.setPages(mPages2);
+        
+    }
+
+    
     @Override
     protected void onResume()
     {
