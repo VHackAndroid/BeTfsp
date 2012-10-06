@@ -178,7 +178,7 @@ public class ClientActivity extends Activity {
     						runOnUiThread(new Runnable() {
     							@Override
     							public void run() {
-    								Toast.makeText(ClientActivity.this, "INCOGNITO ENABLED", Toast.LENGTH_SHORT).show();
+    								showCards();
     							}
     						});
     					}}, 750);
@@ -193,11 +193,24 @@ public class ClientActivity extends Activity {
 	    			runOnUiThread(new Runnable() {
 	    	            @Override
 	    	            public void run() {
-	    	            	Toast.makeText(ClientActivity.this, "DISABLE INCOGNITO", Toast.LENGTH_SHORT).show();
+	    	            	hideCards();
 	    	            }
 	    	        });
 				}
     		}
     	}
     };
+    
+    // UI
+    private void showCards() {
+    	if (canViewCards()) {
+    		
+    	}
+    }
+    
+    private void hideCards() {
+    	if (canViewCards()) {
+    		
+    	}
+    }
 }
