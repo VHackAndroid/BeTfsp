@@ -55,7 +55,7 @@ public class Splash extends Activity {
 
 	// TO BE CONFIGURED (TODO)
 	public static boolean IS_SERVER = true;
-	public static boolean IS_LODE = true;
+	public static boolean IS_LODE = false;
 
 	// Connectivity state
 	public static String UUID;
