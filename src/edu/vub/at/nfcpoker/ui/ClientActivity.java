@@ -203,12 +203,12 @@ public class ClientActivity extends Activity implements OnClickListener{
         mCardView1 = (CurlView) findViewById(R.id.Card1);
         mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView1.setCurrentIndex(0);
-        mCardView1.setBackgroundColor(POKER_GREEN);
+        //mCardView1.setBackgroundColor(POKER_GREEN);
         
         mCardView2 = (CurlView) findViewById(R.id.Card2);
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
-        mCardView2.setBackgroundColor(POKER_GREEN);        
+        //mCardView2.setBackgroundColor(POKER_GREEN);        
         
         listenToGameServer();
     }
@@ -444,13 +444,15 @@ public class ClientActivity extends Activity implements OnClickListener{
     // UI
     private void showCards() {
     	if (canViewCards()) {
-    		
+            mCardView1.setCurrentIndex(1);
+            mCardView2.setCurrentIndex(1);
     	}
     }
     
     private void hideCards() {
     	if (canViewCards()) {
-    		
+            mCardView1.setCurrentIndex(0);
+            mCardView2.setCurrentIndex(0);
     	}
     }
 
