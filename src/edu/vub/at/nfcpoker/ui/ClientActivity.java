@@ -121,7 +121,7 @@ public class ClientActivity extends Activity {
     private void incrementBetAmount(int value) {
     	currentBet += value;
         final EditText textCurrentBet = (EditText) findViewById(R.id.currentBet);
-        textCurrentBet.setText(currentBet);
+        textCurrentBet.setText(""+currentBet);
     }
     
     // Interactivity
