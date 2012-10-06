@@ -18,18 +18,28 @@ import fi.harism.curl.CurlView;
 public class PageProvider implements CurlView.PageProvider {
 
 	// Bitmap resources.
-	private int[] mBitmapIds = { R.drawable.backside, R.drawable.diamonds_5d2 };
+	private int[] mBitmapIds;
 	private Context ctx;
 
-	public PageProvider(Context ctx) {
+	public PageProvider(Context ctx, int[] mBitmapIds) {
 		this.ctx = ctx;
+		this.mBitmapIds = mBitmapIds;
 	}
 
 	@Override
 	public int getPageCount() {
-		return 2;
+		return mBitmapIds.length;
+	}
+	
+	public void setBitmaps(int[] mBitmapIds) {
+		this.mBitmapIds = mBitmapIds;
 	}
 
+	public void setSecondBitmap(int mBitmapId) {
+		if (this.mBitmapIds.length < 2) return;
+		this.mBitmapIds[1] = mBitmapId;
+	}
+	
 	private Bitmap loadBitmap(int width, int height, int index) {
 		Bitmap b = Bitmap.createBitmap(width, height,
 				Bitmap.Config.ARGB_8888);
