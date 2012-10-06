@@ -215,13 +215,19 @@ public class ClientActivity extends Activity implements OnClickListener{
     
     private void listenToGameServer() {
     	final ClientActivity theActivity = this;
-    	final TimerTask tt = new TimerTask() {
+    	final String ip = getIntent().getStringExtra("ip");
+    	final int port = getIntent().getIntExtra("port", 0);
+    	final Thread tt = new Thread() {
     		public void run() {
     			try {
-    				Log.v("AMBIENTPOKER", "Looking for server...");
-    				CommLibConnectionInfo clci = CommLib.discover(PokerServer.class);
-    				Log.v("AMBIENTPOKER", "Discovered server at " + clci.getAddress());
-    				Client c = clci.connect(new Listener() {
+    				Log.v("AMBIENTPOKER", "Discovered server at " + ip);
+    				Client c = CommLibConnectionInfo.connect(ip, port, new Listener() {
+    					@Override
+    					public void connected(Connection arg0) {
+    						super.connected(arg0);
+    						Log.d("AMBIENTPOKER","Connected to server!");
+    					}
+    					
     					@Override
     					public void received(Connection c, Object m) {
     						super.received(c, m);
@@ -285,8 +291,7 @@ public class ClientActivity extends Activity implements OnClickListener{
     		}
     	};
     	
-    	Timer timer = new Timer();
-    	timer.schedule(tt, 1000);
+    	tt.start();
     		
     }
     
