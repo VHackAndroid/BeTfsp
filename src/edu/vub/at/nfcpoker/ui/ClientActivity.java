@@ -36,14 +36,11 @@ public class ClientActivity extends Activity {
     private long incognitoLight;
     private long incognitoProximity;
     private Timer incognitoDelay;
-	
-	// Game state
-	public static GameState GAME_STATE;
-	private int currentBet;
+    private SensorManager sensorManager;
 	
 	// Enums
 	public enum GameState {
-	    INIT, NFCPAIRING, FLOP, TURN, RIVER
+	    INIT, NFCPAIRING, HOLE, HOLE_NEXT, FLOP, FLOP_NEXT, TURN, TURN_NEXT, RIVER, RIVER_NEXT
 	}
 	
     @Override
@@ -55,36 +52,14 @@ public class ClientActivity extends Activity {
         // Settings
         
         // Game state
-        currentBet = 0;
-        GAME_STATE = GameState.INIT;
         
         // Interactivity
-        if (useIncognitoMode) {
-	        incognitoMode = false;
-	        incognitoLight = -1;
-	        incognitoProximity = -1;
-	        incognitoDelay = new Timer();
-	        SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
-	        if (useIncognitoLight) {
-		        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-		        if (lightSensor != null) {
-			        sensorManager.registerListener(incognitoSensorEventListener, 
-			        		lightSensor, 
-			        		SensorManager.SENSOR_DELAY_NORMAL);
-			        incognitoLight = 0;
-		        }
-	        }
-	        if (useIncognitoProxmity) {
-		        Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-		        if (proximitySensor != null) {
-			        sensorManager.registerListener(incognitoSensorEventListener, 
-			        		proximitySensor, 
-			        		SensorManager.SENSOR_DELAY_NORMAL);
-			        incognitoProximity = 0;
-		        }
-	        }
-        }
+        incognitoMode = false;
+        incognitoLight = -1;
+        incognitoProximity = -1;
+        incognitoDelay = new Timer();
+        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        
         
         // UI
         /*final Intent intent = new Intent(NfcAdapter.ACTION_TAG_DISCOVERED);
@@ -120,6 +95,42 @@ public class ClientActivity extends Activity {
             	incrementBetAmount(1);
             }
         });        
+    @Override
+    protected void onResume()
+    {
+        if (useIncognitoMode) {
+	        incognitoMode = false;
+	        incognitoLight = -1;
+	        incognitoProximity = -1;
+	        incognitoDelay = new Timer();
+
+	        if (useIncognitoLight) {
+		        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		        if (lightSensor != null) {
+			        sensorManager.registerListener(incognitoSensorEventListener, 
+			        		lightSensor, 
+			        		SensorManager.SENSOR_DELAY_NORMAL);
+			        incognitoLight = 0;
+		        }
+	        }
+	        if (useIncognitoProxmity) {
+	        	Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+		        if (proximitySensor != null) {
+			        sensorManager.registerListener(incognitoSensorEventListener, 
+			        		proximitySensor, 
+			        		SensorManager.SENSOR_DELAY_NORMAL);
+			        incognitoProximity = 0;
+		        }
+	        }
+        }
+        super.onResume();
+    }
+    
+    @Override
+    protected void onPause()
+    {
+    	sensorManager.unregisterListener(incognitoSensorEventListener);
+        super.onPause();
     }
 
     // Game
