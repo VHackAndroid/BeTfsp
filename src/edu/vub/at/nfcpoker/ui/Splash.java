@@ -21,11 +21,16 @@ import android.provider.Settings.Secure;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
 import android.graphics.Color;
 import android.graphics.RectF;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.view.Menu;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -40,6 +45,9 @@ public class Splash extends Activity {
 	public static String NETWORK_GROUP;
     private Nfc mNfc;
     private Long mLastPausedMillis = 0L;
+    
+    // Interactivity
+    private int incognitoSensors;
 	
 	// Game state
 	public static GameState GAME_STATE;
@@ -72,13 +80,68 @@ public class Splash extends Activity {
             BluetoothConnector.prepare(mNfc, mBluetoothConnected, getAppReference());
         }
         
+        
+        // Interactivity
+        incognitoSensors = 0;
+        SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        if (lightSensor != null) {
+	        sensorManager.registerListener(incognitoSensorEventListener, 
+	        		lightSensor, 
+	        		SensorManager.SENSOR_DELAY_NORMAL);
+	        incognitoSensors++;
+        }
+        Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        if (proximitySensor != null) {
+	        sensorManager.registerListener(incognitoSensorEventListener, 
+	        		proximitySensor, 
+	        		SensorManager.SENSOR_DELAY_NORMAL);
+	        incognitoSensors++;
+        }
+        
         // UI
         /*final Intent intent = new Intent(NfcAdapter.ACTION_TAG_DISCOVERED);
         intent.putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES, AsciiNdefMessage.CreateNdefMessage(UUID));
         startActivity(intent);*/
-        
+        setContentView(R.layout.client);
         
     }
+    
+    SensorEventListener incognitoSensorEventListener = new SensorEventListener() {
+    	@Override
+    	public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    		
+    	}
+
+    	@Override
+    	public void onSensorChanged(SensorEvent event) {
+    		int incognito = 0;
+    		if (event.sensor.getType()==Sensor.TYPE_LIGHT){
+    			float currentReading = event.values[0];
+    			if (currentReading < event.sensor.getMaximumRange() / 10) {
+    				incognito++;
+    			}
+    		}
+    		if (event.sensor.getType()==Sensor.TYPE_PROXIMITY){
+    			float currentReading = event.values[0];
+    			if (currentReading < event.sensor.getMaximumRange() / 10) {
+    				incognito++;
+    			}
+    		}
+    		if (incognito >= incognitoSensors) {
+    			runOnUiThread(new Runnable() {
+
+    	            @Override
+    	            public void run() {
+    	                // Toast.makeText(YourActivityName.this, "This is Toast!!!", Toast.LENGTH_SHORT).show();
+    	                
+    	            }
+    	        });
+    		}
+    	}
+    };
+    
+    
     
     protected void onResume() {
         super.onResume();
