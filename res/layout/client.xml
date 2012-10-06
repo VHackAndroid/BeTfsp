@@ -120,61 +120,28 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" >
 
-        <ImageButton
-            android:id="@+id/AddBlack"
+        <TextView
+            android:id="@+id/labelCurrentBet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:baselineAlignBottom="true"
-            android:paddingLeft="4dip"
-            android:paddingRight="2dip"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_add" />
+            android:layout_weight="0.09"
+            android:freezesText="true"
+            android:paddingLeft="5dip"
+            android:text="Current bet:"
+            android:textColor="@android:color/black" />
 
-        <ImageButton
-            android:id="@+id/AddBlue"
+        <TextView
+            android:id="@+id/currentBet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_add" />
-
-        <ImageButton
-            android:id="@+id/AddWhite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_add" />
-
-        <ImageButton
-            android:id="@+id/AddRed"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_add" />
-
-        <ImageButton
-            android:id="@+id/AddGreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
-            android:paddingLeft="2dip"
-            android:paddingRight="4dip"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_add" />
+            android:layout_weight="0.93"
+            android:freezesText="false"
+            android:inputType="number"
+            android:lines="1"
+            android:maxLines="1"
+            android:text="TextView"
+            android:textColor="@android:color/black"
+            android:typeface="normal" />
 
     </LinearLayout>
 
@@ -182,15 +149,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" >
-
-        <EditText
-            android:id="@+id/currentBet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ems="5"
-            android:inputType="numberSigned" >
-        </EditText>
 
         <Button
             android:id="@+id/Bet"
