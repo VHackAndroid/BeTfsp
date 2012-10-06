@@ -9,7 +9,7 @@ import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 
 public interface Message {
 
-	enum ClientActionType { CallAt, RaiseTo, Fold, Check };
+	 enum ClientActionType { CallAt, RaiseTo, Fold, Check };
 
 	public static final class ClientAction {
 		public ClientActionType type;
@@ -34,6 +34,14 @@ public interface Message {
 			default:
 				return type.toString() + "(" + extra + ")";
 			}
+		}
+		
+		public ClientActionType getClientActionType(){
+			return type;
+		}
+		
+		public int getExtra(){
+			return extra;
 		}
 				
 	}
@@ -152,9 +160,13 @@ public interface Message {
 		// kryo
 		public ClientActionMessage() {}
 		
+		public ClientAction getClientAction(){
+			return action;
+		}
+		
 		@Override
 		public String toString() {
-			return super.toString() + ": Client action information message, client" + userId + " -> " + action;
+			return super.toString() + ": Client action information message, client" + userId + " -> " + action.toString();
 		}
 	}
 }

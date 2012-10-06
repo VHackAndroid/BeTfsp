@@ -35,6 +35,9 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.TableThing;
+import edu.vub.at.nfcpoker.comm.Message;
+import edu.vub.at.nfcpoker.comm.Message.ClientAction;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.PokerServer;
@@ -54,6 +57,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentBet = 0;
+	private static int minimumBet = 0;
 	private static int currentMoney = 0;
 	private int currentChipSwiped = 0;
 	
@@ -226,6 +230,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 		
         
         incrementBetAmount(0);
+        updateBetAmount(0);
+        
         listenToGameServer();
     }
     
@@ -341,15 +347,28 @@ public class ClientActivity extends Activity implements OnClickListener {
 								});
     						}
     						
+    						if (m instanceof ClientActionMessage) {
+    							final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
+    							final ClientAction action = newClientActionMessage.getClientAction();
+    							Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
+    							if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
+    								theActivity.runOnUiThread(new Runnable() {
+    									@Override
+    									public void run() {
+    										updateMinBetAmount(action.getExtra());
+    									}
+    								});
+
+    							}
+    						}
+
+    						
     						if (m instanceof RequestClientActionFutureMessage) {
     							final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
     							pendingFuture = rcafm.futureId;
     							enableActions();
     						}
     					}
-
-
-						
     				});
     			} catch (IOException e) {
     				Log.e("AMBIENTPOKER", "Could not discover server: ");
@@ -426,10 +445,16 @@ public class ClientActivity extends Activity implements OnClickListener {
     }*/
     
     // Game
-    private void incrementBetAmount(int value) {
+    private void updateBetAmount(int value) {
     	currentBet += value;
         final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
         textCurrentBet.setText(" " + currentBet);
+    }
+    
+    private void updateMinBetAmount(int value) {
+    	minimumBet = value;
+        final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
+        textCurrentBet.setText(" " + minimumBet);
     }
     
     private boolean canViewCards() {
@@ -546,12 +571,12 @@ public class ClientActivity extends Activity implements OnClickListener {
                  if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 	 if (canBet()) { 
                 		 Toast.makeText(ClientActivity.this, "Adding to the bet " + currentChipSwiped, Toast.LENGTH_SHORT).show();
-                		 incrementBetAmount(currentChipSwiped);
+                		 updateBetAmount(currentChipSwiped);
                 	 }
                  }  else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
                 	 if (canBet()) { 
                 	 Toast.makeText(ClientActivity.this, "Removing to the bet " + currentChipSwiped, Toast.LENGTH_SHORT).show();
-                	 incrementBetAmount(-currentChipSwiped);
+                	 updateBetAmount(-currentChipSwiped);
                 	 }
                  }
              } catch (Exception e) {
