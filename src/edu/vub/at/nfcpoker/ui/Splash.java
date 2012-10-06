@@ -55,6 +55,8 @@ public class Splash extends Activity {
         UUID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
         NETWORK_GROUP = "TODO-FROM-NFC";
         
+        Intent intent = new Intent(this, ClientActivity.class);
+        startActivity(intent);
     }
 
 }
