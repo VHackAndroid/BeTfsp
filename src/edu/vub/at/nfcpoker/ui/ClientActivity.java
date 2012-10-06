@@ -84,6 +84,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private Button bet;
 	private Button check;
 	private Button fold;
+	
+	private UUID pendingFuture;
+	private Connection serverConnection;
     
     
 	// Enums
@@ -176,16 +179,75 @@ public class ClientActivity extends Activity implements OnClickListener {
         mCardView2 = (CurlView) findViewById(R.id.Card2);
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
-        //mCardView2.setBackgroundColor(POKER_GREEN);        
+        //mCardView2.setBackgroundColor(POKER_GREEN); 
+        
 		bet = (Button) findViewById(R.id.Bet);
 		check = (Button) findViewById(R.id.Check);
 		fold = (Button) findViewById(R.id.Fold);
        
+		bet.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				disableActions();
+			}
+		});
+		
+		check.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ClientAction ca = new ClientAction(ClientActionType.Check);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				disableActions();
+			}
+		});
+		
+		fold.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				ClientAction ca = new ClientAction(ClientActionType.Fold);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				disableActions();
+			}
+		});
+		
         
         incrementBetAmount(0);
         listenToGameServer();
     }
     
+	
+	private void setServerConnection(Connection c) {
+		serverConnection = c;
+	}
+	
+	private void enableActions() {
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				bet.setEnabled(true);
+				check.setEnabled(true);
+				fold.setEnabled(true);
+			}
+		});						
+	}
+
+	private void disableActions() {
+		clearPendingFuture();
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				bet.setEnabled(false);
+				check.setEnabled(false);
+				fold.setEnabled(false);
+			}
+		});
+	}
+	
+	
     private void listenToGameServer() {
     	final ClientActivity theActivity = this;
     	final String ip = getIntent().getStringExtra("ip");
@@ -198,10 +260,12 @@ public class ClientActivity extends Activity implements OnClickListener {
     					@Override
     					public void connected(Connection arg0) {
     						super.connected(arg0);
+    						setServerConnection(arg0);
     						Log.d("AMBIENTPOKER","Connected to server!");
     					}
-    					
-    					@Override
+
+
+						@Override
     					public void received(Connection c, Object m) {
     						super.received(c, m);
 					
@@ -209,6 +273,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 					
     						if (m instanceof GameState) {
     							GameState newGameState = (GameState) m;
+    							disableActions();
     							switch (newGameState) {
     							case STOPPED:
     								Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
@@ -216,13 +281,12 @@ public class ClientActivity extends Activity implements OnClickListener {
     							case WAITING_FOR_PLAYERS:
     								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
     								Toast.makeText(theActivity, "Waiting for players", Toast.LENGTH_SHORT).show();
-    								disableActions();
     								hideCards();
     								break;
     							case PREFLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
-    								enableActions();
     								showCards();
+    								clearPendingFuture();
     								break;
     							case FLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to FLOP");
@@ -259,31 +323,16 @@ public class ClientActivity extends Activity implements OnClickListener {
 									}
 								});
     						}
+    						
+    						if (m instanceof RequestClientActionFutureMessage) {
+    							final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
+    							pendingFuture = rcafm.futureId;
+    							enableActions();
+    						}
     					}
 
-						private void enableActions() {
-							theActivity.runOnUiThread(new Runnable() {
-								
-								@Override
-								public void run() {
-									bet.setEnabled(true);
-									check.setEnabled(true);
-									fold.setEnabled(true);
-								}
-							});						
-						}
 
-						private void disableActions() {
-							theActivity.runOnUiThread(new Runnable() {
-								
-								@Override
-								public void run() {
-									bet.setEnabled(false);
-									check.setEnabled(false);
-									fold.setEnabled(false);
-								}
-							});
-						}
+						
     				});
     			} catch (IOException e) {
     				Log.e("AMBIENTPOKER", "Could not discover server: ");
@@ -495,6 +544,11 @@ public class ClientActivity extends Activity implements OnClickListener {
          }
 
      }
+	 
+
+		private void clearPendingFuture() {
+			pendingFuture = null;
+		}
 }
 
 	
