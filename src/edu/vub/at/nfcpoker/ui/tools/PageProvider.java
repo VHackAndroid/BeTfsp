@@ -31,15 +31,6 @@ public class PageProvider implements CurlView.PageProvider {
 		return mBitmapIds.length;
 	}
 	
-	public void setBitmaps(int[] mBitmapIds) {
-		this.mBitmapIds = mBitmapIds;
-	}
-
-	public void setSecondBitmap(int mBitmapId) {
-		if (this.mBitmapIds.length < 2) return;
-		this.mBitmapIds[1] = mBitmapId;
-	}
-	
 	private Bitmap loadBitmap(int width, int height, int index) {
 		Bitmap b = Bitmap.createBitmap(width, height,
 				Bitmap.Config.ARGB_8888);

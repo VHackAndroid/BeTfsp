@@ -42,8 +42,8 @@ public class Deck {
 
 	public Card[] drawCards(int i) {
 		Card[] ret = new Card[i];
-		for (int j = 0; j < i; i++)
-			ret[i] = drawFromDeck();
+		for (int j = 0; j < i; j++)
+			ret[j] = drawFromDeck();
 		
 		return ret;
 	}

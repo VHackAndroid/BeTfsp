@@ -1,6 +1,11 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,9 +42,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -50,6 +53,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -203,23 +208,13 @@ public class ClientActivity extends Activity implements OnClickListener{
         mCardView2 = (CurlView) findViewById(R.id.Card2);
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
-        mCardView2.setBackgroundColor(POKER_GREEN);
-        
-
-
-        // TODO EGB CHANGE THIS FOR THE CARDS THAT THE SERVER SENDS YOU
-        short x = 3;
-        Card c = new Card(x,(short) (x+1));
-        int id = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
-
-        int[] bitmapIds = new int[] { R.drawable.backside, id };
-        mCardView1.setPageProvider(new PageProvider(this, bitmapIds));
-        
+        mCardView2.setBackgroundColor(POKER_GREEN);        
         
         listenToGameServer();
     }
     
     private void listenToGameServer() {
+    	final ClientActivity theActivity = this;
     	final TimerTask tt = new TimerTask() {
     		public void run() {
     			try {
@@ -241,6 +236,7 @@ public class ClientActivity extends Activity implements OnClickListener{
     								break;
     							case WAITING_FOR_PLAYERS:
     								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+    								Toast.makeText(theActivity, "Waiting for players", 3000);
     								break;
     							case PREFLOP:
     								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
@@ -267,13 +263,19 @@ public class ClientActivity extends Activity implements OnClickListener{
     							for (int i = 0; i < cards.length; i++) {
     								Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
     							}
+    							
     						}
 					
     						if (m instanceof ReceiveHoleCardsMessage) {
-    							ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
+    							final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
     							Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+    							theActivity.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										updateHandGui(newHoleCards);
+									}
+								});
     						}
-						
     					}
     				});
     			} catch (IOException e) {
@@ -286,6 +288,18 @@ public class ClientActivity extends Activity implements OnClickListener{
     	Timer timer = new Timer();
     	timer.schedule(tt, 1000);
     		
+    }
+    
+    private void updateHandGui(ReceiveHoleCardsMessage cards) {
+
+        int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
+        int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
+        mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
+        
+        int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card2.toString(), null, null);
+        int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
+        mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
+        
     }
     
     @Override
