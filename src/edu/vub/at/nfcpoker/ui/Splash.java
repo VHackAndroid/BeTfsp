@@ -77,9 +77,25 @@ public class Splash extends Activity {
 				new DiscoveryAsyncTask().execute();
 			}
 		});
+        
+        Button server = (Button) findViewById(R.id.server);
+        if (server != null)
+        	server.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					startServer();
+				}
+			});
     }
 
-    @Override
+    protected void startServer() {
+		Intent i = new Intent(this, ClientActivity.class);
+		startActivity(i);
+		finish();
+	}
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_splash, menu);
         return true;
