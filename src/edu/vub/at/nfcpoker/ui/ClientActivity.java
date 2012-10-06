@@ -188,8 +188,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		bet.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				runOnNotUiThread(new Runnable() {	
+					public void run() {
+						ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
+						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));					
+					}
+				});
 				disableActions();
 			}
 		});
@@ -197,8 +201,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		check.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ClientAction ca = new ClientAction(ClientActionType.Check);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				runOnNotUiThread(new Runnable() {
+					public void run() {
+						ClientAction ca = new ClientAction(ClientActionType.Check);
+						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+					}
+				});
 				disableActions();
 			}
 		});
@@ -206,8 +214,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		fold.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ClientAction ca = new ClientAction(ClientActionType.Fold);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				runOnNotUiThread(new Runnable() {
+					public void run() {
+						ClientAction ca = new ClientAction(ClientActionType.Fold);
+						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+					}
+				});
 				disableActions();
 			}
 		});
@@ -218,6 +230,11 @@ public class ClientActivity extends Activity implements OnClickListener {
     }
     
 	
+	protected void runOnNotUiThread(Runnable runnable) {
+		new Thread(runnable).start();		
+	}
+
+
 	private void setServerConnection(Connection c) {
 		serverConnection = c;
 	}
