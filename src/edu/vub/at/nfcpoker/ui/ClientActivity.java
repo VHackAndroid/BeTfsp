@@ -21,7 +21,12 @@ public class ClientActivity extends Activity {
     private Long mLastPausedMillis = 0L;
     
     // Interactivity
-    private int incognitoSensors;
+    private static final boolean useIncognitoMode = true;
+    private static final boolean useIncognitoLight = false;
+    private static final boolean useIncognitoProxmity = true;
+    private boolean incognitoMode;
+    private long incognitoLight;
+    private long incognitoProximity;
 	
 	// Game state
 	public static GameState GAME_STATE;
@@ -41,21 +46,30 @@ public class ClientActivity extends Activity {
         GAME_STATE = GameState.INIT;
         
         // Interactivity
-        incognitoSensors = 0;
-        SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-        if (lightSensor != null) {
-	        sensorManager.registerListener(incognitoSensorEventListener, 
-	        		lightSensor, 
-	        		SensorManager.SENSOR_DELAY_NORMAL);
-	        incognitoSensors++;
-        }
-        Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
-        if (proximitySensor != null) {
-	        sensorManager.registerListener(incognitoSensorEventListener, 
-	        		proximitySensor, 
-	        		SensorManager.SENSOR_DELAY_NORMAL);
-	        incognitoSensors++;
+        if (useIncognitoMode) {
+	        incognitoMode = false;
+	        incognitoLight = -1;
+	        incognitoProximity = -1;
+	        SensorManager sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+
+	        if (useIncognitoLight) {
+		        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+		        if (lightSensor != null) {
+			        sensorManager.registerListener(incognitoSensorEventListener, 
+			        		lightSensor, 
+			        		SensorManager.SENSOR_DELAY_NORMAL);
+			        incognitoLight = 0;
+		        }
+	        }
+	        if (useIncognitoProxmity) {
+		        Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+		        if (proximitySensor != null) {
+			        sensorManager.registerListener(incognitoSensorEventListener, 
+			        		proximitySensor, 
+			        		SensorManager.SENSOR_DELAY_NORMAL);
+			        incognitoProximity = 0;
+		        }
+	        }
         }
         
         // UI
@@ -73,28 +87,44 @@ public class ClientActivity extends Activity {
 
     	@Override
     	public void onSensorChanged(SensorEvent event) {
-    		int incognito = 0;
     		if (event.sensor.getType()==Sensor.TYPE_LIGHT){
     			float currentReading = event.values[0];
-    			if (currentReading < event.sensor.getMaximumRange() / 10) {
-    				incognito++;
+    			if (currentReading < 10) {
+    				if (incognitoLight == 0) incognitoLight = System.currentTimeMillis();
+        			Log.d("Light SENSOR", "It's dark!" + currentReading);
+    			} else {
+    				incognitoLight = 0;
+        			Log.d("Light SENSOR", "It's bright!" + currentReading);
     			}
-    			Log.d("SENSOR", "" + currentReading);
     		}
     		if (event.sensor.getType()==Sensor.TYPE_PROXIMITY){
     			float currentReading = event.values[0];
-    			if (currentReading < event.sensor.getMaximumRange() / 10) {
-    				incognito++;
+    			if (currentReading < 1) {
+    				if (incognitoProximity == 0) incognitoProximity = System.currentTimeMillis();
+        			Log.d("Proximity SENSOR", "I found a hand!" + currentReading);
+    			} else {
+    				incognitoProximity = 0;
+        			Log.d("Proximity SENSOR", "All clear!" + currentReading);
     			}
     		}
-    		if (incognito >= incognitoSensors) {
+    		if ((incognitoLight != 0) && (incognitoProximity != 0)) {
+				incognitoMode = true;
     			runOnUiThread(new Runnable() {
     	            @Override
     	            public void run() {
-    	            	Toast.makeText(ClientActivity.this, "This is Toast!!!", Toast.LENGTH_SHORT).show();
-    	                
+    	            	Toast.makeText(ClientActivity.this, "INCOGNITO ENABLED", Toast.LENGTH_SHORT).show();
     	            }
     	        });
+    		} else {
+				if (incognitoMode) {
+					incognitoMode = false;
+	    			runOnUiThread(new Runnable() {
+	    	            @Override
+	    	            public void run() {
+	    	            	Toast.makeText(ClientActivity.this, "DISABLE INCOGNITO", Toast.LENGTH_SHORT).show();
+	    	            }
+	    	        });
+				}
     		}
     	}
     };
