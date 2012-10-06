@@ -25,9 +25,11 @@ import android.widget.Toast;
 
 public class ClientActivity extends Activity {
 
-    private Nfc mNfc;
-    private Long mLastPausedMillis = 0L;
-    
+	// Game state
+	public static GameState GAME_STATE = GameState.INIT;
+	private static int currentBet = 0;
+	private static int currentMoney = 0;
+	
     // Interactivity
     private static final boolean useIncognitoMode = true;
     private static final boolean useIncognitoLight = false;
@@ -68,33 +70,33 @@ public class ClientActivity extends Activity {
         final ImageButton buttonAddBlack = (ImageButton) findViewById(R.id.AddBlack);
         buttonAddBlack.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	incrementBetAmount(100);
+            	if (canBet()) incrementBetAmount(100);
             }
         });
         final ImageButton buttonAddGreen = (ImageButton) findViewById(R.id.AddGreen);
         buttonAddGreen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	incrementBetAmount(25);
+            	if (canBet()) incrementBetAmount(25);
             }
         });
         final ImageButton buttonAddBlue = (ImageButton) findViewById(R.id.AddBlue);
         buttonAddBlue.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	incrementBetAmount(10);
+            	if (canBet()) incrementBetAmount(10);
             }
         });
         final ImageButton buttonAddRed = (ImageButton) findViewById(R.id.AddRed);
         buttonAddRed.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	incrementBetAmount(5);
+            	if (canBet()) incrementBetAmount(5);
             }
         });
         final ImageButton buttonAddWhite = (ImageButton) findViewById(R.id.AddWhite);
         buttonAddWhite.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-            	incrementBetAmount(1);
+            	if (canBet()) incrementBetAmount(1);
             }
-        });        
+        });
     @Override
     protected void onResume()
     {
@@ -138,6 +140,24 @@ public class ClientActivity extends Activity {
     	currentBet += value;
         final EditText textCurrentBet = (EditText) findViewById(R.id.currentBet);
         textCurrentBet.setText(""+currentBet);
+    }
+    
+    private boolean canViewCards() {
+    	return ((GAME_STATE == GameState.HOLE) ||
+    			(GAME_STATE == GameState.HOLE_NEXT) ||
+    			(GAME_STATE == GameState.FLOP) ||
+    			(GAME_STATE == GameState.FLOP_NEXT) ||
+    			(GAME_STATE == GameState.TURN) ||
+    			(GAME_STATE == GameState.TURN_NEXT) ||
+    			(GAME_STATE == GameState.RIVER) ||
+    	    	(GAME_STATE == GameState.RIVER_NEXT));
+    }
+    
+    private boolean canBet() {
+    	return ((GAME_STATE == GameState.HOLE) ||
+    			(GAME_STATE == GameState.FLOP) ||
+    			(GAME_STATE == GameState.TURN) ||
+    			(GAME_STATE == GameState.RIVER));
     }
     
     // Interactivity
