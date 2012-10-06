@@ -55,6 +55,7 @@ public class Splash extends Activity {
 
 	// TO BE CONFIGURED (TODO)
 	public static boolean IS_SERVER = true;
+	public static boolean IS_LODE = true;
 
 	// Connectivity state
 	public static String UUID;
@@ -77,6 +78,11 @@ public class Splash extends Activity {
 				new DiscoveryAsyncTask().execute();
 			}
 		});
+        
+        if (IS_LODE) {
+        	Intent intent = new Intent(this, ClientActivity.class);
+        	startActivity(intent);
+        }
     }
 
     @Override
