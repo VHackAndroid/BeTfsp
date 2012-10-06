@@ -14,6 +14,8 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
+import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 
 public class ConcretePokerServer extends PokerServer  {
@@ -123,22 +125,32 @@ public class ConcretePokerServer extends PokerServer  {
 				}
 				
 				Deck deck = new Deck();
-				Card[] commonCards = 
-						new Card[] { deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck() };
+				Card[] commonCards = deck.drawCards(5);
 				
 				// hole cards
 				newState(GameState.PREFLOP);
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
-				for (Integer clientNum : clientsInGame.navigableKeySet())
-					holeCards.put(clientNum, new Card[] { deck.drawFromDeck(), deck.drawFromDeck() });
+				for (Integer clientNum : clientsInGame.navigableKeySet()) {
+					Card preflop[] = deck.drawCards(2);
+					holeCards.put(clientNum, preflop);
+					Connection c = clientsInGame.get(clientNum);
+					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
+				}
+					
 				
 				// flop cards
+				Card[] flop = deck.drawCards(3);
+				broadcast(new ReceivePublicCards(flop));
 				newState(GameState.FLOP);
 
 				// turn cards
+				Card[] turn = deck.drawCards(1);
+				broadcast(new ReceivePublicCards(turn));
 				newState(GameState.TURN);
 
 				// river cards
+				Card[] river = deck.drawCards(1);
+				broadcast(new ReceivePublicCards(turn));
 				newState(GameState.RIVER);
 
 				// results

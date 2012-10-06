@@ -39,5 +39,13 @@ public class Deck {
 	public int getTotalCards() {
 		return cards.size();  //we could use this method when making a complete poker game to see if we needed a new deck
 	}
+
+	public Card[] drawCards(int i) {
+		Card[] ret = new Card[i];
+		for (int j = 0; j < i; i++)
+			ret[i] = drawFromDeck();
+		
+		return ret;
+	}
 } 
 
