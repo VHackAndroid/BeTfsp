@@ -28,6 +28,7 @@ import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
+import edu.vub.at.nfcpoker.ui.ServerActivity;
 
 public class ConcretePokerServer extends PokerServer  {
 	
@@ -86,13 +87,17 @@ public class ConcretePokerServer extends PokerServer  {
 	};
 	
 	int nextClientID = 0;
+
+	private ServerActivity gui;
+	
 	public enum GameState {
 		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 	};
 	
 
 
-	public ConcretePokerServer(Activity gui) {
+	public ConcretePokerServer(ServerActivity gui) {
+		this.gui = gui;
 	}
 	
 	public void start() {		
@@ -127,6 +132,7 @@ public class ConcretePokerServer extends PokerServer  {
 		public void run() {
 			gameState = GameState.PREFLOP;
 			while (true) {
+				gui.resetCards();
 				synchronized(this) {
 					clientsInGame.putAll(gameLoop.newClients);
 					newClients.clear();
@@ -163,7 +169,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				// flop cards
 				Card[] flop = deck.drawCards(3);
-				revealCards(flop);
+				gui.revealCards(flop);
 				newState(GameState.FLOP);
 				broadcast(new ReceivePublicCards(flop));
 				createActionFutures(actionFutures);
@@ -171,7 +177,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 				// turn cards
 				Card[] turn = deck.drawCards(1);
-				revealCards(turn);
+				gui.revealCards(turn);
 				newState(GameState.TURN);
 				broadcast(new ReceivePublicCards(turn));
 				createActionFutures(actionFutures);
@@ -179,7 +185,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				// river cards
 				Card[] river = deck.drawCards(1);
-				revealCards(river);
+				gui.revealCards(river);
 				newState(GameState.RIVER);
 				broadcast(new ReceivePublicCards(river));
 				createActionFutures(actionFutures);
@@ -257,9 +263,5 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	}
 
-	public void revealCards(Card[] cards) {
-		for (Card c : cards)
-			Log.d("PokerServer", "Revealing card " + c);
-	};
 
 }
