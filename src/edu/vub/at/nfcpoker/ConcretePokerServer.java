@@ -163,6 +163,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				// flop cards
 				Card[] flop = deck.drawCards(3);
+				revealCards(flop);
 				newState(GameState.FLOP);
 				broadcast(new ReceivePublicCards(flop));
 				createActionFutures(actionFutures);
@@ -170,6 +171,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 				// turn cards
 				Card[] turn = deck.drawCards(1);
+				revealCards(turn);
 				newState(GameState.TURN);
 				broadcast(new ReceivePublicCards(turn));
 				createActionFutures(actionFutures);
@@ -177,6 +179,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				// river cards
 				Card[] river = deck.drawCards(1);
+				revealCards(river);
 				newState(GameState.RIVER);
 				broadcast(new ReceivePublicCards(river));
 				createActionFutures(actionFutures);
@@ -252,6 +255,11 @@ public class ConcretePokerServer extends PokerServer  {
 				synchronized(this) { this.notifyAll(); }
 			}
 		}
+	}
+
+	public void revealCards(Card[] cards) {
+		for (Card c : cards)
+			Log.d("PokerServer", "Revealing card " + c);
 	};
 
 }
