@@ -1,7 +1,11 @@
 package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.NavigableSet;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryonet.Connection;
@@ -12,11 +16,17 @@ import android.app.Activity;
 import android.util.Log;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.commlib.FoldingClient;
+import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.comm.Message;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.comm.Message.ClientAction;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
+import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 
 public class ConcretePokerServer extends PokerServer  {
@@ -57,7 +67,8 @@ public class ConcretePokerServer extends PokerServer  {
 					public void received(Connection c, Object msg) {
 						super.received(c, msg);
 						if (msg instanceof FutureMessage) {
-							
+							FutureMessage fm = (FutureMessage) msg;
+							CommLib.resolveFuture(fm.futureId, fm.futureValue);
 						}
 					}
 					
@@ -137,6 +148,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				Deck deck = new Deck();
 				
+				Vector<Future<ClientAction>> actionFutures = new Vector<Future<ClientAction>>();  
 				// hole cards
 				newState(GameState.PREFLOP);
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
@@ -146,31 +158,72 @@ public class ConcretePokerServer extends PokerServer  {
 					Connection c = clientsInGame.get(clientNum);
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
-					
+				createActionFutures(actionFutures);
+				roundTable(actionFutures, clientsInGame.navigableKeySet());
 				
 				// flop cards
 				Card[] flop = deck.drawCards(3);
-				broadcast(new ReceivePublicCards(flop));
 				newState(GameState.FLOP);
+				broadcast(new ReceivePublicCards(flop));
+				createActionFutures(actionFutures);
+				roundTable(actionFutures, clientsInGame.navigableKeySet());
 
 				// turn cards
 				Card[] turn = deck.drawCards(1);
-				broadcast(new ReceivePublicCards(turn));
 				newState(GameState.TURN);
-
+				broadcast(new ReceivePublicCards(turn));
+				createActionFutures(actionFutures);
+				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				
 				// river cards
 				Card[] river = deck.drawCards(1);
-				broadcast(new ReceivePublicCards(river));
 				newState(GameState.RIVER);
-
+				broadcast(new ReceivePublicCards(river));
+				createActionFutures(actionFutures);
+				roundTable(actionFutures, clientsInGame.navigableKeySet());
+				
 				// results
 				newState(GameState.END_OF_ROUND);
-
+				// compare.
 				
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
 					Log.wtf("PokerServer", "Thread.sleep was interrupted", e);
+				}
+			}
+		}
+
+		public void createActionFutures(Vector<Future<ClientAction>> actionFutures) {
+			Iterator<Future<ClientAction>> it = ((Set<Future<ClientAction>>) actionFutures.clone()).iterator();
+			actionFutures.clear();
+			for (Integer i : clientsInGame.navigableKeySet()) {
+				Future<ClientAction> oldFut = it.hasNext() ? it.next() : null;
+				ClientAction oldAction = oldFut != null ? oldFut.get() : null;
+				if (oldAction != null && oldAction.type != ClientActionType.Fold) {
+					Future<ClientAction> fut = new Future<ClientAction>();
+					actionFutures.add(fut);
+					clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut));								
+				} else {
+					actionFutures.add(oldFut);
+				}
+			}
+		}
+
+		public void roundTable(Vector<Future<ClientAction>> actionFutures, NavigableSet<Integer> navigableSet) {
+			Iterator<Integer> it = clientsInGame.navigableKeySet().iterator();
+			for (Future<ClientAction> fut: actionFutures) {
+				ClientAction ca = fut.get();
+				broadcast(new ClientActionMessage(ca, it.next()));
+				switch (ca.type) { // todo
+				case RaiseTo:
+					break;
+				case Fold:
+					break;
+				case CallAt:
+					break;
+				case Check:
+					break;
 				}
 			}
 		}

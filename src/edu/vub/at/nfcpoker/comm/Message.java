@@ -25,6 +25,16 @@ public interface Message {
 		
 		// for kryo
 		public ClientAction() {}
+		
+		@Override
+		public String toString() {
+			switch (type) {
+			case Fold: case Check:
+				return type.toString();
+			default:
+				return type.toString() + "(" + extra + ")";
+			}
+		}
 				
 	}
 
@@ -132,10 +142,10 @@ public interface Message {
 	public class ClientActionMessage extends TimestampedMessage {
 		
 		public int userId;
-		public ClientActionType type;
+		public ClientAction action;
 		
-		public ClientActionMessage(int id, ClientActionType type) {
-			this.type = type;
+		public ClientActionMessage(ClientAction action, int id) {
+			this.action = action;
 			this.userId = id;
 		}
 
@@ -144,7 +154,7 @@ public interface Message {
 		
 		@Override
 		public String toString() {
-			return super.toString() + ": Client action information message, client" + userId + " -> " + type;
+			return super.toString() + ": Client action information message, client" + userId + " -> " + action;
 		}
 	}
 }
