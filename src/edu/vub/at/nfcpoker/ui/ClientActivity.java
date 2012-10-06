@@ -9,6 +9,7 @@ import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 
 import mobisocial.nfc.Nfc;
 import mobisocial.nfc.addon.BluetoothConnector;
+import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
 import android.app.Activity;
@@ -107,11 +108,18 @@ public class ClientActivity extends Activity {
         });
 
         final ViewFlipper viewFlipper1 = (ViewFlipper) findViewById(R.id.viewFlipper1);
+        final ImageButton btn = (ImageButton) findViewById(R.id.Card1Front);
+        // TODO EGB CHANGE THIS FOR THE CARDS THAT THE SERVER SENDS YOU
+        short x = 3;
+        Card c = new Card(x,(short) (x+1));
+        int id = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
+        btn.setImageResource(id);
         AnimationFactory.flipTransition(viewFlipper1, FlipDirection.LEFT_RIGHT);
         
         final ViewFlipper viewFlipper2 = (ViewFlipper) findViewById(R.id.viewFlipper2);
         AnimationFactory.flipTransition(viewFlipper2, FlipDirection.LEFT_RIGHT);
 
+        
         /*
         ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
 		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
