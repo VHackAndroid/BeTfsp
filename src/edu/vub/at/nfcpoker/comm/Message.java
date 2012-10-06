@@ -12,6 +12,11 @@ public interface Message {
 		public TimestampedMessage() {
 			timestamp = new Date().getTime();
 		}
+		
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName() + "@" + timestamp;
+		}
 	}
 	
 	public static final class StateChangeMessage extends TimestampedMessage {
@@ -24,5 +29,9 @@ public interface Message {
 		// for kryo
 		public StateChangeMessage() {}
 
+		@Override
+		public String toString() {
+			return super.toString() + ": State change to " + newState;
+		}
 	}
 }
