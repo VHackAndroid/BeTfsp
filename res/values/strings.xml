@@ -1,10 +1,10 @@
 <resources>
 
-    <string name="app_name">Ambient-Poker</string>
-    <string name="hello_world">Ambient-Poker</string>
+    <string name="app_name">wePoker</string>
+    <string name="hello_world">wePoker</string>
     <string name="menu_settings">Settings</string>
-    <string name="title_activity_splash">Ambient-Poker</string>
-    <string name="title_activity_client">Ambient-Poker</string>
-    <string name="title_activity_server">Ambient-Poker (Table)</string>
+    <string name="title_activity_splash">wePoker</string>
+    <string name="title_activity_client">wePoker</string>
+    <string name="title_activity_server">wePoker (Table)</string>
 
 </resources>
