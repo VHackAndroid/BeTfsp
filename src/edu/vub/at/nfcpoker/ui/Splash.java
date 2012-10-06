@@ -60,8 +60,8 @@ public class Splash extends ThingActivity<TableThing> {
 			super.onPostExecute(result);
 			if (result != null) {
 				Intent i = new Intent(Splash.this, ClientActivity.class);
-				i.putExtra("ip", ((TableThing) lastScannedTag_).ip_);
-				i.putExtra("port", ((TableThing) lastScannedTag_).port_);
+				i.putExtra("ip", result.getAddress());
+				i.putExtra("port", Integer.parseInt(result.getPort()));
 				startActivity(i);
 			} else {
 				Toast.makeText(Splash.this, "Could not discover hosts", Toast.LENGTH_SHORT).show();
@@ -93,35 +93,33 @@ public class Splash extends ThingActivity<TableThing> {
 //				((TableThing) lastScannedTag_).broadcast();
 //			}
 //		});
+		
+		new DiscoveryAsyncTask().execute();
 
-		Button discover = (Button) findViewById(R.id.discover);
-		discover.setText("Discovering server...");
-		discover.setEnabled(false);
-		discover.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				new DiscoveryAsyncTask().execute();
-			}
-		});
-
-		if (IS_LODE) {
-			startServer();
-			return;
-			//Intent intent = new Intent(this, ClientActivity.class);
-			//startActivity(intent);
-			//updateWatchTimeout(System.currentTimeMillis(), 100000);
-		} else {
-			Button server = (Button) findViewById(R.id.server);
-			if (server != null)
-				server.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						startServer();
-					}
-				});
-		}
+		
+		Button server = (Button) findViewById(R.id.server);
+		if (server != null)
+			server.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					startServer();
+				}
+			});
 
 		// NFC
+		final Dialog nfc_dialog = createNFCDialog();
+
+		Button nfc = (Button) findViewById(R.id.nfc);
+		nfc.setEnabled(false);
+		nfc.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				nfc_dialog.show();
+			}
+		});
+	}
+
+	private Dialog createNFCDialog() {
 		final Splash theActivity = this;
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = this.getLayoutInflater();
@@ -158,7 +156,7 @@ public class Splash extends ThingActivity<TableThing> {
 					}
 				} catch (Exception e) {
 					Toast.makeText(theActivity, "Failed to write NFC tag, verify IP and port information", Toast.LENGTH_SHORT).show();
-					Log.d("NFC-TAG", e.getMessage());
+					Log.d("NFC-TAG", "Failed to write NFC tag", e);
 				}
 			}
 		});
@@ -167,15 +165,7 @@ public class Splash extends ThingActivity<TableThing> {
 				dialog.cancel();
 			}
 		});
-
-		Button nfc = (Button) findViewById(R.id.nfc);
-		nfc.setEnabled(false);
-		nfc.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				dialog.show();
-			}
-		});
+		return dialog;
 	}
 
 	// NFC
@@ -185,7 +175,6 @@ public class Splash extends ThingActivity<TableThing> {
 		Button nfcButton = (Button) findViewById(R.id.nfc);
 		nfcButton.setEnabled(true);
 		lastScannedTag_ = tableThing;
-		((Button) findViewById(R.id.discover)).setEnabled(true);
 		startClient();
 	}
 
@@ -195,7 +184,6 @@ public class Splash extends ThingActivity<TableThing> {
 		Button nfcButton = (Button) findViewById(R.id.nfc);
 		nfcButton.setEnabled(true);
 		lastScannedTag_ = r;
-		((Button) findViewById(R.id.discover)).setEnabled(false);
 	}
 
 	protected void startServer() {

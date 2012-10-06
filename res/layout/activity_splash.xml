@@ -19,12 +19,29 @@
             android:contentDescription="Splash screen"
             android:src="@drawable/splash" />
 
-        <Button
-            android:id="@+id/discover"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="200dip"
-            android:text="Discovering..." />
+            android:gravity="center_vertical" >
+
+            <ProgressBar
+                android:id="@+id/progressBar1"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxHeight="40dip"
+                android:maxWidth="40dip"
+                android:minHeight="40dip"
+                android:minWidth="40dip" />
+
+            <TextView
+                android:id="@+id/Discovering"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Discovering ..."
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/nfc"
