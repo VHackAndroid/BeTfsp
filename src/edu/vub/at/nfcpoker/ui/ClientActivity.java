@@ -80,10 +80,10 @@ public class ClientActivity extends Activity implements OnClickListener{
 	private static final int[] DEFAULT_CARDS = new int[] { R.drawable.backside, R.drawable.backside };
 	
     // Interactivity
+    public static boolean incognitoMode;
     private static final boolean useIncognitoMode = true;
     private static final boolean useIncognitoLight = false;
     private static final boolean useIncognitoProxmity = true;
-    private boolean incognitoMode;
     private long incognitoLight;
     private long incognitoProximity;
     private Timer incognitoDelay;

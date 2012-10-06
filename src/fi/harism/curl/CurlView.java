@@ -16,6 +16,7 @@
 
 package fi.harism.curl;
 
+import edu.vub.at.nfcpoker.ui.ClientActivity;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -524,6 +525,8 @@ public class CurlView extends GLSurfaceView implements View.OnTouchListener,
 	 * pages in landscape
 	 */
 	private void startCurl(int page) {
+		if (ClientActivity.incognitoMode) return;
+		
 		switch (page) {
 
 		// Once right side page is curled, first right page is assigned into
