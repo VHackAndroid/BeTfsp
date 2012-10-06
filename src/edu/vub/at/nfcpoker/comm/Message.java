@@ -1,11 +1,14 @@
 package edu.vub.at.nfcpoker.comm;
 
 import java.util.Date;
+import java.util.UUID;
 
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 
 public interface Message {
+
+
 
 
 
@@ -75,6 +78,24 @@ public interface Message {
 				cardsStr.append(", ").append(cards[i].toString());
 			
 			return super.toString() + cardsStr.toString();
+		}
+	}
+	
+	public class FutureMessage extends TimestampedMessage {
+		UUID futureId;
+		Object futureValue;
+		
+		public FutureMessage(UUID futureId_, Object futureValue_) {
+			futureId = futureId_;
+			futureValue = futureValue_;
+		}
+
+		//kryo
+		public FutureMessage() {}
+
+		@Override
+		public String toString() {
+			return super.toString() + ": Resolve " + futureId + " with " + futureValue;
 		}
 	}
 }
