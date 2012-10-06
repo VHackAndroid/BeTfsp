@@ -120,29 +120,64 @@
         android:layout_height="wrap_content"
         android:layout_weight="1" >
 
+        <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+
         <TextView
             android:id="@+id/labelCurrentBet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.09"
             android:freezesText="true"
-            android:paddingLeft="5dip"
+            android:paddingLeft="2dip"
             android:text="Current bet:"
-            android:textColor="@android:color/black" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/black"
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/currentBet"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.93"
             android:freezesText="false"
-            android:inputType="number"
             android:lines="1"
             android:maxLines="1"
-            android:text="TextView"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@android:color/black"
+            android:textSize="20sp"
             android:typeface="normal" />
-
+ </LinearLayout>
+  <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+        
+        <TextView
+            android:id="@+id/labelMinBet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:freezesText="true"
+            android:text="Minimum bet:"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:typeface="normal" />
+        
+        <TextView
+            android:id="@+id/minBet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:freezesText="false"
+            android:lines="1"
+            android:maxLines="1"
+            android:text="0"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:typeface="normal" />
+ </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
