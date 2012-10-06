@@ -103,13 +103,64 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/Chips"
-        android:layout_width="wrap_content"
+    <LinearLayout 
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:scaleType="fitCenter"
-        android:src="@drawable/chips" />
+        android:orientation="horizontal"
+     >
+
+     <ImageView
+         android:id="@+id/whitechip"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:paddingLeft="2dip"
+         android:paddingRight="2dip"
+         android:scaleType="fitCenter"
+         android:src="@drawable/chips_white" />
+        
+     <ImageView
+         android:id="@+id/redchip"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:paddingLeft="2dip"
+         android:paddingRight="2dip"
+         android:scaleType="fitCenter"
+         android:src="@drawable/chips_red" />
+            
+     <ImageView
+         android:id="@+id/greechip"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:paddingLeft="2dip"
+         android:paddingRight="2dip"
+         android:scaleType="fitCenter"
+         android:src="@drawable/chips_green" />
+            
+     <ImageView
+         android:id="@+id/bluechip"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:paddingLeft="2dip"
+         android:paddingRight="2dip"
+         android:scaleType="fitCenter"
+         android:src="@drawable/chips_blue" />
+     
+     <ImageView
+         android:id="@+id/blackchip"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:paddingLeft="2dip"
+         android:paddingRight="2dip"
+         android:scaleType="fitCenter"
+         android:src="@drawable/chips_black" />
+     
+    </LinearLayout>
+    
 
     <LinearLayout
         android:layout_width="match_parent"

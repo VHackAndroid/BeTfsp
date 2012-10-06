@@ -1,22 +1,14 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.Activity;
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.Toast;
-import android.widget.ViewFlipper;
+
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
@@ -24,6 +16,8 @@ import com.esotericsoftware.kryonet.Listener;
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 
+import mobisocial.nfc.Nfc;
+import mobisocial.nfc.addon.BluetoothConnector;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
@@ -32,8 +26,31 @@ import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.ui.tools.PageCurlView;
+import android.app.Activity;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 
-public class ClientActivity extends Activity {
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ViewFlipper;
+
+public class ClientActivity extends Activity implements OnClickListener{
 
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
@@ -50,6 +67,14 @@ public class ClientActivity extends Activity {
     private Timer incognitoDelay;
     private SensorManager sensorManager;
 	
+    // egb: added for gestures.
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+    private GestureDetector gestureDetector;
+    View.OnTouchListener gestureListener;
+    
+    
 	// Enums
 //	public enum GameState {
 //	    INIT, NFCPAIRING, HOLE, HOLE_NEXT, FLOP, FLOP_NEXT, TURN, TURN_NEXT, RIVER, RIVER_NEXT
@@ -107,7 +132,20 @@ public class ClientActivity extends Activity {
             	if (canBet()) incrementBetAmount(1);
             }
         });
-
+        
+        
+        // Gesture detection
+        gestureDetector = new GestureDetector(new MyGestureDetector());
+        gestureListener = new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View arg0, MotionEvent arg1) {
+				return gestureDetector.onTouchEvent(arg1);
+			}
+        };
+        
+        final ImageView imageView = (ImageView) findViewById(R.id.whitechip);
+        imageView.setOnClickListener(ClientActivity.this); 
+        imageView.setOnTouchListener(gestureListener);
         
         /*
         ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
@@ -358,4 +396,32 @@ public class ClientActivity extends Activity {
     		
     	}
     }
+
+
+	@Override
+	public void onClick(View v) {
+	//	Filter f = (Filter) v.getTag();
+      //  FilterFullscreenActivity.show(this, input, f);
+		
+	}
+		
+	 class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
+         @Override
+         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+             try {
+                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                     return false;
+                 // right to left swipe
+                 if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                     Toast.makeText(ClientActivity.this, "Left Swipe", Toast.LENGTH_SHORT).show();
+                 }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                     Toast.makeText(ClientActivity.this, "Right Swipe", Toast.LENGTH_SHORT).show();
+                 }
+             } catch (Exception e) {
+                 // nothing
+             }
+             return false;
+         }
+
+     }
 }
