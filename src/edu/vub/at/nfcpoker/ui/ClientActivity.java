@@ -16,8 +16,6 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,20 +23,20 @@ import android.widget.Toast;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.google.common.base.CaseFormat;
 
-import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.TableThing;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
-import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
+import edu.vub.nfc.thing.EmptyRecord;
+import edu.vub.nfc.thing.Thing;
 import fi.harism.curl.CurlView;
 
-public class ClientActivity extends Activity implements OnClickListener{
+public class ClientActivity extends Activity implements OnClickListener {
 
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
@@ -262,6 +260,7 @@ public class ClientActivity extends Activity implements OnClickListener{
         
     }
     
+    
     @Override
     protected void onResume()
     {
@@ -449,6 +448,7 @@ public class ClientActivity extends Activity implements OnClickListener{
          }
 
      }
+
 }
 
 	
