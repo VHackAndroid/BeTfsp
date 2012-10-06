@@ -5,7 +5,6 @@ import edu.vub.at.nfcpoker.R;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
-import android.widget.TextView;
 
 public class ServerActivity extends Activity {
 
