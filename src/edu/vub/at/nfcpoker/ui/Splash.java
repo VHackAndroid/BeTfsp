@@ -55,7 +55,7 @@ public class Splash extends Activity {
 
 	// TO BE CONFIGURED (TODO)
 	public static boolean IS_SERVER = true;
-	public static boolean IS_LODE = true;
+	public static boolean IS_LODE = false;
 
 	// Connectivity state
 	public static String UUID;
@@ -78,14 +78,30 @@ public class Splash extends Activity {
 				new DiscoveryAsyncTask().execute();
 			}
 		});
-        
+
         if (IS_LODE) {
         	Intent intent = new Intent(this, ClientActivity.class);
         	startActivity(intent);
-        }
-    }
+        } else {
+        	Button server = (Button) findViewById(R.id.server);
+        	if (server != null)
+        		server.setOnClickListener(new OnClickListener() {
 
-    @Override
+        			@Override
+        			public void onClick(View v) {
+        				startServer();
+        			}
+        		});
+        }
+	}
+
+    protected void startServer() {
+		Intent i = new Intent(this, ServerActivity.class);
+		startActivity(i);
+		finish();
+	}
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_splash, menu);
         return true;

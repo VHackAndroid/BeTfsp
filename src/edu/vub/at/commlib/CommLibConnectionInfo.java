@@ -1,6 +1,11 @@
 package edu.vub.at.commlib;
 
+import java.io.IOException;
 import java.util.Map;
+
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
 
 public class CommLibConnectionInfo {
 	public String serverType_;
@@ -9,7 +14,7 @@ public class CommLibConnectionInfo {
 		// Only for Kryo
 	}
 	
-	CommLibConnectionInfo(String serverType, String[] extra) {
+	public CommLibConnectionInfo(String serverType, String[] extra) {
 		serverType_ = serverType;
 		extra_  = extra;
 	}
@@ -20,5 +25,16 @@ public class CommLibConnectionInfo {
 
 	public String getPort() {
 		return extra_[1];
+	}
+
+	public Client connect(Listener listener) throws IOException {
+		Client ret = new Client();
+		ret.start();
+		ret.getKryo().setRegistrationRequired(false);
+		if (listener != null)
+			ret.addListener(listener);
+		ret.connect(5000, getAddress(), Integer.parseInt(getPort()));
+
+		return ret;
 	}
 }
