@@ -34,7 +34,7 @@ public class PageProvider implements CurlView.PageProvider {
 	private Bitmap loadBitmap(int width, int height, int index) {
 		Bitmap b = Bitmap.createBitmap(width, height,
 				Bitmap.Config.ARGB_8888);
-		b.eraseColor(Color.WHITE);
+		// b.eraseColor(Color.WHITE);
 		Canvas c = new Canvas(b);
 		Drawable d = ctx.getResources().getDrawable(mBitmapIds[index]);
 
@@ -57,8 +57,8 @@ public class PageProvider implements CurlView.PageProvider {
 		r.bottom = r.top + imageHeight + border + border;
 
 		Paint p = new Paint();
-		//p.setColor(0xFFC0C0C0); Lode
-		p.setColor(Color.WHITE);
+		p.setColor(0xFFC0C0C0); // Lode
+		//p.setColor(Color.WHITE);
 		c.drawRect(r, p);
 		r.left += border;
 		r.right -= border;
