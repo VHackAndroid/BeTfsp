@@ -1024,9 +1024,9 @@ public class PageCurlView extends View {
 	 */
 	private void drawPageNum(Canvas canvas, int pageNum)
 	{
-		mTextPaint.setColor(Color.WHITE);
-		String pageNumText = "- "+pageNum+" -";
-		drawCentered(canvas, pageNumText,canvas.getHeight()-mTextPaint.getTextSize()-5,mTextPaint,mTextPaintShadow);
+		//mTextPaint.setColor(Color.WHITE);
+		//String pageNumText = "- "+pageNum+" -";
+		//drawCentered(canvas, pageNumText,canvas.getHeight()-mTextPaint.getTextSize()-5,mTextPaint,mTextPaintShadow);
 	}
 	
 	//---------------------------------------------------------------
