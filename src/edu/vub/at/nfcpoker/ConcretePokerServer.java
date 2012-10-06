@@ -12,7 +12,9 @@ import android.app.Activity;
 import android.util.Log;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 
 public class ConcretePokerServer extends PokerServer  {
 	
@@ -45,7 +47,7 @@ public class ConcretePokerServer extends PokerServer  {
 					public void connected(Connection c) {
 						super.connected(c);
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
-						addClient(c);
+						gameLoop.addClient(c);
 					}
 				});
 			} catch (IOException e) {
@@ -54,50 +56,91 @@ public class ConcretePokerServer extends PokerServer  {
 		};
 	};
 	
-	public Runnable gameLoopR = new Runnable() {
-		@Override
-		public void run() {
-			gameLoop();
-		}
-	};
-	
 	int nextClientID = 0;
-	private TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
-	private TreeMap<Integer, Connection> clientsInGame = new TreeMap<Integer, Connection>();
-	
 	public enum GameState {
-		STOPPED, WAITING_FOR_PLAYERS, HOLE, FLOP, TURN, RIVER, END_OF_ROUND;
+		WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 	};
 	
-	public GameState gameState;
-	
-	public boolean isGameRunning() {
-		return gameState != GameState.STOPPED && gameState != GameState.WAITING_FOR_PLAYERS;
-	}
+
 
 	public ConcretePokerServer(Activity gui) {
 	}
 	
-	public void addClient(Connection c) {
-		synchronized(this) {
-			newClients.put(nextClientID++, c);
-		}
-		if (newClients.size() >= 2 && !isGameRunning()) {
-			Log.d("PokerServer", "Two or more clients connected, game can start");
-			new Thread(gameLoopR).start();
-		}
-	}
-
 	public void start() {		
 		new Thread(serverR).start();
 		new Thread(exporterR).start();
 	}
-
-	private void gameLoop() {
-		synchronized(this) {
-			clientsInGame.putAll(newClients);
-			newClients.clear();
-		}
-	}
 	
+	private GameLoop gameLoop = new GameLoop();
+	
+	class GameLoop implements Runnable {
+		
+		public GameLoop() {
+			gameState = GameState.WAITING_FOR_PLAYERS;
+		}
+
+		public TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
+		public TreeMap<Integer, Connection> clientsInGame = new TreeMap<Integer, Connection>();
+		public GameState gameState;
+			
+		public void run() {
+			while (true) {
+				synchronized(this) {
+					gameLoop.clientsInGame.putAll(gameLoop.newClients);
+					gameLoop.newClients.clear();
+				}
+				
+				Deck deck = new Deck();
+				Card[] commonCards = 
+						new Card[] { deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck(), deck.drawFromDeck() };
+				
+				// hole cards
+				newState(GameState.PREFLOP);
+				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
+				for (Integer clientNum : clientsInGame.navigableKeySet())
+					holeCards.put(clientNum, new Card[] { deck.drawFromDeck(), deck.drawFromDeck() });
+				
+				// flop cards
+				newState(GameState.FLOP);
+
+				// turn cards
+				newState(GameState.TURN);
+
+				// river cards
+				newState(GameState.RIVER);
+
+				// results
+				newState(GameState.END_OF_ROUND);
+
+				
+				try {
+					Thread.sleep(10000);
+				} catch (InterruptedException e) {
+					Log.wtf("PokerServer", "Thread.sleep was interrupted", e);
+				}
+			}
+		}
+
+		private void newState(GameState newState) {
+			gameState = newState;
+			broadcast(new StateChangeMessage(newState));
+		}
+		
+		private void broadcast(Message m) {
+			for (Connection c : clientsInGame.values())
+				c.sendTCP(m);
+		}
+
+		public void addClient(Connection c) {
+			Log.d("PokerServer", "Adding client " + c.getRemoteAddressTCP());
+			synchronized(this) {
+				newClients.put(nextClientID++, c);
+			}
+			if (newClients.size() >= 2 && gameState == GameState.WAITING_FOR_PLAYERS) {
+				Log.d("PokerServer", "Two or more clients connected, game can start");
+				new Thread(this).start();
+			}
+		}
+	};
+
 }
