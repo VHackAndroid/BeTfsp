@@ -47,7 +47,7 @@
         </activity>
         <activity
             android:name=".ui.ServerActivity"
-            android:label="@string/title_activity_server" >
+            android:label="@string/title_activity_server" android:configChanges="keyboard|keyboardHidden|orientation" android:screenOrientation="landscape">
         </activity>
     </application>
 

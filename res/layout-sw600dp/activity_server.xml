@@ -8,15 +8,13 @@
     android:gravity="center"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/players_top"
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/current_phase"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:gravity="top|center_horizontal"
-        android:minHeight="50dp" >
-
-    </LinearLayout>
+        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#ffffff" />
 
     <LinearLayout
         android:id="@+id/cards"
