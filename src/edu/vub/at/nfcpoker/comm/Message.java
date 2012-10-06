@@ -128,4 +128,23 @@ public interface Message {
 			return super.toString() + ": Future message for " + futureId;
 		}
 	}
+
+	public class ClientActionMessage extends TimestampedMessage {
+		
+		public int userId;
+		public ClientActionType type;
+		
+		public ClientActionMessage(int id, ClientActionType type) {
+			this.type = type;
+			this.userId = id;
+		}
+
+		// kryo
+		public ClientActionMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client action information message, client" + userId + " -> " + type;
+		}
+	}
 }
