@@ -175,8 +175,8 @@ public interface Message {
 
 	 public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
 			
-			private Set<Integer> bestPlayers;
-			private Hand bestHand;
+			public Set<Integer> bestPlayers;
+			public Hand bestHand;
 
 			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Hand bestHand) {
 				this.bestPlayers = bestPlayers;
