@@ -116,6 +116,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentMoney = 2000;
 	private int currentBet = 0;
+	private int currentTotalBet = 0;
 	private int minimumBet = 0;
 	private int currentChipSwiped = 0;
 
@@ -284,6 +285,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		});
 
 		currentBet = 0;
+		currentTotalBet = 0;
 		currentChipSwiped = 0;
 		nextToReveal = 0;
 
@@ -301,8 +303,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 
 	private void updateMoneyTitle() {
-		if (currentBet > 0) {
-			setTitle("wePoker (" +currentMoney+"\u20AC -> "+(currentMoney-currentBet)+"\u20AC)");
+		if (currentTotalBet > 0) {
+			setTitle("wePoker (" +currentMoney+"\u20AC -- Total bet: "+(currentTotalBet)+"\u20AC)");
 		} else {
 			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
@@ -387,6 +389,12 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					break;
 				case END_OF_ROUND:
 					Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
+					currentBet = 0;
+					currentTotalBet = 0;
+					currentChipSwiped = 0;
+					nextToReveal = 0;
+					hideCards();
+					updateMoneyTitle();
 					break;
 				}
 
@@ -549,6 +557,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			currentBet = minimumBet;
 			toast = ToastBetAmount.MinimumBet;
 		}
+		currentTotalBet += currentBet;
 
 		switch (toast) {
 		case Positive:
@@ -566,7 +575,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		}
 
 		final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
-		textCurrentBet.setText(" " + currentBet);
+		textCurrentBet.setText(" " + currentBet + " ("+currentTotalBet+")");
 		updateMoneyTitle();
 	}
 
