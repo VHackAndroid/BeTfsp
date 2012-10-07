@@ -31,6 +31,7 @@ import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
 
@@ -72,7 +73,6 @@ public class ConcretePokerServer extends PokerServer  {
 						super.connected(c);
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
-						c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 					}
 					
 					@Override
@@ -334,8 +334,11 @@ public class ConcretePokerServer extends PokerServer  {
 		public void addClient(Connection c) {
 			Log.d("PokerServer", "Adding client " + c.getRemoteAddressTCP());
 			synchronized(this) {
-				newClients.put(nextClientID++, c);
+				newClients.put(nextClientID, c);
 			}
+			c.sendTCP(new StateChangeMessage(gameLoop.gameState));
+			c.sendTCP(new SetIDMessage(nextClientID));
+			nextClientID++;
 			if (newClients.size() >= 2) {
 				if (gameState == GameState.STOPPED) {
 					Log.d("PokerServer", "Two or more clients connected, game can start");
