@@ -247,6 +247,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				runOnNotUiThread(new Runnable() {
 					public void run() {
 						currentMoney -= currentBet;
+						currentTotalBet += currentBet;
 						currentBet = 0;
 						ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
@@ -557,7 +558,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			currentBet = minimumBet;
 			toast = ToastBetAmount.MinimumBet;
 		}
-		currentTotalBet += currentBet;
 
 		switch (toast) {
 		case Positive:
