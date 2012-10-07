@@ -310,7 +310,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	private void updateMoneyTitle() {
 		if (currentBet > 0) {
-			setTitle("wePoker (" +currentMoney+"Û --> "+(currentMoney-currentBet)+"Û)");
+			setTitle("wePoker (" +currentMoney+"Û -> "+(currentMoney-currentBet)+"Û)");
 		} else {
 			setTitle("wePoker (" +currentMoney+"Û)");
 		}
@@ -341,6 +341,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			}
 		});
 	}
+	
 	Listener listener = new Listener() {
 		@Override
 		public void connected(Connection arg0) {
