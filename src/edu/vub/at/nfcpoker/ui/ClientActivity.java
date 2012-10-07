@@ -265,9 +265,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
         // Game state
         isDedicated = getIntent().getBooleanExtra("isDedicated", false);
         if (isDedicated) {
-            setContentView(R.layout.client_dedicated);
+            setContentView(R.layout.activity_client_is_dedicated);
         } else {
-            setContentView(R.layout.client);
+            setContentView(R.layout.activity_client);
         }
         
         // Interactivity
@@ -399,6 +399,14 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		serverConnection = c;
 	}
 	
+	private void updateMoneyTitle() {
+		if (currentBet > 0) {
+			setTitle("wePoker    (" +currentMoney+"$ --> "+(currentMoney-currentBet)+")");
+		} else {
+			setTitle("wePoker    (" +currentMoney+"$)");
+		}
+	}
+	
 	private void enableActions() {
 		runOnUiThread(new Runnable() {
 			
@@ -407,6 +415,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				bet.setEnabled(true);
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				updateMoneyTitle();
 			}
 		});						
 	}
@@ -419,6 +428,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				bet.setEnabled(false);
 				check.setEnabled(false);
 				fold.setEnabled(false);
+				updateMoneyTitle();
 			}
 		});
 	}

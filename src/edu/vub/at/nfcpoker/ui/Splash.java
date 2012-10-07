@@ -190,7 +190,7 @@ public class Splash extends ThingActivity<TableThing> {
 					break;
 				}
 			}
-		};
+		}; 
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setMessage("No Ambient-Poker game discovered, do you wish to start one?")
