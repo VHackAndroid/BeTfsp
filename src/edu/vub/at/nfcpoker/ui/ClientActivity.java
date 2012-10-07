@@ -125,9 +125,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
-	private static int currentBet = 0;
-	private static int minimumBet = 0;
 	private static int currentMoney = 2000;
+	private int currentBet = 0;
+	private int minimumBet = 0;
 	private int currentChipSwiped = 0;
 	
 	// Dedicated
@@ -257,6 +257,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public void onClick(View v) {
 				runOnNotUiThread(new Runnable() {	
 					public void run() {
+						currentMoney -= currentBet;
+						currentBet = 0;
 						ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));					
 					}
@@ -270,6 +272,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public void onClick(View v) {
 				runOnNotUiThread(new Runnable() {
 					public void run() {
+						currentBet = 0;
 						ClientAction ca = new ClientAction(ClientActionType.Check);
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
@@ -283,6 +286,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public void onClick(View v) {
 				runOnNotUiThread(new Runnable() {
 					public void run() {
+						currentBet = 0;
 						ClientAction ca = new ClientAction(ClientActionType.Fold);
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
