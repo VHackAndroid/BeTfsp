@@ -359,7 +359,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			if (m instanceof StateChangeMessage) {
 				StateChangeMessage scm = (StateChangeMessage) m;
 				GameState newGameState = scm.newState;
-				newGameState = GameState.RIVER;
 				disableActions();
 				switch (newGameState) {
 				case STOPPED:
