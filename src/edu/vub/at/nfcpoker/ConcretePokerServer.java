@@ -1,6 +1,12 @@
 package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -23,19 +29,25 @@ import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
 
 public class ConcretePokerServer extends PokerServer  {
 	
+	public class RoundEndedException extends Exception {}
+
+	private boolean isDedicated = false;
+
 	Runnable exporterR = new Runnable() {	
 		@Override
 		public void run() {
 			Log.d("PokerServer", "Starting export");
 			String address = "192.168.1.106";
 			String port = "" + CommLib.SERVER_PORT;
-			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port});
+			String dedicated = "" + isDedicated;
+			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port, dedicated});
 			try {
 				CommLib.export(clci);
 			} catch (IOException e) {
@@ -115,11 +127,10 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 	};
-	
 
-
-	public ConcretePokerServer(ServerActivity gui) {
+	public ConcretePokerServer(ServerActivity gui, boolean isDedicated) {
 		this.gui = gui;
+		this.isDedicated = isDedicated;
 	}
 	
 	public void start() {		
@@ -179,48 +190,88 @@ public class ConcretePokerServer extends PokerServer  {
 					//todo what if clientsInGame.size drops below two?
 				}
 				
-				Deck deck = new Deck();
-				
-				// hole cards
-				newState(GameState.PREFLOP);
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
-				for (Integer clientNum : clientsInGame.navigableKeySet()) {
-					Card preflop[] = deck.drawCards(2);
-					holeCards.put(clientNum, preflop);
-					Connection c = clientsInGame.get(clientNum);
-					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
-				}
-				createActionFutures();
-				roundTable();
-				
-				// flop cards
-				Card[] flop = deck.drawCards(3);
-				gui.revealCards(flop);
-				newState(GameState.FLOP);
-				broadcast(new ReceivePublicCards(flop));
-				createActionFutures();
-				roundTable();
+				Set<Card> cardPool = new HashSet<Card>();
+				try {
+					Deck deck = new Deck();
+					boolean moreRounds;
+					
+					// hole cards
+					newState(GameState.PREFLOP);
+					for (Integer clientNum : clientsInGame.navigableKeySet()) {
+						Card preflop[] = deck.drawCards(2);
+						holeCards.put(clientNum, preflop);
+						Connection c = clientsInGame.get(clientNum);
+						c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
+					}
+					createActionFutures();
+					roundTable();
+					
+					
+					// flop cards
+					Card[] flop = deck.drawCards(3);
+					cardPool.addAll(Arrays.asList(flop));
+					gui.revealCards(flop);
+					newState(GameState.FLOP);
+					broadcast(new ReceivePublicCards(flop));
+					createActionFutures();
+					roundTable();
 
-				// turn cards
-				Card[] turn = deck.drawCards(1);
-				gui.revealCards(turn);
-				newState(GameState.TURN);
-				broadcast(new ReceivePublicCards(turn));
-				createActionFutures();
-				roundTable();
-				
-				// river cards
-				Card[] river = deck.drawCards(1);
-				gui.revealCards(river);
-				newState(GameState.RIVER);
-				broadcast(new ReceivePublicCards(river));
-				createActionFutures();
-				roundTable();
+					// turn cards
+					Card[] turn = deck.drawCards(1);
+					cardPool.add(turn[0]);
+					gui.revealCards(turn);
+					newState(GameState.TURN);
+					broadcast(new ReceivePublicCards(turn));
+					createActionFutures();
+					roundTable();
+					
+					// river cards
+					Card[] river = deck.drawCards(1);
+					cardPool.add(river[0]);
+					gui.revealCards(river);
+					newState(GameState.RIVER);
+					broadcast(new ReceivePublicCards(river));
+					createActionFutures();
+					roundTable();					
+				} catch (RoundEndedException e1) {
+					/* ignore */
+				}
 				
 				// results
 				newState(GameState.END_OF_ROUND);
-				// compare.
+				TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
+				for (Integer player : actionFutures.navigableKeySet()) {
+					Future<ClientAction> fut = actionFutures.get(player);
+					if (fut != null
+							&& fut.isResolved()
+							&& fut.unsafeGet().getClientActionType() != Message.ClientActionType.Fold) 
+						hands.put(player, Hand.makeBestHand(cardPool, Arrays.asList(holeCards.get(player))));
+				}
 				
+				if (!hands.isEmpty()) {
+					Iterator<Integer> it = hands.keySet().iterator();
+					Set<Integer> bestPlayers = new HashSet<Integer>();
+					Integer firstPlayer = it.next();
+					bestPlayers.add(firstPlayer);
+					Hand bestHand = hands.get(firstPlayer);
+					
+					while (it.hasNext()) {
+						int nextPlayer = it.next();
+						Hand nextHand = hands.get(nextPlayer);
+						int comparison = nextHand.compareTo(bestHand);
+						if (comparison > 0)  {
+							bestHand = nextHand;
+							bestPlayers.clear();
+							bestPlayers.add(nextPlayer);
+						} else if (comparison == 0) {
+							bestPlayers.add(nextPlayer);
+						}
+					}
+					broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand));
+				}
+				
+				// finally, sleep
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
@@ -245,27 +296,27 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 
-		public void roundTable() {
+		public void roundTable() throws RoundEndedException {
 			TreeMap<Integer, Future<ClientAction>> clonedFutures;
 			synchronized (this) {
 				clonedFutures = (TreeMap<Integer, Future<ClientAction>>) actionFutures.clone(); 
 			}
+			
+			int playersRemaining = 0;
 			
 			for (Integer i: clonedFutures.navigableKeySet()) {
 				Future<ClientAction> fut = clonedFutures.get(i);
 				ClientAction ca = fut.get();
 				broadcast(new ClientActionMessage(ca, i));
 				switch (ca.type) { // todo
-				case RaiseTo:
+				case Fold: 
 					break;
-				case Fold:
-					break;
-				case CallAt:
-					break;
-				case Check:
-					break;
+				default:
+					playersRemaining++;
 				}
 			}
+			if (playersRemaining <= 1)
+				throw new RoundEndedException();
 		}
 
 		private void newState(GameState newState) {
