@@ -310,9 +310,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	private void updateMoneyTitle() {
 		if (currentBet > 0) {
-			setTitle("wePoker (" +currentMoney+"Û -> "+(currentMoney-currentBet)+"Û)");
+			setTitle("wePoker (" +currentMoney+"\u20AC -> "+(currentMoney-currentBet)+"\u20AC)");
 		} else {
-			setTitle("wePoker (" +currentMoney+"Û)");
+			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
 	}
 	
@@ -549,10 +549,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
     	switch (toast) {
     	case Positive:
-        	Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "Û to the bet", Toast.LENGTH_SHORT).show();
+        	Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "\u20AC to the bet", Toast.LENGTH_SHORT).show();
     		break;
     	case Negative:
-    		Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "Û", Toast.LENGTH_SHORT).show();
+    		Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "\u20AC", Toast.LENGTH_SHORT).show();
     		break;
     	case OutOfMoney:
     		Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT).show();
