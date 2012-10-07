@@ -310,7 +310,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	private void updateMoneyTitle() {
 		if (currentBet > 0) {
-			setTitle("wePoker (" +currentMoney+"Û --> "+(currentMoney-currentBet)+")");
+			setTitle("wePoker (" +currentMoney+"Û --> "+(currentMoney-currentBet)+"Û)");
 		} else {
 			setTitle("wePoker (" +currentMoney+"Û)");
 		}
@@ -373,18 +373,22 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					hideCards();
 					break;
 				case PREFLOP:
+		        	Toast.makeText(ClientActivity.this, "Any preflop bet?", Toast.LENGTH_SHORT).show();
 					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
 					runOnUiThread(new Runnable() {
 						public void run() {	hideBarrier(); }});
 					showCards();
 					break;
 				case FLOP:
+		        	Toast.makeText(ClientActivity.this, "Flopping cards...", Toast.LENGTH_SHORT).show();
 					Log.v("AMBIENTPOKER", "Game state changed to FLOP");
 					break;
 				case TURN:
+		        	Toast.makeText(ClientActivity.this, "Here is the turn", Toast.LENGTH_SHORT).show();
 					Log.v("AMBIENTPOKER", "Game state changed to TURN");
 					break;
 				case RIVER:
+		        	Toast.makeText(ClientActivity.this, "River card visible", Toast.LENGTH_SHORT).show();
 					Log.v("AMBIENTPOKER", "Game state changed to RIVER");
 					break;
 				case END_OF_ROUND:
@@ -445,8 +449,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					// hoera
+		        	Toast.makeText(ClientActivity.this, "You won!!", Toast.LENGTH_LONG).show();
+		        	
 				} else {
 					// boe
+		        	Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
 				}
 			}
 		}
