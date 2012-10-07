@@ -177,10 +177,12 @@ public interface Message {
 			
 			public Set<Integer> bestPlayers;
 			public Hand bestHand;
+			public int chips;
 
-			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Hand bestHand) {
+			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Hand bestHand, int amountOfChips) {
 				this.bestPlayers = bestPlayers;
 				this.bestHand = bestHand;
+				this.chips = amountOfChips;
 			}
 
 			// kryo

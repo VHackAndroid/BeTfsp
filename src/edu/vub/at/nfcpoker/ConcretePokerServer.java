@@ -276,7 +276,7 @@ public class ConcretePokerServer extends PokerServer  {
 				if (endedPrematurely) {
 					if (remainingPlayers.size() == 1) {
 						addMoney(remainingPlayers.iterator().next(), chipsPool);
-						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, null));
+						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, null, chipsPool));
 					}
 				} else {
 					TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
@@ -306,7 +306,7 @@ public class ConcretePokerServer extends PokerServer  {
 						
 						for (Integer player: bestPlayers)
 							addMoney(player, chipsPool / bestPlayers.size());
-						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand));
+						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand, chipsPool));
 					}
 				}
 				
