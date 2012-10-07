@@ -413,7 +413,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					nextToReveal = 0;
 					runOnUiThread(new Runnable() {
 						public void run() {
-							hideCards();
 							updateMoneyTitle();
 						}});
 					break;
