@@ -25,7 +25,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -156,7 +155,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private Connection serverConnection;
 
 	@Override
-	@SuppressWarnings("unused")
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
