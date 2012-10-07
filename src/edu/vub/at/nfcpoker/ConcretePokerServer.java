@@ -60,6 +60,7 @@ public class ConcretePokerServer extends PokerServer  {
 						super.connected(c);
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
+						c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 					}
 					
 					@Override
@@ -156,7 +157,6 @@ public class ConcretePokerServer extends PokerServer  {
 		public GameState gameState;
 			
 		public void run() {
-			gameState = GameState.PREFLOP;
 			while (true) {
 				gui.resetCards();
 				synchronized(this) {
@@ -170,7 +170,7 @@ public class ConcretePokerServer extends PokerServer  {
 					if (clientsInGame.size() < 2) {
 						try {
 							Log.d("PokerServer", "# of clients < 2, changing state to stopped");
-							broadcast(new StateChangeMessage(GameState.WAITING_FOR_PLAYERS));
+							newState(GameState.WAITING_FOR_PLAYERS);
 							this.wait();
 						} catch (InterruptedException e) {
 							Log.wtf("PokerServer", "Thread was interrupted");
@@ -285,12 +285,13 @@ public class ConcretePokerServer extends PokerServer  {
 			synchronized(this) {
 				newClients.put(nextClientID++, c);
 			}
-			if (newClients.size() >= 2)
+			if (newClients.size() >= 2) {
 				if (gameState == GameState.STOPPED) {
 					Log.d("PokerServer", "Two or more clients connected, game can start");
 					new Thread(this).start();
-			} else if (gameState == GameState.WAITING_FOR_PLAYERS) {
-				synchronized(this) { this.notifyAll(); }
+				} else if (gameState == GameState.WAITING_FOR_PLAYERS) {
+					synchronized(this) { this.notifyAll(); }
+				}
 			}
 		}
 	}
