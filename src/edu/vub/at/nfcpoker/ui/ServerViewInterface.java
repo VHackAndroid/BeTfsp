@@ -12,5 +12,7 @@ public interface ServerViewInterface {
 	public void addPlayer(int clientID, String clientName, int initialMoney);
 
 	public void showStatechange(GameState newState);
+
+	public void setPlayerMoney(Integer player, int current);
 	
 }

@@ -257,7 +257,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						currentMoney -= currentBet;
 						currentTotalBet += currentBet;
 						currentBet = 0;
-						ClientAction ca = new ClientAction(ClientActionType.CallAt, currentBet);
+						ClientAction ca = new ClientAction(ClientActionType.Bet, currentBet);
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
 				});
@@ -454,13 +454,15 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
 				final ClientAction action = newClientActionMessage.getClientAction();
 				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
-				if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
-					ClientActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							updateMinBetAmount(action.getExtra());
-						}
-					});
+				if (action.getClientActionType() == Message.ClientActionType.Bet) {
+					final int amount = action.getExtra();
+					if ( amount > minimumBet) {
+						runOnUiThread(new Runnable() {
+							public void run() {
+								updateMinBetAmount(amount);
+							}
+						});
+					}
 				}
 			}
 
@@ -777,6 +779,12 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	@Override
 	public void showStatechange(GameState newState) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setPlayerMoney(Integer player, int current) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -105,5 +105,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				// TODO Auto-generated method stub
 			}
 		});
+	}
+
+	@Override
+	public void setPlayerMoney(Integer player, int current) {
+		// TODO Auto-generated method stub
+		
 	};
 }

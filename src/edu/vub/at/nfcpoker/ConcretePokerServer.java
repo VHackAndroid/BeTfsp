@@ -183,10 +183,12 @@ public class ConcretePokerServer extends PokerServer  {
 		public TreeMap<Integer, String> playerNames = new TreeMap<Integer, String>();
 
 		public GameState gameState;
+		int chipsPool = 0;
 			
 		public void run() {
 			while (true) {
 				gui.resetCards();
+				chipsPool = 0;
 				synchronized(this) {
 					actionFutures.clear();
 					for (Integer id : newClients.navigableKeySet()) {
@@ -211,7 +213,6 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
 				Set<Card> cardPool = new HashSet<Card>();
-				int chipsPool = 0;
 				try {
 					Deck deck = new Deck();
 					
@@ -322,6 +323,7 @@ public class ConcretePokerServer extends PokerServer  {
 			int current = playerMoney.get(player);
 			current += chips;
 			playerMoney.put(player, current);
+			gui.setPlayerMoney(player, current);
 		}
 
 		private void setupPlayer(Integer id, Connection connection) {
@@ -365,12 +367,19 @@ public class ConcretePokerServer extends PokerServer  {
 				switch (ca.type) { // todo
 				case Fold: 
 					break;
+				case Bet:
+					addMoney(i, -ca.getExtra());
+					addChipsToPool(ca.getExtra());
 				default:
 					playersRemaining++;
 				}
 			}
 			if (playersRemaining <= 1)
 				throw new RoundEndedException();
+		}
+
+		private void addChipsToPool(int extra) {
+			chipsPool += extra;
 		}
 
 		private void newState(GameState newState) {
