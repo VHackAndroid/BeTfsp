@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.R;
@@ -57,6 +58,10 @@ public class Splash extends ThingActivity<TableThing> {
 				if (client_startClientServerTimer != null) {
 					client_startClientServerTimer.cancel();
 					client_startClientServerTimer = null;
+					if (client_startClientServerAsk != null) {
+						client_startClientServerAsk.dismiss();
+						client_startClientServerAsk = null;
+					}
 				}
 				Intent i = new Intent(Splash.this, ClientActivity.class);
 				i.putExtra("ip", result.getAddress());
@@ -80,11 +85,12 @@ public class Splash extends ThingActivity<TableThing> {
 	// Discovery
 	private DiscoveryAsyncTask client_discoveryTask;
 	private Timer client_startClientServerTimer;
+	private Dialog client_startClientServerAsk;
 	
 	// UI
 	private static boolean isTablet;
 	private int startClientServerTimerTimeout = 10000;
-	private int startClientServerTimerTimeout2 = 20000;
+	private int startClientServerTimerTimeout2 = 30000;
 
 	// NFC
 	private Object lastScannedTag_;
@@ -140,22 +146,13 @@ public class Splash extends ThingActivity<TableThing> {
 		}
 
 		if (!isTablet) {
+			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			client_discoveryTask = new DiscoveryAsyncTask();
 			client_discoveryTask.execute();
 			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
-			client_startClientServerTimer = new Timer();
-			client_startClientServerTimer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							askStartClientServer();
-						}
-					});
-				}
-			}, startClientServerTimerTimeout, startClientServerTimerTimeout2);
+			scheduleAskStartClientServer(startClientServerTimerTimeout);
 		} else {
+			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			final Button disc = (Button) findViewById(R.id.discover_button);
 			disc.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
@@ -165,6 +162,21 @@ public class Splash extends ThingActivity<TableThing> {
 			});
 		}
 		
+	}
+
+	private void scheduleAskStartClientServer(int timeout) {
+		client_startClientServerTimer = new Timer();
+		client_startClientServerTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						askStartClientServer();
+					}
+				});
+			}
+		}, timeout);
 	}
 	
 	private void askStartClientServer() {
@@ -177,19 +189,31 @@ public class Splash extends ThingActivity<TableThing> {
 						client_discoveryTask.cancel(true);
 						client_startClientServerTimer.cancel();
 						client_startClientServerTimer = null;
-						startServer();
 					}
 					break;
 				case DialogInterface.BUTTON_NEGATIVE:
+					scheduleAskStartClientServer(startClientServerTimerTimeout2);
 					break;
 				}
+				client_startClientServerAsk = null;
 			}
-		}; 
+		};
+		
+		DialogInterface.OnCancelListener onCancelListener = new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface arg0) {
+				scheduleAskStartClientServer(startClientServerTimerTimeout2);
+				client_startClientServerAsk = null;
+			}
+		};
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setMessage("No Ambient-Poker game discovered, do you wish to start one?")
-		.setPositiveButton("Yes", dialogClickListener)
-		.setNegativeButton("No", dialogClickListener).show();
+		client_startClientServerAsk =
+				builder.setMessage("No Ambient-Poker game discovered.\nDo you wish to start one?")
+				.setOnCancelListener(onCancelListener)
+				.setPositiveButton("Yes", dialogClickListener)
+				.setNegativeButton("No", dialogClickListener).create();
+		client_startClientServerAsk.show();
 	}
 
 	private Dialog createNFCDialog() {
