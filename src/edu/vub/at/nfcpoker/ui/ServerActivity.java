@@ -1,5 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.HashMap;
+
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
@@ -20,6 +22,8 @@ import android.widget.TextView;
 
 @TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
+	
+	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>(); 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -99,17 +103,34 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	@Override
-	public void addPlayer(int clientID, String clientName, int initialMoney) {
+	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				// TODO Auto-generated method stub
+				LinearLayout users = (LinearLayout) findViewById(R.id.users);
+				View badge = getLayoutInflater().inflate(R.layout.user, users);
+				
+				TextView name = (TextView) badge.findViewById(R.id.playerName);
+				name.setText(clientName);
+				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
+				money.setText("\u20AC" + initialMoney);
+				TextView status = (TextView) badge.findViewById(R.id.playerStatus);
+				status.setText(clientName);
+
+				playerBadges.put(clientID, badge);
 			}
 		});
 	}
 
 	@Override
-	public void setPlayerMoney(Integer player, int current) {
-		// TODO Auto-generated method stub
-		
+	public void setPlayerMoney(final Integer player, final int current) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				View badge = playerBadges.get(player);
+				if (badge != null) {
+					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
+					money.setText("\u20AC" + current);
+				}
+			}
+		});
 	};
 }

@@ -80,27 +80,14 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/log"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="200dp"
-        android:layout_marginRight="200dp"
-        android:layout_marginTop="20dp"
-        android:background="#206020"
-        android:focusable="false"
-        android:lines="5"
-        android:text=""
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff" />
-
     <LinearLayout
-        android:id="@+id/players_bottom"
-        android:layout_width="match_parent"
+        android:id="@+id/users"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:gravity="bottom|center_horizontal"
-        android:minHeight="50dp" >
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:minHeight="50dp"
+        android:orientation="horizontal" >
 
     </LinearLayout>
 
