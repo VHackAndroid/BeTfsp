@@ -96,5 +96,14 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				phase.setText(newState.toString());
 			}
 		});
+	}
+
+	@Override
+	public void addPlayer(int clientID, String clientName, int initialMoney) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				// TODO Auto-generated method stub
+			}
+		});
 	};
 }

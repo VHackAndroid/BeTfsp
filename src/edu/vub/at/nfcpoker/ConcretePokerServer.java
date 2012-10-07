@@ -1,9 +1,13 @@
 package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -32,6 +36,7 @@ import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
+import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
 public class ConcretePokerServer extends PokerServer  {
 	
@@ -99,7 +104,7 @@ public class ConcretePokerServer extends PokerServer  {
 	
 	int nextClientID = 0;
 
-	private ServerActivity gui;
+	private ServerViewInterface gui;
 	
 	public enum GameState {
 		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
@@ -127,7 +132,7 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerActivity gui, boolean isDedicated) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
 	}
@@ -141,8 +146,11 @@ public class ConcretePokerServer extends PokerServer  {
 	
 	class GameLoop implements Runnable {
 		
+		private static final int INITIAL_MONEY = 2000;
+
 		public GameLoop() {
 			gameState = GameState.STOPPED;
+			Collections.shuffle(names);
 		}
 
 		// todo: what if client disconnects before next round?
@@ -158,12 +166,22 @@ public class ConcretePokerServer extends PokerServer  {
 						return;
 					}
 				}
+				
+				for (Integer i : newClients.keySet()) {
+					if (newClients.get(i) == c) {
+						newClients.remove(i);
+						return;
+					}
+				}
 			}
 		}
 
 		public TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
 		public TreeMap<Integer, Connection> clientsInGame = new TreeMap<Integer, Connection>();
 		public TreeMap<Integer, Future<ClientAction>> actionFutures = new TreeMap<Integer, Future<ClientAction>>();  
+		public TreeMap<Integer, Integer> playerMoney = new TreeMap<Integer, Integer>();
+		public TreeMap<Integer, String> playerNames = new TreeMap<Integer, String>();
+
 		public GameState gameState;
 			
 		public void run() {
@@ -171,7 +189,9 @@ public class ConcretePokerServer extends PokerServer  {
 				gui.resetCards();
 				synchronized(this) {
 					actionFutures.clear();
-					clientsInGame.putAll(gameLoop.newClients);
+					for (Integer id : newClients.navigableKeySet()) {
+						setupPlayer(id, newClients.get(id));
+					}
 					newClients.clear();
 					for (Integer i : clientsInGame.keySet()) {
 						if (clientsInGame.get(i) == null)
@@ -191,6 +211,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				TreeMap<Integer, Card[]> holeCards = new TreeMap<Integer, Card[]>();
 				Set<Card> cardPool = new HashSet<Card>();
+				int chipsPool = 0;
 				try {
 					Deck deck = new Deck();
 					
@@ -253,6 +274,7 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				if (endedPrematurely) {
 					if (remainingPlayers.size() == 1) {
+						addMoney(remainingPlayers.iterator().next(), chipsPool);
 						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, null));
 					}
 				} else {
@@ -280,6 +302,9 @@ public class ConcretePokerServer extends PokerServer  {
 								bestPlayers.add(nextPlayer);
 							}
 						}
+						
+						for (Integer player: bestPlayers)
+							addMoney(player, chipsPool / bestPlayers.size());
 						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand));
 					}
 				}
@@ -291,6 +316,21 @@ public class ConcretePokerServer extends PokerServer  {
 					Log.wtf("PokerServer", "Thread.sleep was interrupted", e);
 				}
 			}
+		}
+
+		private void addMoney(Integer player, int chips) {
+			int current = playerMoney.get(player);
+			current += chips;
+			playerMoney.put(player, current);
+		}
+
+		private void setupPlayer(Integer id, Connection connection) {
+			final String name = generateName(id);
+			playerNames.put(id, name);
+			playerMoney.put(id, INITIAL_MONEY);
+			gui.addPlayer(id, name, INITIAL_MONEY);
+			
+			clientsInGame.put(id, connection);
 		}
 
 		public void createActionFutures() {
@@ -362,5 +402,11 @@ public class ConcretePokerServer extends PokerServer  {
 				}
 			}
 		}
+	}
+	
+	public static ArrayList<String> names = new ArrayList<String>(Arrays.asList( "Dries", "Lode", "Elisa", "Wolf", "Tom", "Kevin", "Andoni" ));
+
+	public static String generateName(int id) {
+		return names.get(id % names.size())+"(" + id + ")";
 	}
 }

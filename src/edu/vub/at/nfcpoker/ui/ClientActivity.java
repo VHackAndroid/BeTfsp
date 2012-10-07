@@ -768,4 +768,16 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		}
 
 	}
+
+	@Override
+	public void addPlayer(int clientID, String clientName, int initialMoney) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void showStatechange(GameState newState) {
+		// TODO Auto-generated method stub
+		
+	}
 }
