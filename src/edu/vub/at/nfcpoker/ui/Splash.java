@@ -94,7 +94,18 @@ public class Splash extends ThingActivity<TableThing> {
 //			}
 //		});
 		
-		new DiscoveryAsyncTask().execute();
+		View tablet_layout = findViewById(R.id.tablet_layout);
+		if (tablet_layout == null) {
+			new DiscoveryAsyncTask().execute();
+		} else {
+			final Button disc = (Button) findViewById(R.id.discover_button);
+			disc.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					new DiscoveryAsyncTask().execute();
+					disc.setEnabled(false);
+				}
+			});
+		}
 
 		
 		Button server = (Button) findViewById(R.id.server);
@@ -107,16 +118,18 @@ public class Splash extends ThingActivity<TableThing> {
 			});
 
 		// NFC
-		final Dialog nfc_dialog = createNFCDialog();
 
 		Button nfc = (Button) findViewById(R.id.nfc);
-		nfc.setEnabled(false);
-		nfc.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				nfc_dialog.show();
-			}
-		});
+		if (nfc != null) {
+			final Dialog nfc_dialog = createNFCDialog();
+			nfc.setEnabled(false);
+			nfc.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					nfc_dialog.show();
+				}
+			});
+		}
 	}
 
 	private Dialog createNFCDialog() {

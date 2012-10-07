@@ -1,5 +1,6 @@
 package edu.vub.nfc.thing;
 
+import android.content.pm.PackageManager;
 import android.nfc.NdefMessage;
 import android.os.Bundle;
 import android.util.Log;
@@ -107,8 +108,10 @@ public abstract class ThingActivity<T extends Thing> extends NFCActivity impleme
 	@Override
 	public void onCreate(Bundle savedInstanceState) {	
 		super.onCreate(savedInstanceState, new ThingToNdefMessageConverter());
-		this.discoverer_ = new ThingDiscoverer(this, getMimeType(), new NdefMessageToThingConverter(), new ThingToNdefMessageConverter());
-		new ThingBeamListener(this, new NdefMessageToThingConverter());
+		if (isNFCSupported()) {
+			this.discoverer_ = new ThingDiscoverer(this, getMimeType(), new NdefMessageToThingConverter(), new ThingToNdefMessageConverter());
+			new ThingBeamListener(this, new NdefMessageToThingConverter());
+		}
 	}	
 	
 	// to be implemented by subclasses

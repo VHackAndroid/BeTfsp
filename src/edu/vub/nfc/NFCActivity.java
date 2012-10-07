@@ -14,6 +14,8 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
+import android.content.pm.FeatureInfo;
+import android.content.pm.PackageManager;
 import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -63,6 +65,10 @@ public class NFCActivity extends Activity implements CreateNdefMessageCallback, 
 		super.onCreate(savedInstanceState);
 	};
 	
+	public boolean isNFCSupported() {
+		return getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+	}
+	
 	// This is the constructor to use, write converter (for null messages) and tag mime-type are passed.
 	// Converter is used for beaming null messages only. Tag References and Beamers encapsulate their own converters.
     public void onCreate(
@@ -70,6 +76,9 @@ public class NFCActivity extends Activity implements CreateNdefMessageCallback, 
     		ObjectToNdefMessageConverter objectToNdefMessageConverter) {
         super.onCreate(savedInstanceState);
         nullMessageConverter_ = objectToNdefMessageConverter;
+        
+        if (!isNFCSupported())
+        	return;
         
         mNfcAdapter_ = NfcAdapter.getDefaultAdapter(this);
         if (mNfcAdapter_ == null) {
@@ -196,6 +205,8 @@ public class NFCActivity extends Activity implements CreateNdefMessageCallback, 
 	
 	@Override
 	protected void onNewIntent(Intent intent) {
+		if (!isNFCSupported())
+			return;
 		reactOnTagDetected(intent);
 	}
 	
@@ -203,6 +214,8 @@ public class NFCActivity extends Activity implements CreateNdefMessageCallback, 
 	protected void onResume() {
 		super.onResume();
 		
+        if (!isNFCSupported())
+        	return;
 		mNfcAdapter_ = NfcAdapter.getDefaultAdapter(this);
 		Intent intent = new Intent(this, getClass());
 		intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -233,6 +246,8 @@ public class NFCActivity extends Activity implements CreateNdefMessageCallback, 
 	@Override
 	protected void onPause() {
 		super.onPause();
+        if (!isNFCSupported())
+        	return;
 		NfcAdapter.getDefaultAdapter(this).disableForegroundDispatch(this);
 	}
 	
