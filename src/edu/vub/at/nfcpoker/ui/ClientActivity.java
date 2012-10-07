@@ -393,9 +393,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				}
 
 				if (toastToShow != null) {
-					final Toast toast = Toast.makeText(ClientActivity.this, toastToShow, Toast.LENGTH_SHORT);;
+					final String toastToShowFinal = toastToShow;
 					runOnUiThread(new Runnable() {
 						public void run() {
+							Toast toast = Toast.makeText(ClientActivity.this, toastToShowFinal, Toast.LENGTH_SHORT);
 							toast.show();
 						}
 					});
