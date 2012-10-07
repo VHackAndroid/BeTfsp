@@ -191,4 +191,21 @@ public interface Message {
 				return super.toString() + ": Round winners" + this.bestPlayers.toString();
 			}
 	}
+	 
+	 public class SetIDMessage extends TimestampedMessage implements Message {
+
+			private int id;
+
+			public SetIDMessage(Integer id) {
+				this.id = id;
+			}
+
+			// kryo
+			public SetIDMessage() {}
+			
+			@Override
+			public String toString() {
+				return super.toString() + ": set ID to " + this.id;
+			}
+	}
 }
