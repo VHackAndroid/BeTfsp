@@ -355,7 +355,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				StateChangeMessage scm = (StateChangeMessage) m;
 				GameState newGameState = scm.newState;
 				disableActions();
-				final Toast toastToShow = null;
+				Toast toastToShow = null;
 				switch (newGameState) {
 				case STOPPED:
 					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
@@ -393,9 +393,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				}
 
 				if (toastToShow != null) {
+					final Toast t = toastToShow;
 					runOnUiThread(new Runnable() {
 						public void run() {
-							toastToShow.show();
+							t.show();
 						}
 					});
 				}
