@@ -1,18 +1,20 @@
 package edu.vub.at.nfcpoker;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.Vector;
+
 // From http://www.dreamincode.net/forums/topic/116864-how-to-make-a-poker-game-in-java/
 
 public class Hand {
 	private Card[] cards;
 	private int[] value;
 
-	public Hand(Deck d) {
+	public Hand(Card[] cards) {
 		value = new int[6];
-		cards = new Card[5];
-		
-		for (int x=0; x<5; x++) {
-			cards[x] = d.drawFromDeck();
-		}
+		this.cards = cards;
 
 		int[] ranks = new int[14];
 		int[] orderedRanks = new int[5];	 //miscellaneous cards that are not otherwise significant
@@ -209,6 +211,33 @@ public class Hand {
 				return -1;
 		}
 		return 0;
+	}
+	
+	public static Hand makeBestHand(Set<Card> base, Collection<Card> holeCards) {
+		Vector<Card> pool = new Vector<Card>(base);
+		pool.addAll(holeCards);
+		
+		Set<Hand> hands = new HashSet<Hand>();
+		
+		for (int i = 0; i < 7; i++) {
+			for (int j = i+1; j < 7; j++) {
+				Vector<Card> newHand = new Vector<Card>(pool);
+				newHand.remove(j);
+				newHand.remove(i);
+				hands.add(new Hand(newHand.toArray(new Card[5])));
+			}
+		}
+		
+		Iterator<Hand> it = hands.iterator();
+		Hand bestHand = it.next();
+		
+		while (it.hasNext()) {
+			Hand next = it.next();
+			if (bestHand.compareTo(next) > 0)
+				bestHand = next;
+		}
+			
+		return bestHand;
 	}
 }
 

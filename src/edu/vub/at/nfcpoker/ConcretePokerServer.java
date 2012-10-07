@@ -240,13 +240,13 @@ public class ConcretePokerServer extends PokerServer  {
 				
 				// results
 				newState(GameState.END_OF_ROUND);
-				TreeMap<Integer, HandWithScore> hands = new TreeMap<Integer, HandWithScore>();
+				TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
 				for (Integer player : actionFutures.navigableKeySet()) {
 					Future<ClientAction> fut = actionFutures.get(player);
 					if (fut != null
 							&& fut.isResolved()
 							&& fut.unsafeGet().getClientActionType() != Message.ClientActionType.Fold) 
-						hands.put(player, HandWithScore.makeBestHand(cardPool, Arrays.asList(holeCards.get(player))));
+						hands.put(player, Hand.makeBestHand(cardPool, Arrays.asList(holeCards.get(player))));
 				}
 				
 				if (!hands.isEmpty()) {
@@ -254,11 +254,11 @@ public class ConcretePokerServer extends PokerServer  {
 					Set<Integer> bestPlayers = new HashSet<Integer>();
 					Integer firstPlayer = it.next();
 					bestPlayers.add(firstPlayer);
-					HandWithScore bestHand = hands.get(firstPlayer);
+					Hand bestHand = hands.get(firstPlayer);
 					
 					while (it.hasNext()) {
 						int nextPlayer = it.next();
-						HandWithScore nextHand = hands.get(nextPlayer);
+						Hand nextHand = hands.get(nextPlayer);
 						int comparison = nextHand.compareTo(bestHand);
 						if (comparison > 0)  {
 							bestHand = nextHand;

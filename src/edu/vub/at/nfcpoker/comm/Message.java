@@ -7,7 +7,7 @@ import java.util.UUID;
 import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
-import edu.vub.at.nfcpoker.HandWithScore;
+import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
@@ -176,9 +176,9 @@ public interface Message {
 	 public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
 			
 			private Set<Integer> bestPlayers;
-			private HandWithScore bestHand;
+			private Hand bestHand;
 
-			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, HandWithScore bestHand) {
+			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Hand bestHand) {
 				this.bestPlayers = bestPlayers;
 				this.bestHand = bestHand;
 			}
