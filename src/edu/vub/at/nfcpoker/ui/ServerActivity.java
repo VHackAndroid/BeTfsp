@@ -6,6 +6,7 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -31,9 +32,21 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	boolean isDedicated = tablet_layout != null;
-    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated);
+    	WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+    	int ip = wm.getConnectionInfo().getIpAddress();
+    	String address = putAddress(ip);
+    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated, address);
     	cps.start();
     }
+    
+	private static String putAddress(int addr) {
+		StringBuffer buf = new StringBuffer();
+		buf.append(addr  & 0xff).append(':').
+		append((addr >>>= 8) & 0xff).append(':').
+ 		append((addr >>>= 8) & 0xff).append(':').
+ 		append((addr >>>= 8) & 0xff);
+		return buf.toString();
+	}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

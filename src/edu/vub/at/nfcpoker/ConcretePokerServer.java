@@ -44,15 +44,15 @@ public class ConcretePokerServer extends PokerServer  {
 	public class RoundEndedException extends Exception {}
 
 	private boolean isDedicated = false;
+	private String address;
 
 	Runnable exporterR = new Runnable() {	
 		@Override
 		public void run() {
 			Log.d("PokerServer", "Starting export");
-			String address = "192.168.1.106";
 			String port = "" + CommLib.SERVER_PORT;
 			String dedicated = "" + isDedicated;
-			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port, dedicated});
+			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {ConcretePokerServer.this.address, port, dedicated});
 			try {
 				CommLib.export(clci);
 			} catch (IOException e) {
@@ -132,9 +132,10 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String address) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
+		this.address = address;
 	}
 	
 	public void start() {		
