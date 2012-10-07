@@ -62,6 +62,7 @@ public class Splash extends ThingActivity<TableThing> {
 				Intent i = new Intent(Splash.this, ClientActivity.class);
 				i.putExtra("ip", result.getAddress());
 				i.putExtra("port", Integer.parseInt(result.getPort()));
+				i.putExtra("isDedicated", result.isDedicated());
 				startActivity(i);
 			} else {
 				Toast.makeText(Splash.this, "Could not discover hosts", Toast.LENGTH_SHORT).show();
@@ -206,9 +207,15 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 	
 	protected void startClient() {
-		Intent i = new Intent(this, ClientActivity.class);
-		startActivity(i);
-		finish();
+		if (lastScannedTag_ != null && lastScannedTag_ instanceof TableThing) {			
+			Intent i = new Intent(this, ClientActivity.class);
+			TableThing tt = (TableThing) lastScannedTag_;
+			i.putExtra("ip", tt.ip_);
+			i.putExtra("port", tt.port_);
+			i.putExtra("isDedicated", false);
+			startActivity(i);
+			finish();
+		}
 	}
 
 	@Override

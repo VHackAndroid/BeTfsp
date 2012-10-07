@@ -27,6 +27,10 @@ public class CommLibConnectionInfo {
 		return extra_[1];
 	}
 
+	public boolean isDedicated() {
+		return Boolean.parseBoolean(extra_[2]);
+	}
+	
 	public Client connect(Listener listener) throws IOException {
 		return connect(getAddress(), Integer.parseInt(getPort()), listener);
 	}

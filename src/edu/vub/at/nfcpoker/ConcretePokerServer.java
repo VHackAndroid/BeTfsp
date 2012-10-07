@@ -32,14 +32,13 @@ import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.ui.ClientActivity;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
 
 public class ConcretePokerServer extends PokerServer  {
 	
-	public class RoundEndedException extends Exception {
+	public class RoundEndedException extends Exception {}
 
-	}
+	private boolean isDedicated = false;
 
 	Runnable exporterR = new Runnable() {	
 		@Override
@@ -47,7 +46,8 @@ public class ConcretePokerServer extends PokerServer  {
 			Log.d("PokerServer", "Starting export");
 			String address = "192.168.1.106";
 			String port = "" + CommLib.SERVER_PORT;
-			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port});
+			String dedicated = "" + isDedicated;
+			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port, dedicated});
 			try {
 				CommLib.export(clci);
 			} catch (IOException e) {
@@ -127,11 +127,10 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 	};
-	
 
-
-	public ConcretePokerServer(ServerActivity gui) {
+	public ConcretePokerServer(ServerActivity gui, boolean isDedicated) {
 		this.gui = gui;
+		this.isDedicated = isDedicated;
 	}
 	
 	public void start() {		

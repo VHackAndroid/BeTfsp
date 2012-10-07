@@ -22,10 +22,12 @@ public class ServerActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_server);
-        ConcretePokerServer cps = new ConcretePokerServer(this);
-        cps.start();
+    	super.onCreate(savedInstanceState);
+    	setContentView(R.layout.activity_server);
+    	View tablet_layout = findViewById(R.id.tablet_layout);
+    	boolean isDedicated = tablet_layout != null;
+    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated);
+    	cps.start();
     }
 
     @Override
