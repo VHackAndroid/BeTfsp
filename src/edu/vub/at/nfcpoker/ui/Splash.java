@@ -179,6 +179,15 @@ public class Splash extends ThingActivity<TableThing> {
 		}, timeout);
 	}
 	
+	private static String putAddress(int addr) {
+		StringBuffer buf = new StringBuffer();
+		buf.append(addr  & 0xff).append(':').
+		append((addr >>>= 8) & 0xff).append(':').
+ 		append((addr >>>= 8) & 0xff).append(':').
+ 		append((addr >>>= 8) & 0xff);
+		return buf.toString();
+	}
+	
 	private void askStartClientServer() {
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
@@ -189,6 +198,22 @@ public class Splash extends ThingActivity<TableThing> {
 						client_discoveryTask.cancel(true);
 						client_startClientServerTimer.cancel();
 						client_startClientServerTimer = null;
+						new Thread() {
+							@Override
+							public void run() {
+								String address = "192.168.1.138";
+								WifiManager m = (WifiManager)getSystemService(WIFI_SERVICE);
+								address = putAddress(m.getDhcpInfo().ipAddress);
+								String port = "" + CommLib.SERVER_PORT;
+								String dedicated = "" + false;
+								CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port, dedicated});
+								try {
+									CommLib.export(clci);
+								} catch (IOException e) {
+									Log.e("PokerServer", "Exporter thread crashed", e);
+								}
+							}
+						}.start();
 					}
 					break;
 				case DialogInterface.BUTTON_NEGATIVE:
