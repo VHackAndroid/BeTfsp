@@ -6,11 +6,13 @@ import java.util.TimerTask;
 import java.util.UUID;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -31,6 +33,7 @@ import com.google.common.base.CaseFormat;
 
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
@@ -54,6 +57,157 @@ import edu.vub.nfc.thing.Thing;
 import fi.harism.curl.CurlView;
 
 public class ClientActivity extends Activity implements OnClickListener {
+
+	public class ConnectAsyncTask extends AsyncTask<Void, Void, Client> {
+
+		private int port;
+		private String address;
+		private Listener listener;
+
+		
+		public ConnectAsyncTask(String address, int port, Listener listener) {
+			this.address = address;
+			this.port = port;
+			this.listener = listener;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			showBarrier("Connecting to server");
+		}
+		
+		@Override
+		protected Client doInBackground(Void... params) {
+			try {
+				return CommLibConnectionInfo.connect(address, port, listener);
+			} catch (IOException e) {
+				Log.d("AMBIENTPOKER", "Could not connect to server", e);
+			}
+			return null;
+		}
+	}
+	
+	private ProgressDialog barrier;
+	
+	private void showBarrier(String cause) {
+		if (barrier == null) {
+			barrier = new ProgressDialog(ClientActivity.this);
+			barrier.setTitle(cause);
+			barrier.setCancelable(false);
+			barrier.setMessage("Please wait");
+			barrier.show();
+		} else {
+			barrier.setTitle(cause);
+		}
+	}
+	
+	private void hideBarrier() {
+		if (barrier != null) {
+			barrier.dismiss();
+			barrier = null;
+		}
+	}
+	
+
+	Listener listener = new Listener() {
+		@Override
+		public void connected(Connection arg0) {
+			super.connected(arg0);
+			setServerConnection(arg0);
+			Log.d("AMBIENTPOKER","Connected to server!");
+		}
+
+
+		@Override
+		public void received(Connection c, Object m) {
+			super.received(c, m);
+	
+			Log.v("AMBIENTPOKER", "Received message " + m.toString());
+	
+			if (m instanceof StateChangeMessage) {
+				StateChangeMessage scm = (StateChangeMessage) m;
+				GameState newGameState = scm.newState;
+				disableActions();
+				switch (newGameState) {
+				case STOPPED:
+					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
+					runOnUiThread(new Runnable() {
+						public void run() {	showBarrier("Waiting for players"); }});
+					break;
+				case WAITING_FOR_PLAYERS:
+					Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+					runOnUiThread(new Runnable() {
+						public void run() {	showBarrier("Waiting for players"); }});
+					hideCards();
+					break;
+				case PREFLOP:
+					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
+					runOnUiThread(new Runnable() {
+						public void run() {	hideBarrier(); }});
+					showCards();
+					break;
+				case FLOP:
+					Log.v("AMBIENTPOKER", "Game state changed to FLOP");
+					break;
+				case TURN:
+					Log.v("AMBIENTPOKER", "Game state changed to TURN");
+					break;
+				case RIVER:
+					Log.v("AMBIENTPOKER", "Game state changed to RIVER");
+					break;
+				case END_OF_ROUND:
+					Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
+					break;
+				}
+			}
+			
+			if (m instanceof ReceivePublicCards) {
+				ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
+				Log.v("AMBIENTPOKER", "Received public cards: ");
+				Card[] cards = newPublicCards.cards;
+				for (int i = 0; i < cards.length; i++) {
+					Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
+				}
+				
+			}
+	
+			if (m instanceof ReceiveHoleCardsMessage) {
+				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
+				Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+				ClientActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						updateHandGui(newHoleCards);
+					}
+				});
+			}
+			
+			if (m instanceof ClientActionMessage) {
+				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
+				final ClientAction action = newClientActionMessage.getClientAction();
+				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
+				if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
+					ClientActivity.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							updateMinBetAmount(action.getExtra());
+						}
+					});
+
+				}
+			}
+
+			
+			if (m instanceof RequestClientActionFutureMessage) {
+				final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
+				pendingFuture = rcafm.futureId;
+				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
+				enableActions();
+			}
+		}
+	};
+	
 
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
@@ -271,114 +425,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	
 	
     private void listenToGameServer() {
-    	final ClientActivity theActivity = this;
     	final String ip = getIntent().getStringExtra("ip");
     	final int port = getIntent().getIntExtra("port", 0);
-    	final Thread tt = new Thread() {
-    		public void run() {
-    			try {
-    				Log.v("AMBIENTPOKER", "Discovered server at " + ip);
-    				Client c = CommLibConnectionInfo.connect(ip, port, new Listener() {
-    					@Override
-    					public void connected(Connection arg0) {
-    						super.connected(arg0);
-    						setServerConnection(arg0);
-    						Log.d("AMBIENTPOKER","Connected to server!");
-    					}
-
-
-						@Override
-    					public void received(Connection c, Object m) {
-    						super.received(c, m);
-					
-    						Log.v("AMBIENTPOKER", "Received message " + m.toString());
-					
-    						if (m instanceof StateChangeMessage) {
-    							StateChangeMessage scm = (StateChangeMessage) m;
-    							GameState newGameState = scm.newState;
-    							disableActions();
-    							switch (newGameState) {
-    							case STOPPED:
-    								Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
-    								break;
-    							case WAITING_FOR_PLAYERS:
-    								Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
-    								Toast.makeText(theActivity, "Waiting for players", Toast.LENGTH_SHORT).show();
-    								hideCards();
-    								break;
-    							case PREFLOP:
-    								Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
-    								showCards();
-    								break;
-    							case FLOP:
-    								Log.v("AMBIENTPOKER", "Game state changed to FLOP");
-    								break;
-    							case TURN:
-    								Log.v("AMBIENTPOKER", "Game state changed to TURN");
-    								break;
-    							case RIVER:
-    								Log.v("AMBIENTPOKER", "Game state changed to RIVER");
-    								break;
-    							case END_OF_ROUND:
-    								Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
-    								break;
-    							}
-    						}
-    						
-    						if (m instanceof ReceivePublicCards) {
-    							ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
-    							Log.v("AMBIENTPOKER", "Received public cards: ");
-    							Card[] cards = newPublicCards.cards;
-    							for (int i = 0; i < cards.length; i++) {
-    								Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
-    							}
-    							
-    						}
-					
-    						if (m instanceof ReceiveHoleCardsMessage) {
-    							final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
-    							Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
-    							theActivity.runOnUiThread(new Runnable() {
-									@Override
-									public void run() {
-										updateHandGui(newHoleCards);
-									}
-								});
-    						}
-    						
-    						if (m instanceof ClientActionMessage) {
-    							final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
-    							final ClientAction action = newClientActionMessage.getClientAction();
-    							Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
-    							if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
-    								theActivity.runOnUiThread(new Runnable() {
-    									@Override
-    									public void run() {
-    										updateMinBetAmount(action.getExtra());
-    									}
-    								});
-
-    							}
-    						}
-
-    						
-    						if (m instanceof RequestClientActionFutureMessage) {
-    							final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
-    							pendingFuture = rcafm.futureId;
-    							Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
-    							enableActions();
-    						}
-    					}
-    				});
-    			} catch (IOException e) {
-    				Log.e("AMBIENTPOKER", "Could not discover server: ");
-    				e.printStackTrace();
-    			}
-    		}
-    	};
-    	
-    	tt.start();
-    		
+    	new ConnectAsyncTask(ip, port, listener).execute();
     }
     
     private void updateHandGui(ReceiveHoleCardsMessage cards) {

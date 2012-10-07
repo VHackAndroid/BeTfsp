@@ -4,24 +4,34 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <ImageView
+        android:id="@+id/splash1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/splash" />
+
     <LinearLayout
+        android:id="@+id/buttons"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/splash1"
         android:gravity="center"
         android:orientation="vertical" >
 
         <Button
-            android:id="@+id/discover"
-            android:layout_width="wrap_content"
+            android:id="@+id/discover_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Discover" />
 
         <Button
             android:id="@+id/server"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Server" />
-
     </LinearLayout>
 
 </RelativeLayout>
