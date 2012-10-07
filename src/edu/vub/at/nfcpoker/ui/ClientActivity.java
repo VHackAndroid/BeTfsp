@@ -355,7 +355,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				StateChangeMessage scm = (StateChangeMessage) m;
 				GameState newGameState = scm.newState;
 				disableActions();
-				Toast toastToShow = null;
+				String toastToShow = null;
 				switch (newGameState) {
 				case STOPPED:
 					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
@@ -369,22 +369,22 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					hideCards();
 					break;
 				case PREFLOP:
-					toastToShow = Toast.makeText(ClientActivity.this, "Any preflop bet?", Toast.LENGTH_SHORT);
+					toastToShow = "Any preflop bet?";
 					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
 					runOnUiThread(new Runnable() {
 						public void run() {	hideBarrier(); }});
 					showCards();
 					break;
 				case FLOP:
-					toastToShow = Toast.makeText(ClientActivity.this, "Flopping cards...", Toast.LENGTH_SHORT);
+					toastToShow = "Flopping cards...";
 					Log.v("AMBIENTPOKER", "Game state changed to FLOP");
 					break;
 				case TURN:
-					toastToShow = Toast.makeText(ClientActivity.this, "Here is the turn", Toast.LENGTH_SHORT);
+					toastToShow = "Here is the turn";
 					Log.v("AMBIENTPOKER", "Game state changed to TURN");
 					break;
 				case RIVER:
-					toastToShow = Toast.makeText(ClientActivity.this, "River card visible", Toast.LENGTH_SHORT);
+					toastToShow = "River card visible";
 					Log.v("AMBIENTPOKER", "Game state changed to RIVER");
 					break;
 				case END_OF_ROUND:
@@ -393,10 +393,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				}
 
 				if (toastToShow != null) {
-					final Toast t = toastToShow;
+					final Toast toast = Toast.makeText(ClientActivity.this, toastToShow, Toast.LENGTH_SHORT);;
 					runOnUiThread(new Runnable() {
 						public void run() {
-							t.show();
+							toast.show();
 						}
 					});
 				}
