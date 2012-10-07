@@ -19,7 +19,6 @@ package android.nfc;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.UnsupportedOperationException;
 import java.nio.ByteBuffer;
 
 /**

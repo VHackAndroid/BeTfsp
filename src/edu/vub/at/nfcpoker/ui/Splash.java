@@ -12,7 +12,6 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.PokerServer;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.AsyncTask;
@@ -25,14 +24,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-import edu.vub.at.commlib.CommLib;
-import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.TableThing;
-import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.nfc.thing.EmptyRecord;
 import edu.vub.nfc.thing.Thing;
 import edu.vub.nfc.thing.ThingActivity;
@@ -255,7 +248,7 @@ public class Splash extends ThingActivity<TableThing> {
 		Button nfcButton = (Button) findViewById(R.id.nfc);
 		nfcButton.setEnabled(true);
 		lastScannedTag_ = tableThing;
-		startClient();
+		startClientNFC(tableThing);
 	}
 
 	@Override
@@ -272,12 +265,11 @@ public class Splash extends ThingActivity<TableThing> {
 		finish();
 	}
 	
-	protected void startClient() {
-		if (lastScannedTag_ != null && lastScannedTag_ instanceof TableThing) {			
+	protected void startClientNFC(TableThing tag) {
+		if (tag != null) {			
 			Intent i = new Intent(this, ClientActivity.class);
-			TableThing tt = (TableThing) lastScannedTag_;
-			i.putExtra("ip", tt.ip_);
-			i.putExtra("port", tt.port_);
+			i.putExtra("ip", tag.ip_);
+			i.putExtra("port", tag.port_);
 			i.putExtra("isDedicated", false);
 			startActivity(i);
 			finish();

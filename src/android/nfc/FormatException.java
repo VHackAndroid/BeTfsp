@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+@SuppressWarnings("serial")
 public class FormatException extends Exception {
     public FormatException() {
         super();

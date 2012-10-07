@@ -25,7 +25,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -35,33 +34,23 @@ import android.widget.Toast;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.google.common.base.CaseFormat;
 
-import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.TableThing;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
-import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
-import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
-import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
-import edu.vub.nfc.thing.EmptyRecord;
-import edu.vub.nfc.thing.Thing;
 import fi.harism.curl.CurlView;
 
 public class ClientActivity extends Activity implements OnClickListener, ServerViewInterface {
@@ -166,7 +155,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private Connection serverConnection;
 	
     @Override
-    @SuppressWarnings("unused")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
@@ -723,13 +711,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
              }
              return false;
          }
-
      }
-	 
-
-	 private void clearPendingFuture() {
-		 pendingFuture = null;
-	 }
 }
 
 	

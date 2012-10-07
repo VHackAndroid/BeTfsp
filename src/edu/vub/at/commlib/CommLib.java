@@ -15,10 +15,13 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import edu.vub.at.nfcpoker.comm.Message.ClientAction;
+
 public class CommLib {
 
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
+	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
 
 	public static CommLibConnectionInfo discover(Class<?> klass) throws IOException {
@@ -63,14 +66,15 @@ public class CommLib {
 		}
 	}
 	
-	public static Future createFuture() {
-		Future f = new Future(null);
+	public static Future<ClientAction> createFuture() {
+		Future<ClientAction> f = new Future<ClientAction>(null);
 		futures.put(f.getFutureId(), f);
 		return f;
 	}
 
 	public static void resolveFuture(UUID futureId, Object futureValue) {
-		Future f = futures.remove(futureId);
+		@SuppressWarnings("unchecked")
+		Future<Object> f = futures.remove(futureId);
 		if (f == null) {
 			Log.w("wePoker", "Future null!");
 			return;

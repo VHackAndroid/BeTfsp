@@ -3,12 +3,9 @@ package edu.vub.at.nfcpoker.ui.tools;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.ui.ClientActivity;
 import fi.harism.curl.CurlPage;
 import fi.harism.curl.CurlView;
 

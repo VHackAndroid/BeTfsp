@@ -2,8 +2,6 @@ package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -37,6 +35,7 @@ import edu.vub.at.nfcpoker.ui.ServerActivity;
 
 public class ConcretePokerServer extends PokerServer  {
 	
+	@SuppressWarnings("serial")
 	public class RoundEndedException extends Exception {}
 
 	private boolean isDedicated = false;
@@ -194,7 +193,6 @@ public class ConcretePokerServer extends PokerServer  {
 				Set<Card> cardPool = new HashSet<Card>();
 				try {
 					Deck deck = new Deck();
-					boolean moreRounds;
 					
 					// hole cards
 					newState(GameState.PREFLOP);
@@ -311,6 +309,7 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 
+		@SuppressWarnings("unchecked")
 		public void roundTable() throws RoundEndedException {
 			TreeMap<Integer, Future<ClientAction>> clonedFutures;
 			synchronized (this) {

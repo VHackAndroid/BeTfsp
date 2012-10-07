@@ -1,6 +1,5 @@
 package edu.vub.at.nfcpoker;
 
-import android.util.Log;
 import edu.vub.nfc.thing.Thing;
 import edu.vub.nfc.thing.ThingActivity;
 
