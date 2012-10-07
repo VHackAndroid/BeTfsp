@@ -8,7 +8,7 @@ import java.util.Vector;
 
 // From http://www.dreamincode.net/forums/topic/116864-how-to-make-a-poker-game-in-java/
 
-public class Hand {
+public class Hand implements Comparable<Hand> {
 	private Card[] cards;
 	private int[] value;
 
@@ -201,7 +201,7 @@ public class Hand {
 			System.out.println(cards[x]);
 	}
 
-	int compareTo(Hand that)
+	public int compareTo(Hand that)
 	{
 		for (int x=0; x<6; x++)
 		{
@@ -233,7 +233,7 @@ public class Hand {
 		
 		while (it.hasNext()) {
 			Hand next = it.next();
-			if (bestHand.compareTo(next) > 0)
+			if (bestHand.compareTo(next) < 0)
 				bestHand = next;
 		}
 			
