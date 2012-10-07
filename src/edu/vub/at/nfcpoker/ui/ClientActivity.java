@@ -789,4 +789,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void removePlayer(Integer i) {
+		// TODO Auto-generated method stub
+		
+	}
 }

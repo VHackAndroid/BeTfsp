@@ -14,5 +14,7 @@ public interface ServerViewInterface {
 	public void showStatechange(GameState newState);
 
 	public void setPlayerMoney(Integer player, int current);
+
+	public void removePlayer(Integer i);
 	
 }

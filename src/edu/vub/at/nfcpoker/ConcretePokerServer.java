@@ -163,6 +163,7 @@ public class ConcretePokerServer extends PokerServer  {
 						Future<ClientAction> fut = actionFutures.get(i);
 						if (fut != null && ! fut.isResolved()) 
 							fut.resolve(new ClientAction(Message.ClientActionType.Fold, 0));
+						gui.removePlayer(i);
 						return;
 					}
 				}

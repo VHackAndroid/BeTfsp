@@ -132,5 +132,19 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				}
 			}
 		});
+	}
+
+	@Override
+	public void removePlayer(final Integer player) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				View badge = playerBadges.get(player);
+				if (badge != null) {
+					LinearLayout users = (LinearLayout) findViewById(R.id.users);
+					users.removeView(badge);
+					playerBadges.remove(player);
+				}
+			}
+		});
 	};
 }
