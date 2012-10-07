@@ -1,15 +1,17 @@
 package edu.vub.at.nfcpoker.comm;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.UUID;
 
 import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.HandWithScore;
 
 public interface Message {
 
-	 enum ClientActionType { CallAt, RaiseTo, Fold, Check };
+	enum ClientActionType { CallAt, RaiseTo, Fold, Check };
 
 	public static final class ClientAction {
 		public ClientActionType type;
@@ -168,5 +170,25 @@ public interface Message {
 		public String toString() {
 			return super.toString() + ": Client action information message, client" + userId + " -> " + action.toString();
 		}
+	}
+	
+
+	 public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
+			
+			private Set<Integer> bestPlayers;
+			private HandWithScore bestHand;
+
+			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, HandWithScore bestHand) {
+				this.bestPlayers = bestPlayers;
+				this.bestHand = bestHand;
+			}
+
+			// kryo
+			public RoundWinnersDeclarationMessage() {}
+			
+			@Override
+			public String toString() {
+				return super.toString() + ": Round winners" + this.bestPlayers.toString();
+			}
 	}
 }
