@@ -256,8 +256,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					public void run() {
 						currentMoney -= currentBet;
 						currentTotalBet += currentBet;
-						currentBet = 0;
 						ClientAction ca = new ClientAction(ClientActionType.Bet, currentBet);
+						currentBet = 0;
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
 				});
@@ -487,9 +487,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final RoundWinnersDeclarationMessage rwdm = (RoundWinnersDeclarationMessage) m;
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
-					// hoera
+					currentMoney += rwdm.chips / players.size();
 					runOnUiThread(new Runnable() {
 						public void run() {
+							updateMoneyTitle();
 							Toast.makeText(ClientActivity.this, "You won!!", Toast.LENGTH_LONG).show();
 						}});
 
