@@ -78,8 +78,9 @@ public class PageProvider implements CurlView.PageProvider {
 			// First case is image on front side, solid colored back.
 			case 0: {
 				Bitmap front = loadBitmap(width, height, 0);
+				Bitmap back = loadBitmap(width, height, 0);
 				page.setTexture(front, CurlPage.SIDE_FRONT);
-				page.setTexture(front, CurlPage.SIDE_BACK);
+				page.setTexture(back, CurlPage.SIDE_BACK);
 				break;
 			}
 			// Second case is image on back side, solid colored front.

@@ -11,6 +11,10 @@ import java.util.Vector;
 public class Hand implements Comparable<Hand> {
 	private Card[] cards;
 	private int[] value;
+	
+	
+	// for kryo
+	public Hand() {}
 
 	public Hand(Card[] cards) {
 		value = new int[6];
