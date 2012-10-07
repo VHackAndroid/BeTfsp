@@ -355,26 +355,35 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			if (m instanceof StateChangeMessage) {
 				StateChangeMessage scm = (StateChangeMessage) m;
 				GameState newGameState = scm.newState;
-				disableActions();
+				runOnUiThread(new Runnable() {
+					public void run() {
+						disableActions();
+					}});
 				String toastToShow = null;
 				switch (newGameState) {
 				case STOPPED:
 					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
 					runOnUiThread(new Runnable() {
-						public void run() {	showBarrier("Waiting for players"); }});
+						public void run() {
+							showBarrier("Waiting for players");
+						}});
 					break;
 				case WAITING_FOR_PLAYERS:
 					Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
 					runOnUiThread(new Runnable() {
-						public void run() {	showBarrier("Waiting for players"); }});
-					hideCards();
+						public void run() {
+							showBarrier("Waiting for players");
+							hideCards();
+						}});
 					break;
 				case PREFLOP:
 					toastToShow = "Any preflop bet?";
 					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
 					runOnUiThread(new Runnable() {
-						public void run() {	hideBarrier(); }});
-					showCards();
+						public void run() {
+							hideBarrier();
+							showCards();
+						}});
 					break;
 				case FLOP:
 					toastToShow = "Flopping cards...";
@@ -394,8 +403,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					currentTotalBet = 0;
 					currentChipSwiped = 0;
 					nextToReveal = 0;
-					hideCards();
-					updateMoneyTitle();
+					runOnUiThread(new Runnable() {
+						public void run() {
+							hideCards();
+							updateMoneyTitle();
+						}});
 					break;
 				}
 
@@ -449,7 +461,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
 				pendingFuture = rcafm.futureId;
 				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
-				enableActions();
+
+				runOnUiThread(new Runnable() {
+					public void run() {
+						enableActions();
+					}});
 			}
 
 			if (m instanceof SetIDMessage) {
@@ -462,11 +478,17 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					// hoera
-					Toast.makeText(ClientActivity.this, "You won!!", Toast.LENGTH_LONG).show();
+					runOnUiThread(new Runnable() {
+						public void run() {
+							Toast.makeText(ClientActivity.this, "You won!!", Toast.LENGTH_LONG).show();
+						}});
 
 				} else {
 					// boe
-					Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
+					runOnUiThread(new Runnable() {
+						public void run() {
+							Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
+						}});
 				}
 			}
 		}
