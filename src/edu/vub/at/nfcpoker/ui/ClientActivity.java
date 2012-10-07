@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -53,6 +54,8 @@ import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
+import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
@@ -94,6 +97,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 	
 	private ProgressDialog barrier;
+
+	public int myClientID;
 	
 	private void showBarrier(String cause) {
 		if (barrier == null) {
@@ -115,104 +120,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 	
 
-	Listener listener = new Listener() {
-		@Override
-		public void connected(Connection arg0) {
-			super.connected(arg0);
-			setServerConnection(arg0);
-			Log.d("AMBIENTPOKER","Connected to server!");
-		}
-
-
-		@Override
-		public void received(Connection c, Object m) {
-			super.received(c, m);
 	
-			Log.v("AMBIENTPOKER", "Received message " + m.toString());
-	
-			if (m instanceof StateChangeMessage) {
-				StateChangeMessage scm = (StateChangeMessage) m;
-				GameState newGameState = scm.newState;
-				newGameState = GameState.RIVER;
-				disableActions();
-				switch (newGameState) {
-				case STOPPED:
-					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
-					runOnUiThread(new Runnable() {
-						public void run() {	showBarrier("Waiting for players"); }});
-					break;
-				case WAITING_FOR_PLAYERS:
-					Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
-					runOnUiThread(new Runnable() {
-						public void run() {	showBarrier("Waiting for players"); }});
-					hideCards();
-					break;
-				case PREFLOP:
-					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
-					runOnUiThread(new Runnable() {
-						public void run() {	hideBarrier(); }});
-					showCards();
-					break;
-				case FLOP:
-					Log.v("AMBIENTPOKER", "Game state changed to FLOP");
-					break;
-				case TURN:
-					Log.v("AMBIENTPOKER", "Game state changed to TURN");
-					break;
-				case RIVER:
-					Log.v("AMBIENTPOKER", "Game state changed to RIVER");
-					break;
-				case END_OF_ROUND:
-					Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
-					break;
-				}
-			}
-			
-			if (m instanceof ReceivePublicCards) {
-				ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
-				Log.v("AMBIENTPOKER", "Received public cards: ");
-				Card[] cards = newPublicCards.cards;
-				for (int i = 0; i < cards.length; i++) {
-					Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
-				}
-				
-			}
-	
-			if (m instanceof ReceiveHoleCardsMessage) {
-				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
-				Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
-				ClientActivity.this.runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						updateHandGui(newHoleCards);
-					}
-				});
-			}
-			
-			if (m instanceof ClientActionMessage) {
-				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
-				final ClientAction action = newClientActionMessage.getClientAction();
-				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
-				if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
-					ClientActivity.this.runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							updateMinBetAmount(action.getExtra());
-						}
-					});
-
-				}
-			}
-
-			
-			if (m instanceof RequestClientActionFutureMessage) {
-				final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
-				pendingFuture = rcafm.futureId;
-				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
-				enableActions();
-			}
-		}
-	};
 	
 	
 	// Game state
@@ -433,6 +341,117 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			}
 		});
 	}
+	Listener listener = new Listener() {
+		@Override
+		public void connected(Connection arg0) {
+			super.connected(arg0);
+			setServerConnection(arg0);
+			Log.d("AMBIENTPOKER","Connected to server!");
+		}
+
+
+		@Override
+		public void received(Connection c, Object m) {
+			super.received(c, m);
+	
+			Log.v("AMBIENTPOKER", "Received message " + m.toString());
+	
+			if (m instanceof StateChangeMessage) {
+				StateChangeMessage scm = (StateChangeMessage) m;
+				GameState newGameState = scm.newState;
+				newGameState = GameState.RIVER;
+				disableActions();
+				switch (newGameState) {
+				case STOPPED:
+					Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
+					runOnUiThread(new Runnable() {
+						public void run() {	showBarrier("Waiting for players"); }});
+					break;
+				case WAITING_FOR_PLAYERS:
+					Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+					runOnUiThread(new Runnable() {
+						public void run() {	showBarrier("Waiting for players"); }});
+					hideCards();
+					break;
+				case PREFLOP:
+					Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
+					runOnUiThread(new Runnable() {
+						public void run() {	hideBarrier(); }});
+					showCards();
+					break;
+				case FLOP:
+					Log.v("AMBIENTPOKER", "Game state changed to FLOP");
+					break;
+				case TURN:
+					Log.v("AMBIENTPOKER", "Game state changed to TURN");
+					break;
+				case RIVER:
+					Log.v("AMBIENTPOKER", "Game state changed to RIVER");
+					break;
+				case END_OF_ROUND:
+					Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
+					break;
+				}
+			}
+			
+			if (m instanceof ReceivePublicCards) {
+				ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
+				Log.v("AMBIENTPOKER", "Received public cards: ");
+				Card[] cards = newPublicCards.cards;
+				for (int i = 0; i < cards.length; i++) {
+					Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
+				}
+			}
+	
+			if (m instanceof ReceiveHoleCardsMessage) {
+				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
+				Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+				ClientActivity.this.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						updateHandGui(newHoleCards);
+					}
+				});
+			}
+			
+			if (m instanceof ClientActionMessage) {
+				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
+				final ClientAction action = newClientActionMessage.getClientAction();
+				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
+				if (action.getClientActionType().equals(Message.ClientActionType.RaiseTo)) {
+					ClientActivity.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							updateMinBetAmount(action.getExtra());
+						}
+					});
+				}
+			}
+
+			
+			if (m instanceof RequestClientActionFutureMessage) {
+				final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
+				pendingFuture = rcafm.futureId;
+				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
+				enableActions();
+			}
+			
+			if (m instanceof SetIDMessage) {
+				final SetIDMessage sidm = (SetIDMessage) m;
+				myClientID = sidm.id;
+			}
+			
+			if (m instanceof RoundWinnersDeclarationMessage) {
+				final RoundWinnersDeclarationMessage rwdm = (RoundWinnersDeclarationMessage) m;
+				final Set<Integer> players = rwdm.bestPlayers;
+				if (players.contains(myClientID)) {
+					// hoera
+				} else {
+					// boe
+				}
+			}
+		}
+	};
 	
 	
     private void listenToGameServer() {
@@ -697,9 +716,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
      }
 	 
 
-		private void clearPendingFuture() {
-			pendingFuture = null;
-		}
+	 private void clearPendingFuture() {
+		 pendingFuture = null;
+	 }
 }
 
 	

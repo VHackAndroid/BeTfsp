@@ -31,6 +31,7 @@ import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerActivity;
 
@@ -72,7 +73,6 @@ public class ConcretePokerServer extends PokerServer  {
 						super.connected(c);
 						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
-						c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 					}
 					
 					@Override
@@ -236,39 +236,54 @@ public class ConcretePokerServer extends PokerServer  {
 					roundTable();					
 				} catch (RoundEndedException e1) {
 					/* ignore */
+					Log.d("PokerServer", "Everybody folded at round " + gameState);
 				}
 				
 				// results
+				boolean endedPrematurely = gameState != GameState.RIVER;
 				newState(GameState.END_OF_ROUND);
-				TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
+				
+				Set<Integer> remainingPlayers = new HashSet<Integer>();
 				for (Integer player : actionFutures.navigableKeySet()) {
 					Future<ClientAction> fut = actionFutures.get(player);
 					if (fut != null
 							&& fut.isResolved()
-							&& fut.unsafeGet().getClientActionType() != Message.ClientActionType.Fold) 
-						hands.put(player, Hand.makeBestHand(cardPool, Arrays.asList(holeCards.get(player))));
+							&& fut.unsafeGet().getClientActionType() != Message.ClientActionType.Fold) {
+						remainingPlayers.add(player);
+					}
 				}
 				
-				if (!hands.isEmpty()) {
-					Iterator<Integer> it = hands.keySet().iterator();
-					Set<Integer> bestPlayers = new HashSet<Integer>();
-					Integer firstPlayer = it.next();
-					bestPlayers.add(firstPlayer);
-					Hand bestHand = hands.get(firstPlayer);
-					
-					while (it.hasNext()) {
-						int nextPlayer = it.next();
-						Hand nextHand = hands.get(nextPlayer);
-						int comparison = nextHand.compareTo(bestHand);
-						if (comparison > 0)  {
-							bestHand = nextHand;
-							bestPlayers.clear();
-							bestPlayers.add(nextPlayer);
-						} else if (comparison == 0) {
-							bestPlayers.add(nextPlayer);
-						}
+				if (endedPrematurely) {
+					if (remainingPlayers.size() == 1) {
+						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, null));
 					}
-					broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand));
+				} else {
+					TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
+					for (Integer player : remainingPlayers) {
+							hands.put(player, Hand.makeBestHand(cardPool, Arrays.asList(holeCards.get(player))));
+					}
+					
+					if (!hands.isEmpty()) {
+						Iterator<Integer> it = hands.keySet().iterator();
+						Set<Integer> bestPlayers = new HashSet<Integer>();
+						Integer firstPlayer = it.next();
+						bestPlayers.add(firstPlayer);
+						Hand bestHand = hands.get(firstPlayer);
+						
+						while (it.hasNext()) {
+							int nextPlayer = it.next();
+							Hand nextHand = hands.get(nextPlayer);
+							int comparison = nextHand.compareTo(bestHand);
+							if (comparison > 0)  {
+								bestHand = nextHand;
+								bestPlayers.clear();
+								bestPlayers.add(nextPlayer);
+							} else if (comparison == 0) {
+								bestPlayers.add(nextPlayer);
+							}
+						}
+						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand));
+					}
 				}
 				
 				// finally, sleep
@@ -334,8 +349,11 @@ public class ConcretePokerServer extends PokerServer  {
 		public void addClient(Connection c) {
 			Log.d("PokerServer", "Adding client " + c.getRemoteAddressTCP());
 			synchronized(this) {
-				newClients.put(nextClientID++, c);
+				newClients.put(nextClientID, c);
 			}
+			c.sendTCP(new StateChangeMessage(gameLoop.gameState));
+			c.sendTCP(new SetIDMessage(nextClientID));
+			nextClientID++;
 			if (newClients.size() >= 2) {
 				if (gameState == GameState.STOPPED) {
 					Log.d("PokerServer", "Two or more clients connected, game can start");
