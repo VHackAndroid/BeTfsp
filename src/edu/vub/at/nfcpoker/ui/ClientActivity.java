@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -588,12 +589,17 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			toast = ToastBetAmount.MinimumBet;
 		}
 
+		Toast t;
 		switch (toast) {
 		case Positive:
-			Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "\u20AC to the bet", Toast.LENGTH_SHORT).show();
+			t = Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "\u20AC to the bet", Toast.LENGTH_SHORT);
+			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+			t.show();
 			break;
 		case Negative:
-			Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "\u20AC", Toast.LENGTH_SHORT).show();
+			t = Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "\u20AC", Toast.LENGTH_SHORT);
+			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+			t.show();
 			break;
 		case OutOfMoney:
 			Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT).show();
@@ -604,7 +610,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		}
 
 		final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
-		textCurrentBet.setText(" " + currentBet + " ("+currentTotalBet+")");
+		textCurrentBet.setText(" " + currentBet);
 		updateMoneyTitle();
 	}
 
