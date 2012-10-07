@@ -194,7 +194,7 @@ public interface Message {
 	 
 	 public class SetIDMessage extends TimestampedMessage implements Message {
 
-			private int id;
+			public int id;
 
 			public SetIDMessage(Integer id) {
 				this.id = id;

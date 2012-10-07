@@ -53,6 +53,7 @@ import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
@@ -94,6 +95,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 	
 	private ProgressDialog barrier;
+
+	public int myClientID;
 	
 	private void showBarrier(String cause) {
 		if (barrier == null) {
@@ -210,6 +213,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				pendingFuture = rcafm.futureId;
 				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
 				enableActions();
+			}
+			
+			if (m instanceof SetIDMessage) {
+				final SetIDMessage sidm = (SetIDMessage) m;
+				myClientID = sidm.id;
 			}
 		}
 	};
