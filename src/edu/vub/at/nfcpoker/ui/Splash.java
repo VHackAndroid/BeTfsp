@@ -143,6 +143,7 @@ public class Splash extends ThingActivity<TableThing> {
 			Intent i = new Intent(this, ClientActivity.class);
 			i.putExtra("isDedicated", false);
 			startActivity(i);
+			return;
 		}
 
 		if (!isTablet) {

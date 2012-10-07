@@ -79,7 +79,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			// LODE showBarrier("Connecting to server");
+			showBarrier("Connecting to server");
 		}
 		
 		@Override
@@ -219,7 +219,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentBet = 0;
 	private static int minimumBet = 0;
-	private static int currentMoney = 0;
+	private static int currentMoney = 2000;
 	private int currentChipSwiped = 0;
 	
 	// Dedicated
@@ -383,8 +383,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			}
 		});
 		
-        
-        updateBetAmount(0);
+		currentBet = 0;
+		currentChipSwiped = 0;
+		nextToReveal = 0;
 
         listenToGameServer();
     }
@@ -401,9 +402,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	private void updateMoneyTitle() {
 		if (currentBet > 0) {
-			setTitle("wePoker    (" +currentMoney+"$ --> "+(currentMoney-currentBet)+")");
+			setTitle("wePoker (" +currentMoney+"Û --> "+(currentMoney-currentBet)+")");
 		} else {
-			setTitle("wePoker    (" +currentMoney+"$)");
+			setTitle("wePoker (" +currentMoney+"Û)");
 		}
 	}
 	
@@ -450,6 +451,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
         int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
         mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
         
+        updateMoneyTitle();
     }
     
     @Override
@@ -501,37 +503,49 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
         super.onMeasure(MeasureSpec.makeMeasureSpec(myWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
     }*/
     
+    enum ToastBetAmount {
+    	Positive, Negative, OutOfMoney, MinimumBet
+    }
+    
     // Game
     private void updateBetAmount(int value) {
+    	ToastBetAmount toast = ToastBetAmount.Positive;
+    	if (value < 0) toast = ToastBetAmount.Negative;
     	currentBet += value;
+    	if (currentBet > currentMoney) {
+    		currentBet = currentMoney;
+    		toast = ToastBetAmount.OutOfMoney;
+    	}
+    	if (minimumBet > currentBet) {
+    		currentBet = minimumBet;
+    		toast = ToastBetAmount.MinimumBet;
+    	}
+
+    	switch (toast) {
+    	case Positive:
+        	Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "Û to the bet", Toast.LENGTH_SHORT).show();
+    		break;
+    	case Negative:
+    		Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "Û", Toast.LENGTH_SHORT).show();
+    		break;
+    	case OutOfMoney:
+    		Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT).show();
+    		break;
+    	case MinimumBet:
+    		Toast.makeText(ClientActivity.this, "Minimum bet required", Toast.LENGTH_SHORT).show();
+    		break;
+    	}
+    	
         final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
         textCurrentBet.setText(" " + currentBet);
+        updateMoneyTitle();
     }
     
     private void updateMinBetAmount(int value) {
     	minimumBet = value;
         final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
         textCurrentBet.setText(" " + minimumBet);
-    }
-    
-    private boolean canViewCards() {
-//    	return ((GAME_STATE == GameState.HOLE) ||
-//    			(GAME_STATE == GameState.HOLE_NEXT) ||
-//    			(GAME_STATE == GameState.FLOP) ||
-//    			(GAME_STATE == GameState.FLOP_NEXT) ||
-//    			(GAME_STATE == GameState.TURN) ||
-//    			(GAME_STATE == GameState.TURN_NEXT) ||
-//    			(GAME_STATE == GameState.RIVER) ||
-//    	    	(GAME_STATE == GameState.RIVER_NEXT));
-    	return true;
-    }
-    
-    private boolean canBet() {
-//    	return ((GAME_STATE == GameState.HOLE) ||
-//    			(GAME_STATE == GameState.FLOP) ||
-//    			(GAME_STATE == GameState.TURN) ||
-//    			(GAME_STATE == GameState.RIVER));
-    	return true;
+        updateMoneyTitle();
     }
     
     // Interactivity
@@ -597,17 +611,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
     
     // UI
     private void showCards() {
-    	if (canViewCards()) {
-            mCardView1.setCurrentIndex(1);
-            mCardView2.setCurrentIndex(1);
-    	}
+        mCardView1.setCurrentIndex(1);
+        mCardView2.setCurrentIndex(1);
     }
     
     private void hideCards() {
-    	if (canViewCards()) {
-            mCardView1.setCurrentIndex(0);
-            mCardView2.setCurrentIndex(0);
-    	}
+        mCardView1.setCurrentIndex(0);
+        mCardView2.setCurrentIndex(0);
     }
 
 	public void revealCards(final Card[] cards) {
@@ -674,15 +684,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
                      return false;
                  // right to left swipe
                  if(e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
-                	 if (canBet()) { 
-                		 Toast.makeText(ClientActivity.this, "Adding to the bet " + currentChipSwiped, Toast.LENGTH_SHORT).show();
-                		 updateBetAmount(currentChipSwiped);
-                	 }
+                	 updateBetAmount(currentChipSwiped);
                  }  else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
-                	 if (canBet()) { 
-                	 Toast.makeText(ClientActivity.this, "Removing to the bet " + currentChipSwiped, Toast.LENGTH_SHORT).show();
                 	 updateBetAmount(-currentChipSwiped);
-                	 }
                  }
              } catch (Exception e) {
                  // nothing
