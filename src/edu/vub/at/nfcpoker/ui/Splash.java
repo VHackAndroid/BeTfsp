@@ -181,9 +181,9 @@ public class Splash extends ThingActivity<TableThing> {
 	
 	private static String putAddress(int addr) {
 		StringBuffer buf = new StringBuffer();
-		buf.append(addr  & 0xff).append(':').
-		append((addr >>>= 8) & 0xff).append(':').
- 		append((addr >>>= 8) & 0xff).append(':').
+		buf.append(addr  & 0xff).append('.').
+		append((addr >>>= 8) & 0xff).append('.').
+ 		append((addr >>>= 8) & 0xff).append('.').
  		append((addr >>>= 8) & 0xff);
 		return buf.toString();
 	}
@@ -201,7 +201,7 @@ public class Splash extends ThingActivity<TableThing> {
 						new Thread() {
 							@Override
 							public void run() {
-								String address = "192.168.1.138";
+								String address;
 								WifiManager m = (WifiManager)getSystemService(WIFI_SERVICE);
 								address = putAddress(m.getDhcpInfo().ipAddress);
 								String port = "" + CommLib.SERVER_PORT;
