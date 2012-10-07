@@ -141,6 +141,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private long incognitoProximity;
 	private Timer incognitoDelay;
 	private SensorManager sensorManager;
+	
+	// Help
+	private boolean firstSwipe = true;
 
 	// egb: added for gestures.
 	private static final int SWIPE_MIN_DISTANCE = 120;
@@ -180,6 +183,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		gestureListener = new View.OnTouchListener() {
 			@Override
 			public boolean onTouch(View arg0, MotionEvent arg1) {
+				if (firstSwipe) {
+					firstSwipe = false;
+					Toast.makeText(ClientActivity.this, "Swipe up or down to add or remove money", Toast.LENGTH_SHORT).show();
+				}
 				int viewSwiped = arg0.getId();
 				switch(viewSwiped) {
 				case R.id.whitechip: currentChipSwiped = 5; break;
