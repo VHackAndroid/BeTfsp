@@ -106,17 +106,17 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
 		runOnUiThread(new Runnable() {
 			public void run() {
+				Log.d("PokerServer", "Adding player name " + clientName);
 				LinearLayout users = (LinearLayout) findViewById(R.id.users);
-				View badge = getLayoutInflater().inflate(R.layout.user, users);
+				View badge = getLayoutInflater().inflate(R.layout.user, null);
 				
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
 				name.setText(clientName);
 				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
 				money.setText("\u20AC" + initialMoney);
-				TextView status = (TextView) badge.findViewById(R.id.playerStatus);
-				status.setText(clientName);
 
 				playerBadges.put(clientID, badge);
+				users.addView(badge);
 			}
 		});
 	}

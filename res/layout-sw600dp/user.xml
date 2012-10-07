@@ -24,12 +24,4 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#CFB52B" />
 
-    <TextView
-        android:id="@+id/playerStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Player Status"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#CFB52B" />
-
 </LinearLayout>
