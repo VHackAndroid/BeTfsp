@@ -5,6 +5,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -23,6 +27,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,7 +61,7 @@ import edu.vub.nfc.thing.EmptyRecord;
 import edu.vub.nfc.thing.Thing;
 import fi.harism.curl.CurlView;
 
-public class ClientActivity extends Activity implements OnClickListener {
+public class ClientActivity extends Activity implements OnClickListener, ServerViewInterface {
 
 	public class ConnectAsyncTask extends AsyncTask<Void, Void, Client> {
 
@@ -74,7 +79,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			showBarrier("Connecting to server");
+			// LODE showBarrier("Connecting to server");
 		}
 		
 		@Override
@@ -128,6 +133,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			if (m instanceof StateChangeMessage) {
 				StateChangeMessage scm = (StateChangeMessage) m;
 				GameState newGameState = scm.newState;
+				newGameState = GameState.RIVER;
 				disableActions();
 				switch (newGameState) {
 				case STOPPED:
@@ -208,13 +214,17 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	};
 	
-
+	
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentBet = 0;
 	private static int minimumBet = 0;
 	private static int currentMoney = 0;
 	private int currentChipSwiped = 0;
+	
+	// Dedicated
+	private int nextToReveal = 0;
+	private boolean isDedicated = false;
 	
 	// UI
 	private CurlView mCardView1;
@@ -246,22 +256,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 	
 	private UUID pendingFuture;
 	private Connection serverConnection;
-    
-    
-	// Enums
-//	public enum GameState {
-//	    INIT, NFCPAIRING, HOLE, HOLE_NEXT, FLOP, FLOP_NEXT, TURN, TURN_NEXT, RIVER, RIVER_NEXT
-//	}
 	
     @Override
     @SuppressWarnings("unused")
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.client);
-        
-        // Settings
         
         // Game state
+        isDedicated = getIntent().getBooleanExtra("isDedicated", false);
+        if (isDedicated) {
+            setContentView(R.layout.activity_client_is_dedicated);
+        } else {
+            setContentView(R.layout.activity_client);
+        }
         
         // Interactivity
         incognitoMode = false;
@@ -270,11 +277,6 @@ public class ClientActivity extends Activity implements OnClickListener {
         incognitoDelay = new Timer();
         sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
         
-        
-        // UI
-        /*final Intent intent = new Intent(NfcAdapter.ACTION_TAG_DISCOVERED);
-        intent.putExtra(NfcAdapter.EXTRA_NDEF_MESSAGES, AsciiNdefMessage.CreateNdefMessage(UUID));
-        startActivity(intent);*/
         
         // Gesture detection
         gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -333,12 +335,10 @@ public class ClientActivity extends Activity implements OnClickListener {
         mCardView1 = (CurlView) findViewById(R.id.Card1);
         mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView1.setCurrentIndex(0);
-        //mCardView1.setBackgroundColor(POKER_GREEN);
         
         mCardView2 = (CurlView) findViewById(R.id.Card2);
         mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
         mCardView2.setCurrentIndex(0);
-        //mCardView2.setBackgroundColor(POKER_GREEN); 
         
 		bet = (Button) findViewById(R.id.Bet);
 		check = (Button) findViewById(R.id.Check);
@@ -385,7 +385,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		
         
         updateBetAmount(0);
-        
+
         listenToGameServer();
     }
     
@@ -399,6 +399,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 		serverConnection = c;
 	}
 	
+	private void updateMoneyTitle() {
+		if (currentBet > 0) {
+			setTitle("wePoker    (" +currentMoney+"$ --> "+(currentMoney-currentBet)+")");
+		} else {
+			setTitle("wePoker    (" +currentMoney+"$)");
+		}
+	}
+	
 	private void enableActions() {
 		runOnUiThread(new Runnable() {
 			
@@ -407,6 +415,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				bet.setEnabled(true);
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				updateMoneyTitle();
 			}
 		});						
 	}
@@ -419,6 +428,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				bet.setEnabled(false);
 				check.setEnabled(false);
 				fold.setEnabled(false);
+				updateMoneyTitle();
 			}
 		});
 	}
@@ -443,8 +453,7 @@ public class ClientActivity extends Activity implements OnClickListener {
     }
     
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         if (useIncognitoMode) {
 	        incognitoMode = false;
 	        incognitoLight = -1;
@@ -476,8 +485,7 @@ public class ClientActivity extends Activity implements OnClickListener {
     }
     
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
     	sensorManager.unregisterListener(incognitoSensorEventListener);
         mCardView1.onPause();
         mCardView2.onPause();
@@ -602,6 +610,54 @@ public class ClientActivity extends Activity implements OnClickListener {
     	}
     }
 
+	public void revealCards(final Card[] cards) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				for (Card c : cards) {
+					Log.d("PokerServer", "Revealing card " + c);
+					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
+					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
+					ib.setImageResource(cardToResourceID(c));
+					ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
+					anim.setDuration(1000);
+					anim.start();
+				}
+			}
+
+			public int cardToResourceID(Card c) {
+				return getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
+			}
+		});
+	}
+
+	public void resetCards() {
+		Log.d("PokerServer", "Hiding cards again");
+		nextToReveal = 0;
+		runOnUiThread(new Runnable() {
+			public void run() {
+				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
+				for (int i = 0; i < 5; i++) {
+					final ImageButton ib = (ImageButton) ll.getChildAt(i);
+					ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
+					ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
+					animX.setDuration(500); animY.setDuration(500);
+					final AnimatorSet scalers = new AnimatorSet();
+					scalers.play(animX).with(animY);
+					scalers.addListener(new AnimatorListenerAdapter() {
+
+						@Override
+						public void onAnimationEnd(Animator animation) {
+							ib.setScaleX(1.f);
+							ib.setScaleY(1.f);
+							ib.setImageResource(R.drawable.backside);
+						}
+
+					});
+					scalers.start();
+				}
+			}
+		});
+	}
 
 	@Override
 	public void onClick(View v) {

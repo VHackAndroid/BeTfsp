@@ -10,6 +10,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.util.Log;
 import android.view.Menu;
@@ -18,7 +19,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class ServerActivity extends Activity {
+@TargetApi(11)
+public class ServerActivity extends Activity implements ServerViewInterface {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

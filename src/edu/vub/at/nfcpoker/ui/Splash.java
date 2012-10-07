@@ -1,6 +1,8 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -59,6 +61,10 @@ public class Splash extends ThingActivity<TableThing> {
 		protected void onPostExecute(CommLibConnectionInfo result) {
 			super.onPostExecute(result);
 			if (result != null) {
+				if (client_startClientServerTimer != null) {
+					client_startClientServerTimer.cancel();
+					client_startClientServerTimer = null;
+				}
 				Intent i = new Intent(Splash.this, ClientActivity.class);
 				i.putExtra("ip", result.getAddress());
 				i.putExtra("port", Integer.parseInt(result.getPort()));
@@ -71,10 +77,23 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 
 
+	private static final boolean LODE = false;
+
+
 	// Connectivity state
 	public static String UUID;
 	public static String NETWORK_GROUP;
+	
+	// Discovery
+	private DiscoveryAsyncTask client_discoveryTask;
+	private Timer client_startClientServerTimer;
+	
+	// UI
+	private static boolean isTablet;
+	private int startClientServerTimerTimeout = 10000;
+	private int startClientServerTimerTimeout2 = 20000;
 
+	// NFC
 	private Object lastScannedTag_;
 
 	@Override
@@ -96,18 +115,7 @@ public class Splash extends ThingActivity<TableThing> {
 //		});
 		
 		View tablet_layout = findViewById(R.id.tablet_layout);
-		if (tablet_layout == null) {
-			new DiscoveryAsyncTask().execute();
-		} else {
-			final Button disc = (Button) findViewById(R.id.discover_button);
-			disc.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					new DiscoveryAsyncTask().execute();
-					disc.setEnabled(false);
-				}
-			});
-		}
-
+		if (tablet_layout != null) isTablet = true;
 		
 		Button server = (Button) findViewById(R.id.server);
 		if (server != null)
@@ -119,7 +127,6 @@ public class Splash extends ThingActivity<TableThing> {
 			});
 
 		// NFC
-
 		Button nfc = (Button) findViewById(R.id.nfc);
 		if (nfc != null) {
 			final Dialog nfc_dialog = createNFCDialog();
@@ -131,6 +138,64 @@ public class Splash extends ThingActivity<TableThing> {
 				}
 			});
 		}
+
+		if (LODE) {
+			Intent i = new Intent(this, ClientActivity.class);
+			i.putExtra("isDedicated", false);
+			startActivity(i);
+		}
+
+		if (!isTablet) {
+			client_discoveryTask = new DiscoveryAsyncTask();
+			client_discoveryTask.execute();
+			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
+			client_startClientServerTimer = new Timer();
+			client_startClientServerTimer.scheduleAtFixedRate(new TimerTask() {
+				@Override
+				public void run() {
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							askStartClientServer();
+						}
+					});
+				}
+			}, startClientServerTimerTimeout, startClientServerTimerTimeout2);
+		} else {
+			final Button disc = (Button) findViewById(R.id.discover_button);
+			disc.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					new DiscoveryAsyncTask().execute();
+					disc.setEnabled(false);
+				}
+			});
+		}
+		
+	}
+	
+	private void askStartClientServer() {
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				switch (which){
+				case DialogInterface.BUTTON_POSITIVE:
+					if (client_startClientServerTimer != null) {
+						client_discoveryTask.cancel(true);
+						client_startClientServerTimer.cancel();
+						client_startClientServerTimer = null;
+						startServer();
+					}
+					break;
+				case DialogInterface.BUTTON_NEGATIVE:
+					break;
+				}
+			}
+		}; 
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("No Ambient-Poker game discovered, do you wish to start one?")
+		.setPositiveButton("Yes", dialogClickListener)
+		.setNegativeButton("No", dialogClickListener).show();
 	}
 
 	private Dialog createNFCDialog() {
