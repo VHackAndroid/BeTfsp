@@ -41,9 +41,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     
 	private static String putAddress(int addr) {
 		StringBuffer buf = new StringBuffer();
-		buf.append(addr  & 0xff).append(':').
-		append((addr >>>= 8) & 0xff).append(':').
- 		append((addr >>>= 8) & 0xff).append(':').
+		buf.append(addr  & 0xff).append('.').
+		append((addr >>>= 8) & 0xff).append('.').
+ 		append((addr >>>= 8) & 0xff).append('.').
  		append((addr >>>= 8) & 0xff);
 		return buf.toString();
 	}
