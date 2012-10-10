@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import android.net.wifi.WifiManager;
@@ -36,13 +37,19 @@ public class Splash extends ThingActivity<TableThing> {
 
 	public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
 
+		private String broadcastAddress;
+		
+		public DiscoveryAsyncTask(String broadcastAddress) {
+			this.broadcastAddress = broadcastAddress;
+		}
+		
 		@Override
 		protected CommLibConnectionInfo doInBackground(Void... arg0) {
 			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 			MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 			ml.acquire();
 			try {
-				return CommLib.discover(PokerServer.class);
+				return CommLib.discover(PokerServer.class, broadcastAddress);
 			} catch (IOException e) {
 				Log.d("Discovery", "Could not start discovery", e);
 				return null;
@@ -85,7 +92,7 @@ public class Splash extends ThingActivity<TableThing> {
 	public static String NETWORK_GROUP;
 	
 	// Discovery
-	private DiscoveryAsyncTask client_discoveryTask;
+	private DiscoveryAsyncTask discoveryTask;
 	private Timer client_startClientServerTimer;
 	private Dialog client_startClientServerAsk;
 	
@@ -146,11 +153,13 @@ public class Splash extends ThingActivity<TableThing> {
 			startActivity(i);
 			return;
 		}
+		
+		final String broadcastAddress = CommLib.getBroadcastAddress(this);
 
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			client_discoveryTask = new DiscoveryAsyncTask();
-			client_discoveryTask.execute();
+			discoveryTask = new DiscoveryAsyncTask(broadcastAddress);
+			discoveryTask.execute();
 			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
 			scheduleAskStartClientServer(startClientServerTimerTimeout);
 		} else {
@@ -158,7 +167,7 @@ public class Splash extends ThingActivity<TableThing> {
 			final Button disc = (Button) findViewById(R.id.discover_button);
 			disc.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					new DiscoveryAsyncTask().execute();
+					new DiscoveryAsyncTask(broadcastAddress).execute();
 					disc.setEnabled(false);
 				}
 			});
@@ -181,39 +190,24 @@ public class Splash extends ThingActivity<TableThing> {
 		}, timeout);
 	}
 	
-	private static String putAddress(int addr) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(addr  & 0xff).append('.').
-		append((addr >>>= 8) & 0xff).append('.').
- 		append((addr >>>= 8) & 0xff).append('.').
- 		append((addr >>>= 8) & 0xff);
-		return buf.toString();
-	}
-	
 	private void askStartClientServer() {
+		final String ipAddress = CommLib.getIpAddress(this);
+		final String broadcastAddress = CommLib.getBroadcastAddress(this);
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which){
 				case DialogInterface.BUTTON_POSITIVE:
 					if (client_startClientServerTimer != null) {
-						client_discoveryTask.cancel(true);
 						client_startClientServerTimer.cancel();
 						client_startClientServerTimer = null;
 						new Thread() {
 							@Override
 							public void run() {
-								String address;
-								WifiManager m = (WifiManager)getSystemService(WIFI_SERVICE);
-								address = putAddress(m.getDhcpInfo().ipAddress);
-								String port = "" + CommLib.SERVER_PORT;
-								String dedicated = "" + false;
-								CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {address, port, dedicated});
-								try {
-									CommLib.export(clci);
-								} catch (IOException e) {
-									Log.e("PokerServer", "Exporter thread crashed", e);
-								}
+						    	ConcretePokerServer cps = new ConcretePokerServer(
+						    			new DummServerView(), false,
+						    			ipAddress, broadcastAddress);
+						    	cps.start();
 							}
 						}.start();
 					}
@@ -311,13 +305,21 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 
 	protected void startServer() {
+		if (discoveryTask != null) {
+			discoveryTask.cancel(true);
+			discoveryTask = null;
+		}
 		Intent i = new Intent(this, ServerActivity.class);
 		startActivity(i);
 		finish();
 	}
 	
 	protected void startClientNFC(TableThing tag) {
-		if (tag != null) {			
+		if (tag != null) {
+			if (discoveryTask != null) {
+				discoveryTask.cancel(true);
+				discoveryTask = null;
+			}
 			Intent i = new Intent(this, ClientActivity.class);
 			i.putExtra("ip", tag.ip_);
 			i.putExtra("port", tag.port_);
@@ -338,3 +340,4 @@ public class Splash extends ThingActivity<TableThing> {
 		return TableThing.class;
 	}
 }
+

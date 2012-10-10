@@ -1,13 +1,11 @@
 package edu.vub.at.nfcpoker;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -35,7 +33,6 @@ import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.ui.ServerActivity;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
 public class ConcretePokerServer extends PokerServer  {
@@ -45,16 +42,19 @@ public class ConcretePokerServer extends PokerServer  {
 
 	private boolean isDedicated = false;
 	private String address;
+	private String broadcastAddress;
 
 	Runnable exporterR = new Runnable() {	
 		@Override
 		public void run() {
-			Log.d("PokerServer", "Starting export");
+			Log.d("PokerServer", "Starting exportR");
 			String port = "" + CommLib.SERVER_PORT;
 			String dedicated = "" + isDedicated;
-			CommLibConnectionInfo clci = new CommLibConnectionInfo(PokerServer.class.getCanonicalName(), new String[] {ConcretePokerServer.this.address, port, dedicated});
+			CommLibConnectionInfo clci = new CommLibConnectionInfo(
+					PokerServer.class.getCanonicalName(),
+					new String[] {ConcretePokerServer.this.address, port, dedicated});
 			try {
-				CommLib.export(clci);
+				CommLib.export(clci, broadcastAddress);
 			} catch (IOException e) {
 				Log.e("PokerServer", "Exporter thread crashed", e);
 			}
@@ -132,10 +132,11 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String address) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String address, String broadcastAddress) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
 		this.address = address;
+		this.broadcastAddress = broadcastAddress;
 	}
 	
 	public void start() {		

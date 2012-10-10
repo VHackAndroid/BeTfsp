@@ -154,7 +154,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private long incognitoProximity;
 	private Timer incognitoDelay;
 	private SensorManager sensorManager;
-	
+
 	// Help
 	private boolean firstSwipe = true;
 
@@ -841,24 +841,24 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	@Override
 	public void addPlayer(int clientID, String clientName, int initialMoney) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showStatechange(GameState newState) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setPlayerMoney(Integer player, int current) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void removePlayer(Integer i) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

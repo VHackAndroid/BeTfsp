@@ -2,6 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
 
+import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
@@ -12,6 +13,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.util.Log;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 @TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
 	
+	@SuppressLint("UseSparseArrays")
 	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>(); 
 
     @Override
@@ -32,21 +35,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	boolean isDedicated = tablet_layout != null;
-    	WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-    	int ip = wm.getConnectionInfo().getIpAddress();
-    	String address = putAddress(ip);
-    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated, address);
+    	ConcretePokerServer cps = new ConcretePokerServer(
+    			this, isDedicated,
+    			CommLib.getIpAddress(this),
+    			CommLib.getBroadcastAddress(this));
     	cps.start();
     }
-    
-	private static String putAddress(int addr) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(addr  & 0xff).append('.').
-		append((addr >>>= 8) & 0xff).append('.').
- 		append((addr >>>= 8) & 0xff).append('.').
- 		append((addr >>>= 8) & 0xff);
-		return buf.toString();
-	}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

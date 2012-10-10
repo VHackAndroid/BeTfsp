@@ -5,10 +5,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import android.content.Context;
+import android.net.DhcpInfo;
+import android.net.wifi.WifiManager;
 import android.util.Log;
 
 import com.esotericsoftware.kryo.Kryo;
@@ -21,17 +25,47 @@ public class CommLib {
 
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
+	
 	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
 
-	public static CommLibConnectionInfo discover(Class<?> klass) throws IOException {
+	private static String putAddress(int addr) {
+		StringBuffer buf = new StringBuffer();
+		buf.append(addr  & 0xff).append('.').
+		append((addr >>>= 8) & 0xff).append('.').
+ 		append((addr >>>= 8) & 0xff).append('.').
+ 		append((addr >>>= 8) & 0xff);
+		return buf.toString();
+	}
+
+	public static String getIpAddress(Context ctx) {
+		WifiManager m = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
+		return putAddress(m.getDhcpInfo().ipAddress);
+	}
+	
+	public static String getBroadcastAddress(Context ctx) {
+		WifiManager m = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
+		DhcpInfo dhcp = m.getDhcpInfo();
+		if (dhcp == null) return "localhost";
+		int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
+	    byte[] quads = new byte[4];
+	    for (int k = 0; k < 4; k++)
+	      quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
+	    //try {
+			//return InetAddress.getByAddress(quads).toString();
+			return putAddress(broadcast);
+		//} catch (UnknownHostException e) {
+		//	return "localhost";
+		//}
+	}
+	
+	public static CommLibConnectionInfo discover(Class<?> klass, String broadcastAddress) throws IOException {
 		final String targetClass = klass.getCanonicalName();
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
 		k.register(UUID.class, new UUIDSerializer());
-		
-		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("192.168.1.255"));
+		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName(broadcastAddress));
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
@@ -45,7 +79,7 @@ public class CommLib {
 		}
 	}
 	
-	public static void export(CommLibConnectionInfo clci) throws IOException {
+	public static void export(CommLibConnectionInfo clci, String broadcastAddress) throws IOException {
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
@@ -58,13 +92,12 @@ public class CommLib {
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
 		DatagramPacket dp = new DatagramPacket(buf, buf.length);
-		ds.connect(new InetSocketAddress(InetAddress.getByName("192.168.1.255"), DISCOVERY_PORT));
+		ds.connect(new InetSocketAddress(InetAddress.getByName(broadcastAddress), DISCOVERY_PORT));
 		while (true) {
 			ds.send(dp);
 			try {
 				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-			}
+			} catch (InterruptedException e) { }
 		}
 	}
 	
