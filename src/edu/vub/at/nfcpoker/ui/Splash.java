@@ -181,12 +181,14 @@ public class Splash extends ThingActivity<TableThing> {
 	@Override
 	public void onResume() {
 		registerWifiWatcher();
+		super.onResume();
 	}
 	
 	@Override
 	public void onPause() {
 		unregisterReceiver(wifiWatcher);
 		// TODO pause discovery 
+		super.onPause();
 	}
 	
 	// Connectivity
