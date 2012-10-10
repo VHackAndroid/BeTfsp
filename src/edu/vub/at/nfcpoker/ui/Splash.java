@@ -6,8 +6,11 @@ import java.util.TimerTask;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
@@ -36,25 +39,22 @@ import edu.vub.nfc.thing.listener.ThingSavedListener;
 public class Splash extends ThingActivity<TableThing> {
 
 	public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
-
-		private String broadcastAddress;
-		
-		public DiscoveryAsyncTask(String broadcastAddress) {
-			this.broadcastAddress = broadcastAddress;
-		}
 		
 		@Override
 		protected CommLibConnectionInfo doInBackground(Void... arg0) {
 			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 			MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 			ml.acquire();
-			try {
-				return CommLib.discover(PokerServer.class, broadcastAddress);
-			} catch (IOException e) {
-				Log.d("Discovery", "Could not start discovery", e);
-				return null;
-			} finally {
-				ml.release();
+			while (true) {
+				try {
+					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
+					ml.release();
+					return c;
+				} catch (IOException e) {
+					Log.d("Discovery", "Could not start discovery", e);
+				}
+				try { Thread.sleep(2000);
+				} catch (InterruptedException e1) { }
 			}
 		}
 
@@ -90,6 +90,9 @@ public class Splash extends ThingActivity<TableThing> {
 	// Connectivity state
 	public static String UUID;
 	public static String NETWORK_GROUP;
+	public static String ipAddress;
+	public static String broadcastAddress;
+	private BroadcastReceiver wifiWatcher;
 	
 	// Discovery
 	private DiscoveryAsyncTask discoveryTask;
@@ -154,11 +157,12 @@ public class Splash extends ThingActivity<TableThing> {
 			return;
 		}
 		
-		final String broadcastAddress = CommLib.getBroadcastAddress(this);
+		registerWifiWatcher();
+		updateIpAddress(this);
 
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			discoveryTask = new DiscoveryAsyncTask(broadcastAddress);
+			discoveryTask = new DiscoveryAsyncTask();
 			discoveryTask.execute();
 			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
 			scheduleAskStartClientServer(startClientServerTimerTimeout);
@@ -167,12 +171,45 @@ public class Splash extends ThingActivity<TableThing> {
 			final Button disc = (Button) findViewById(R.id.discover_button);
 			disc.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					new DiscoveryAsyncTask(broadcastAddress).execute();
+					new DiscoveryAsyncTask().execute();
 					disc.setEnabled(false);
 				}
 			});
 		}
-		
+	}
+	
+	@Override
+	public void onResume() {
+		registerWifiWatcher();
+	}
+	
+	@Override
+	public void onPause() {
+		unregisterReceiver(wifiWatcher);
+		// TODO pause discovery 
+	}
+	
+	// Connectivity
+	private class ConnectionChangeReceiver extends BroadcastReceiver {
+		public void onReceive(Context context, Intent intent ) {
+			Log.d("wePoker", "Wifi Broadcast Reciever");
+			updateIpAddress(context);
+		}
+	}
+	
+	private void registerWifiWatcher() {
+		wifiWatcher = new ConnectionChangeReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+		intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
+		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+		registerReceiver(wifiWatcher, intentFilter);
+	}
+	
+	private void updateIpAddress(Context ctx) {
+		ipAddress = CommLib.getIpAddress(this);
+		broadcastAddress = CommLib.getBroadcastAddress(this);
 	}
 
 	private void scheduleAskStartClientServer(int timeout) {
@@ -191,8 +228,8 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 	
 	private void askStartClientServer() {
-		final String ipAddress = CommLib.getIpAddress(this);
-		final String broadcastAddress = CommLib.getBroadcastAddress(this);
+		final String ipAddress = Splash.ipAddress;
+		final String broadcastAddress = Splash.broadcastAddress;
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -205,8 +242,7 @@ public class Splash extends ThingActivity<TableThing> {
 							@Override
 							public void run() {
 						    	ConcretePokerServer cps = new ConcretePokerServer(
-						    			new DummServerView(), false,
-						    			ipAddress, broadcastAddress);
+						    			new DummServerView(), false);
 						    	cps.start();
 							}
 						}.start();

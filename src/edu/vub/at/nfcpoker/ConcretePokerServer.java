@@ -34,29 +34,35 @@ import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
+import edu.vub.at.nfcpoker.ui.Splash;
 
 public class ConcretePokerServer extends PokerServer  {
 	
 	@SuppressWarnings("serial")
 	public class RoundEndedException extends Exception {}
 
+	
+	int nextClientID = 0;
+	private ServerViewInterface gui;
 	private boolean isDedicated = false;
-	private String address;
-	private String broadcastAddress;
 
 	Runnable exporterR = new Runnable() {	
 		@Override
 		public void run() {
-			Log.d("PokerServer", "Starting exportR");
-			String port = "" + CommLib.SERVER_PORT;
-			String dedicated = "" + isDedicated;
-			CommLibConnectionInfo clci = new CommLibConnectionInfo(
-					PokerServer.class.getCanonicalName(),
-					new String[] {ConcretePokerServer.this.address, port, dedicated});
-			try {
-				CommLib.export(clci, broadcastAddress);
-			} catch (IOException e) {
-				Log.e("PokerServer", "Exporter thread crashed", e);
+			while (true) {
+				Log.d("PokerServer", "Starting exportR");
+				String port = "" + CommLib.SERVER_PORT;
+				String dedicated = "" + isDedicated;
+				CommLibConnectionInfo clci = new CommLibConnectionInfo(
+						PokerServer.class.getCanonicalName(),
+						new String[] {Splash.ipAddress, port, dedicated});
+				try {
+					CommLib.export(clci, Splash.broadcastAddress);
+				} catch (IOException e) {
+					Log.e("PokerServer", "Exporter thread crashed", e);
+				}
+				try { Thread.sleep(2000);
+				} catch (InterruptedException e) { }
 			}
 		}
 	};
@@ -102,10 +108,6 @@ public class ConcretePokerServer extends PokerServer  {
 		};
 	};
 	
-	int nextClientID = 0;
-
-	private ServerViewInterface gui;
-	
 	public enum GameState {
 		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 		
@@ -132,11 +134,9 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String address, String broadcastAddress) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
-		this.address = address;
-		this.broadcastAddress = broadcastAddress;
 	}
 	
 	public void start() {		
