@@ -35,10 +35,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	boolean isDedicated = tablet_layout != null;
-    	ConcretePokerServer cps = new ConcretePokerServer(
-    			this, isDedicated,
-    			CommLib.getIpAddress(this),
-    			CommLib.getBroadcastAddress(this));
+    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated);
     	cps.start();
     }
 
