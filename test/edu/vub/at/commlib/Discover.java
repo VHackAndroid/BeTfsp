@@ -11,7 +11,7 @@ public class Discover {
 	 */
 	public static void main(String[] args) {
 		try {
-			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class);
+			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class, args[0]);
 			System.out.println(clci);
 		} catch (IOException e) {
 			e.printStackTrace();

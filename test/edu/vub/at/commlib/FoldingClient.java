@@ -5,7 +5,6 @@ import java.io.IOException;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.google.common.base.CaseFormat;
 
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
@@ -20,7 +19,7 @@ public class FoldingClient {
 	 */
 	public static void main(String[] args) {
 		try {
-			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class);
+			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class, args[0]);
 			System.out.println("Discovered server at " + clci.getAddress());
 			Client c = clci.connect(new Listener() {
 				@Override
