@@ -33,6 +33,7 @@ public class CommLib {
 		
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName("192.168.1.255"));
 		ds.setBroadcast(true);
+		ds.setReuseAddress(true);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
 		while (true) {
 			ds.receive(dp);
@@ -55,6 +56,7 @@ public class CommLib {
 		
 		DatagramSocket ds = new DatagramSocket();
 		ds.setBroadcast(true);
+		ds.setReuseAddress(true);
 		DatagramPacket dp = new DatagramPacket(buf, buf.length);
 		ds.connect(new InetSocketAddress(InetAddress.getByName("192.168.1.255"), DISCOVERY_PORT));
 		while (true) {
