@@ -48,15 +48,7 @@ public class CommLib {
 		DhcpInfo dhcp = m.getDhcpInfo();
 		if (dhcp == null) return "localhost";
 		int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
-	    byte[] quads = new byte[4];
-	    for (int k = 0; k < 4; k++)
-	      quads[k] = (byte) ((broadcast >> k * 8) & 0xFF);
-	    //try {
-			//return InetAddress.getByAddress(quads).toString();
-			return putAddress(broadcast);
-		//} catch (UnknownHostException e) {
-		//	return "localhost";
-		//}
+		return putAddress(broadcast);
 	}
 	
 	public static CommLibConnectionInfo discover(Class<?> klass, String broadcastAddress) throws IOException {
