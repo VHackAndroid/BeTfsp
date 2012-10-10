@@ -77,6 +77,8 @@ public class Splash extends ThingActivity<TableThing> {
 
 	private static final boolean LODE = false;
 
+	// Shared globals
+	public static final String WEPOKER_WEBSITE = "http://soft.vub.ac.be/wepoker";
 
 	// Connectivity state
 	public static String UUID;

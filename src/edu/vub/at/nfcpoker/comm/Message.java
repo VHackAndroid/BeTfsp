@@ -193,6 +193,40 @@ public interface Message {
 				return super.toString() + ": Round winners" + this.bestPlayers.toString();
 			}
 	}
+
+	public static class ToastMessage extends TimestampedMessage {
+		
+		public String message;
+		
+		public ToastMessage(String message) {
+			this.message = message;
+		}
+
+		// kryo
+		public ToastMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client toast information message -> " + message;
+		}
+	}
+
+	public static class CheatMessage extends TimestampedMessage {
+
+		public int amount;
+		
+		public CheatMessage(int amount) {
+			this.amount = amount;
+		}
+
+		// kryo
+		public CheatMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client cheat information message, client -> " + amount;
+		}
+	}
 	 
 	 public class SetIDMessage extends TimestampedMessage implements Message {
 

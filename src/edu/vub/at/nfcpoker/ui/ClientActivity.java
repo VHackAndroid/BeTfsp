@@ -11,21 +11,31 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,6 +51,7 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
+import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
@@ -51,6 +62,7 @@ import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.ToastMessage;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
 
@@ -572,6 +584,61 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				int myWidth = (int) (parentHeight * 0.5);
 				super.onMeasure(MeasureSpec.makeMeasureSpec(myWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
 		}*/
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.activity_client, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.itemAddMoney:
+			addMoney();
+			return true;
+		case R.id.itemAbout:
+			launchMainWebsite();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+	
+	private void addMoney() {
+		final Dialog moneyDialog;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final EditText input = new EditText(this);
+		input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_SIGNED);
+		builder.setView(input);
+		builder.setPositiveButton("Add Chips", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface di, int arg1) {
+						try {
+							int extra = Integer.parseInt(input.getText().toString());
+							currentMoney += extra;
+							// TODO Server: User X added #{extra}
+							CheatMessage ca = new CheatMessage(extra);
+							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						} catch (Exception e) {	}
+					}
+				});
+		moneyDialog = builder.create();
+		moneyDialog.show();
+	}
+
+	private void launchMainWebsite() {
+		try {
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setData(Uri.parse(Splash.WEPOKER_WEBSITE));
+			startActivity(intent);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	enum ToastBetAmount {
 		Positive, Negative, OutOfMoney, MinimumBet
