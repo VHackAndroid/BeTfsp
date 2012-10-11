@@ -29,6 +29,8 @@ import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -89,7 +91,7 @@ public class Splash extends ThingActivity<TableThing> {
 	private static final boolean LODE = false;
 
 	// Shared globals
-	public static final String WEPOKER_WEBSITE = "http://soft.vub.ac.be/wepoker";
+	public static final String WEPOKER_WEBSITE = "http://wepoker.info";
 
 	// Connectivity state
 	public static volatile String ipAddress;

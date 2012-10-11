@@ -59,7 +59,7 @@ public class ConcretePokerServer extends PokerServer  {
 				try {
 					CommLib.export(clci, Splash.broadcastAddress);
 				} catch (IOException e) {
-					Log.e("PokerServer", "Exporter thread crashed", e);
+					Log.e("PokerServer", "Export failed", e);
 				}
 				try { Thread.sleep(2000);
 				} catch (InterruptedException e) { }

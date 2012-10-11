@@ -26,6 +26,8 @@ public class CommLib {
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
 	
+	private static final int TIMEOUT_EXPORT = 10000;
+	
 	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
 
@@ -90,7 +92,7 @@ public class CommLib {
 		while (true) {
 			ds.send(dp);
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(TIMEOUT_EXPORT);
 			} catch (InterruptedException e) { }
 		}
 	}
