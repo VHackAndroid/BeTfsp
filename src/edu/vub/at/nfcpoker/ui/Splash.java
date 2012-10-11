@@ -18,6 +18,7 @@ import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.settings.Settings;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.AsyncTask;
@@ -91,8 +92,6 @@ public class Splash extends ThingActivity<TableThing> {
 	public static final String WEPOKER_WEBSITE = "http://soft.vub.ac.be/wepoker";
 
 	// Connectivity state
-	public static volatile String UUID;
-	public static volatile String NETWORK_GROUP;
 	public static volatile String ipAddress;
 	public static volatile String broadcastAddress;
 	private BroadcastReceiver wifiWatcher;
@@ -117,8 +116,7 @@ public class Splash extends ThingActivity<TableThing> {
 		setContentView(R.layout.activity_splash);
 
 		// Settings
-		UUID = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
-		NETWORK_GROUP = "TODO-FROM-NFC";
+		Settings.loadSettings(this);
 
 //		Button beamButton = (Button) findViewById(R.id.beamInviteButton);
 //		beamButton.setEnabled(false);
@@ -197,6 +195,12 @@ public class Splash extends ThingActivity<TableThing> {
 		super.onPause();
 		unregisterReceiver(wifiWatcher); wifiWatcher = null;
 		// TODO pause discovery 
+	}
+	
+	@Override
+	public void onStop() {
+		super.onStop();
+		Settings.saveSettings(this);
 	}
 	
 	// Connectivity
@@ -402,12 +406,6 @@ public class Splash extends ThingActivity<TableThing> {
 			startActivity(i);
 			finish();
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_splash, menu);
-		return true;
 	}
 
 	@Override

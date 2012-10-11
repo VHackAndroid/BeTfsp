@@ -54,6 +54,7 @@ import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
+import edu.vub.at.nfcpoker.comm.Message.NicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
@@ -62,6 +63,7 @@ import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
 
@@ -575,19 +577,20 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		super.onPause();
 	}
 
-	/*
-		// UI
-		@Override
-		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-				int parentHeight = MeasureSpec.getSize(heightMeasureSpec);
-				int myWidth = (int) (parentHeight * 0.5);
-				super.onMeasure(MeasureSpec.makeMeasureSpec(myWidth, MeasureSpec.EXACTLY), heightMeasureSpec);
-		}*/
+	@Override
+	public void onStop() {
+		super.onStop();
+		Settings.saveSettings(this);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.activity_client, menu);
+		if (isDedicated) {
+			inflater.inflate(R.menu.activity_client_dedicated, menu);
+		} else {
+			inflater.inflate(R.menu.activity_client, menu);
+		}
 		return true;
 	}
 
@@ -595,6 +598,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
+		case R.id.itemSetName:
+			askNickName();
+			return true;
 		case R.id.itemAddMoney:
 			addMoney();
 			return true;
@@ -604,6 +610,29 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	private void askNickName() {
+		final Context ctx = this;
+		final Dialog moneyDialog;
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final EditText input = new EditText(this);
+		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		builder.setView(input);
+		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface di, int arg1) {
+						try {
+							String nickname = input.getText().toString();
+							Settings.saveSettings(ctx);
+							// TODO Server: User X added #{extra}
+							NicknameMessage ca = new NicknameMessage(nickname);
+							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						} catch (Exception e) {	}
+					}
+				});
+		moneyDialog = builder.create();
+		moneyDialog.show();
 	}
 	
 	private void addMoney() {

@@ -227,6 +227,23 @@ public interface Message {
 			return super.toString() + ": Client cheat information message, client -> " + amount;
 		}
 	}
+
+	public static class NicknameMessage extends TimestampedMessage {
+
+		public String nickname;
+		
+		public NicknameMessage(String nickname) {
+			this.nickname = nickname;
+		}
+
+		// kryo
+		public NicknameMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client nickname information message, client -> " + nickname;
+		}
+	}
 	 
 	 public class SetIDMessage extends TimestampedMessage implements Message {
 
