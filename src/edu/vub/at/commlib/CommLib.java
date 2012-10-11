@@ -57,6 +57,7 @@ public class CommLib {
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
 		k.register(UUID.class, new UUIDSerializer());
+		Log.d("wePoker", "Discovering on broadcast: "+InetAddress.getByName(broadcastAddress));
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName(broadcastAddress));
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
@@ -79,7 +80,8 @@ public class CommLib {
 		Output o = new Output(1024);
 		k.writeObject(o, clci);
 		final byte[] buf = o.toBytes();
-		
+
+		Log.d("wePoker", "Exporting on broadcast: "+InetAddress.getByName(broadcastAddress));
 		DatagramSocket ds = new DatagramSocket();
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
