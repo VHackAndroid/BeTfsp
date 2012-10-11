@@ -200,6 +200,7 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 	
 	private void registerWifiWatcher() {
+		if (wifiWatcher != null) return;
 		wifiWatcher = new ConnectionChangeReceiver();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
