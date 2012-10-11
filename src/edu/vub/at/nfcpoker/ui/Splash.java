@@ -88,16 +88,16 @@ public class Splash extends ThingActivity<TableThing> {
 	public static final String WEPOKER_WEBSITE = "http://soft.vub.ac.be/wepoker";
 
 	// Connectivity state
-	public static String UUID;
-	public static String NETWORK_GROUP;
-	public static String ipAddress;
-	public static String broadcastAddress;
+	public static volatile String UUID;
+	public static volatile String NETWORK_GROUP;
+	public static volatile String ipAddress;
+	public static volatile String broadcastAddress;
 	private BroadcastReceiver wifiWatcher;
 	
 	// Discovery
-	private DiscoveryAsyncTask discoveryTask;
-	private Timer client_startClientServerTimer;
-	private Dialog client_startClientServerAsk;
+	private volatile DiscoveryAsyncTask discoveryTask;
+	private volatile Timer client_startClientServerTimer;
+	private volatile Dialog client_startClientServerAsk;
 	
 	// UI
 	private static boolean isTablet;
