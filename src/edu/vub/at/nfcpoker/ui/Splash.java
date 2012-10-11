@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -21,6 +22,8 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiManager.MulticastLock;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -100,6 +103,7 @@ public class Splash extends ThingActivity<TableThing> {
 	private volatile Dialog client_startClientServerAsk;
 	
 	// UI
+	public static Handler messageHandler;
 	private static boolean isTablet;
 	private int startClientServerTimerTimeout = 10000;
 	private int startClientServerTimerTimeout2 = 30000;
@@ -150,6 +154,10 @@ public class Splash extends ThingActivity<TableThing> {
 			});
 		}
 
+		// UI
+		messageHandler = new IncomingHandler(this);
+		
+		
 		if (LODE) {
 			Intent i = new Intent(this, ClientActivity.class);
 			i.putExtra("isDedicated", false);
@@ -215,6 +223,36 @@ public class Splash extends ThingActivity<TableThing> {
 		broadcastAddress = CommLib.getBroadcastAddress(this);
 	}
 
+	
+	// UI
+	static class IncomingHandler extends Handler {
+		private final WeakReference<Context> mCtx;
+
+		IncomingHandler(Context ctx) {
+			mCtx = new WeakReference<Context>(ctx);
+		}
+
+		@Override
+		public void handleMessage(Message msg) {
+			String txt;
+			Context ctx = mCtx.get();
+			if (ctx != null) {
+				switch(msg.what) {
+				case UIMessage.MESSAGE_TOAST:
+					txt = msg.getData().getString("message");
+					if (txt == null) return;
+					Toast.makeText(ctx, txt, Toast.LENGTH_SHORT).show();
+					break;
+				case UIMessage.MESSAGE_DISCOVERY_FAILED:
+					// TODO
+					break;
+				}
+			}
+		}
+	}
+	    
+	
+	// Discovery
 	private void scheduleAskStartClientServer(int timeout) {
 		client_startClientServerTimer = new Timer();
 		client_startClientServerTimer.schedule(new TimerTask() {
@@ -231,8 +269,6 @@ public class Splash extends ThingActivity<TableThing> {
 	}
 	
 	private void askStartClientServer() {
-		final String ipAddress = Splash.ipAddress;
-		final String broadcastAddress = Splash.broadcastAddress;
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -276,6 +312,7 @@ public class Splash extends ThingActivity<TableThing> {
 		client_startClientServerAsk.show();
 	}
 
+	// NFC
 	private Dialog createNFCDialog() {
 		final Splash theActivity = this;
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -325,7 +362,6 @@ public class Splash extends ThingActivity<TableThing> {
 		return dialog;
 	}
 
-	// NFC
 	@Override
 	public void whenDiscovered(TableThing tableThing) {
 		super.whenDiscovered(tableThing);
