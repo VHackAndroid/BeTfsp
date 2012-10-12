@@ -306,6 +306,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
 				});
+				updateBetAmount();
+				updateMinBetAmount(0);
 				disableActions();
 			}
 		});
