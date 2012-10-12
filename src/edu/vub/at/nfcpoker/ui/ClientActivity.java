@@ -253,10 +253,14 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		mCardView1 = (CurlView) findViewById(R.id.Card1);
 		mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView1.setCurrentIndex(0);
+		mCardView1.setBackgroundColor(POKER_GREEN);
+		mCardView1.setAllowLastPageCurl(false);    
 
 		mCardView2 = (CurlView) findViewById(R.id.Card2);
 		mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView2.setCurrentIndex(0);
+		mCardView2.setBackgroundColor(POKER_GREEN);
+		mCardView2.setAllowLastPageCurl(false);    
 
 		bet = (Button) findViewById(R.id.Bet);
 		check = (Button) findViewById(R.id.Check);
@@ -468,7 +472,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
 				if (action.getClientActionType() == Message.ClientActionType.Bet) {
 					final int amount = action.getExtra();
-					if ( amount > minimumBet) {
+					if (amount > minimumBet) {
 						runOnUiThread(new Runnable() {
 							public void run() {
 								updateMinBetAmount(amount);
