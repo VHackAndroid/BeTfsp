@@ -53,6 +53,7 @@ public class Splash extends ThingActivity<TableThing> {
 			ml.acquire();
 			while (true) {
 				try {
+					Log.d("Discovery", "Discovering... (" + broadcastAddress + ")");
 					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
 					ml.release();
 					return c;
