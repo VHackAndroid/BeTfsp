@@ -427,6 +427,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
+							updateBetAmount();
+							updateMinBetAmount(0);
 						}});
 					break;
 				}
@@ -711,6 +713,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		updateMoneyTitle();
 	}
 
+	private void updateBetAmount() {
+		final TextView currentBet = (TextView) findViewById(R.id.currentBet);
+		currentBet.setText(" " + this.currentBet);
+	}
+	
 	private void updateMinBetAmount(int value) {
 		minimumBet = value;
 		final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
