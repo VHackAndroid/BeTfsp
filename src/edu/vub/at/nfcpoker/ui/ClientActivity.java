@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -210,6 +211,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				case R.id.blackchip: currentChipSwiped = 100; break;
 				default: Log.v("AMBIENTPOKER", "wrong view swipped" + viewSwiped);
 				}
+				ImageView chip = (ImageView) findViewById(viewSwiped);
+				chip.startAnimation(AnimationUtils.loadAnimation(ClientActivity.this, R.anim.rotate_full));
 				return gestureDetector.onTouchEvent(arg1);
 			}
 		};
