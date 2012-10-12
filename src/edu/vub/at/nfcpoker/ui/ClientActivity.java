@@ -133,6 +133,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private int currentTotalBet = 0;
 	private int minimumBet = 0;
 	private int currentChipSwiped = 0;
+	private boolean touchedCard = false;
 	private ReceiveHoleCardsMessage lastReceivedCards;
 
 	// Dedicated
@@ -292,9 +293,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public void onClick(View v) {
 				runOnNotUiThread(new Runnable() {
 					public void run() {
-						currentBet = 0;
-						ClientAction ca = new ClientAction(ClientActionType.Check);
-						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						checkAction();
 					}
 				});
 				disableActions();
@@ -341,6 +340,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
 	}
+	
+	private void checkAction() {
+		if (!check.isEnabled()) return;
+		currentBet = 0;
+		ClientAction ca = new ClientAction(ClientActionType.Check);
+		serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+	}
 
 	private void enableActions() {
 		runOnUiThread(new Runnable() {
@@ -357,7 +363,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	private void disableActions() {
 		runOnUiThread(new Runnable() {
-
 			@Override
 			public void run() {
 				bet.setEnabled(false);
@@ -864,6 +869,17 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 
 	class MyGestureDetector extends GestureDetector.SimpleOnGestureListener {
+		
+		@Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (touchedCard) {
+            	// Double tap on cards means check
+            	touchedCard = false;
+            	checkAction();
+            }
+            return true;
+        }
+		
 		@Override
 		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 			try {
