@@ -133,6 +133,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private int currentTotalBet = 0;
 	private int minimumBet = 0;
 	private int currentChipSwiped = 0;
+	private ReceiveHoleCardsMessage lastReceivedCards;
 
 	// Dedicated
 	private int nextToReveal = 0;
@@ -208,7 +209,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				case R.id.greenchip: currentChipSwiped = 20; break;
 				case R.id.bluechip: currentChipSwiped = 50; break;
 				case R.id.blackchip: currentChipSwiped = 100; break;
-				default: Log.v("AMBIENTPOKER", "wrong view swipped" + viewSwiped);
+				case R.id.Card1: touchedCard = true; break;
+				case R.id.Card2: touchedCard = true; break;
+				default:
+					Log.v("AMBIENTPOKER", "wrong view swipped" + viewSwiped);
+					touchedCard = false;
 				}
 				return gestureDetector.onTouchEvent(arg1);
 			}
@@ -260,7 +265,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView2.setCurrentIndex(0);
 		mCardView2.setBackgroundColor(POKER_GREEN);
-		mCardView2.setAllowLastPageCurl(false);    
+		mCardView2.setAllowLastPageCurl(false); 
 
 		bet = (Button) findViewById(R.id.Bet);
 		check = (Button) findViewById(R.id.Check);
@@ -314,6 +319,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		currentTotalBet = 0;
 		currentChipSwiped = 0;
 		nextToReveal = 0;
+		lastReceivedCards = null;
 
 		listenToGameServer();
 	}
@@ -407,7 +413,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					runOnUiThread(new Runnable() {
 						public void run() {
 							hideBarrier();
-							showCards();
+							if (lastReceivedCards == null) {
+								showBarrier("Waiting for next round");
+							} else {
+								showCards();
+							}
 						}});
 					break;
 				case FLOP:
@@ -428,6 +438,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					currentTotalBet = 0;
 					currentChipSwiped = 0;
 					nextToReveal = 0;
+					lastReceivedCards = null;
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -530,6 +541,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	private void updateHandGui(ReceiveHoleCardsMessage cards) {
 
+		lastReceivedCards = cards;
+		
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
 		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
