@@ -19,7 +19,7 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 	}
 
 	private final Activity act;
-	private DiscoveryAsyncTask.DiscoveryCompletionListener dcl;
+	public DiscoveryCompletionListener dcl;
 
 	public DiscoveryAsyncTask(Activity act, DiscoveryAsyncTask.DiscoveryCompletionListener dcl) {
 		this.act = act;
@@ -31,17 +31,22 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 		WifiManager wm = (WifiManager) this.act.getSystemService(Splash.WIFI_SERVICE);
 		MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 		ml.acquire();
-		while (true) {
-			try {
-				CommLibConnectionInfo c = CommLib.discover(PokerServer.class, Splash.broadcastAddress);
-				ml.release();
-				return c;
-			} catch (IOException e) {
-				Log.d("Discovery", "Could not start discovery", e);
+		try {
+			while (!isCancelled()) {
+				try {
+					String broadcastAddress = CommLib.getBroadcastAddress(this.act);
+					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
+					return c;
+				} catch (IOException e) {
+					Log.d("Discovery", "Could not start discovery", e);
+				}
+				Thread.sleep(2000);
 			}
-			try { Thread.sleep(2000);
-			} catch (InterruptedException e1) { }
+		} catch (InterruptedException e) {
+		} finally {
+			ml.release();
 		}
+		return null;
 	}
 
 	@Override

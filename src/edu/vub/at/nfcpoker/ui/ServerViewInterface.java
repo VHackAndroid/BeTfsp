@@ -1,5 +1,6 @@
 package edu.vub.at.nfcpoker.ui;
 
+import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 
@@ -16,5 +17,7 @@ public interface ServerViewInterface {
 	public void setPlayerMoney(Integer player, int current);
 
 	public void removePlayer(Integer i);
+
+	public Context getContext();
 	
 }

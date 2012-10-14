@@ -90,8 +90,6 @@ public class Splash extends ThingActivity<TableThing> {
 	public static final String WEPOKER_WEBSITE = "http://wepoker.info";
 
 	// Connectivity state
-	public static volatile String ipAddress;
-	public static volatile String broadcastAddress;
 	private BroadcastReceiver wifiWatcher;
 	
 	// Discovery
@@ -170,7 +168,6 @@ public class Splash extends ThingActivity<TableThing> {
 		}
 		
 //		registerWifiWatcher();
-		updateIpAddress(this);
 		
 		final DiscoveryAsyncTask.DiscoveryCompletionListener dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
 			@Override
@@ -203,9 +200,11 @@ public class Splash extends ThingActivity<TableThing> {
 			final Button disc = (Button) findViewById(R.id.discover_button);
 			disc.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					new DiscoveryAsyncTask(Splash.this, dcl).execute();
+					startDiscovery(dcl);
 					disc.setEnabled(false);
 				}
+
+
 			});
 			
 			final Button wifi_direct = (Button) findViewById(R.id.wifi_direct_button);
@@ -248,8 +247,7 @@ public class Splash extends ThingActivity<TableThing> {
 	// Connectivity
 	private class ConnectionChangeReceiver extends BroadcastReceiver {
 		public void onReceive(Context context, Intent intent ) {
-			Log.d("wePoker", "Wifi Broadcast Reciever");
-			updateIpAddress(context);
+			Log.d("wePoker", "My IP Address changed!");
 		}
 	}
 	
@@ -263,12 +261,6 @@ public class Splash extends ThingActivity<TableThing> {
 		intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 		registerReceiver(wifiWatcher, intentFilter);
 	}
-	
-	private void updateIpAddress(Context ctx) {
-		ipAddress = CommLib.getIpAddress(this);
-		broadcastAddress = CommLib.getBroadcastAddress(this);
-	}
-
 	
 	// UI
 	static class IncomingHandler extends Handler {
@@ -321,6 +313,21 @@ public class Splash extends ThingActivity<TableThing> {
 				});
 			}
 		}, timeout);
+	}
+	
+	public void startDiscovery(DiscoveryAsyncTask.DiscoveryCompletionListener dcl) {
+		if (discoveryTask != null)
+			discoveryTask.cancel(true);
+		
+		discoveryTask = new DiscoveryAsyncTask(Splash.this, dcl);
+		discoveryTask.execute();
+	}
+	
+	public void restartDiscovery() {
+		if (discoveryTask == null)
+			return;
+		
+		startDiscovery(discoveryTask.dcl);
 	}
 	
 	private void askStartClientServer() {

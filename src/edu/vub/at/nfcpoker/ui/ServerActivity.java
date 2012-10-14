@@ -2,6 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
 
+import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
@@ -14,6 +15,7 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -164,5 +166,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				}
 			}
 		});
+	}
+
+	@Override
+	public Context getContext() {
+		return this;
 	};
 }
