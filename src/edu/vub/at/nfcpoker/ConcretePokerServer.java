@@ -51,9 +51,9 @@ public class ConcretePokerServer extends PokerServer  {
 		@Override
 		public void run() {
 			while (true) {
-				Log.d("PokerServer", "Starting exportR");
 				String port = "" + CommLib.SERVER_PORT;
 				String dedicated = "" + isDedicated;
+				Log.d("PokerServer", "Starting export thread, advertising " + Splash.ipAddress + ":" + port);
 				CommLibConnectionInfo clci = new CommLibConnectionInfo(
 						PokerServer.class.getCanonicalName(),
 						new String[] {Splash.ipAddress, port, dedicated});
@@ -71,7 +71,7 @@ public class ConcretePokerServer extends PokerServer  {
 	Runnable serverR = new Runnable() {
 		public void run() {
 			try {
-				Log.d("PokerServer", "Starting serverR");
+				Log.d("PokerServer", "Starting server thread");
 				Server s = new Server();
 				Kryo k = s.getKryo();
 				k.setRegistrationRequired(false);
@@ -141,6 +141,7 @@ public class ConcretePokerServer extends PokerServer  {
 	}
 	
 	public void start() {		
+		Log.d("PokerServer", "Starting server and exporter threads...");
 		new Thread(serverR).start();
 		new Thread(exporterR).start();
 	}

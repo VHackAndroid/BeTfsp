@@ -32,9 +32,25 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
-    	boolean isDedicated = tablet_layout != null;
-    	ConcretePokerServer cps = new ConcretePokerServer(this, isDedicated);
-    	cps.start();
+    	final boolean isDedicated = tablet_layout != null;
+    	final boolean isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
+    	
+		Runnable startServer = new Runnable() {
+			
+			@Override
+			public void run() {
+				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated);
+				cps.start();					
+			}
+		};
+    	
+    	
+		if (isWifiDirect) {
+    		WifiDirectManager wdm = WifiDirectManager.create(this, getMainLooper(), true);
+    		wdm.createGroup(startServer);
+    	} else {
+    		startServer.run();
+    	}
     }
 
     @Override

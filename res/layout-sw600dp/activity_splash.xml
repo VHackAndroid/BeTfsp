@@ -29,6 +29,12 @@
             android:text="Discover" />
 
         <Button
+            android:id="@+id/wifi_direct_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Wi-Fi Direct" />
+        
+        <Button
             android:id="@+id/server"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
