@@ -138,17 +138,18 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String serverAddress, String broadcastAddress) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
-    	this.serverAddress = CommLib.getIpAddress(gui.getContext());
-    	this.broadcastAddress = CommLib.getBroadcastAddress(gui.getContext());
+    	this.serverAddress = serverAddress;
+    	this.broadcastAddress = broadcastAddress;
 	}
 	
 	public void start() {		
 		Log.d("PokerServer", "Starting server and exporter threads...");
 		new Thread(serverR).start();
-		new Thread(exporterR).start();
+		if (broadcastAddress != null)
+			new Thread(exporterR).start();
 	}
 	
 	private GameLoop gameLoop = new GameLoop();

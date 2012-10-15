@@ -1,5 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.net.InetAddress;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.ActionListener;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
@@ -18,8 +21,29 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 import edu.vub.at.nfcpoker.ui.DiscoveryAsyncTask.DiscoveryCompletionListener;
+import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
 public class WifiDirectManager extends BroadcastReceiver implements GroupInfoListener, PeerListListener {
+
+	public class LoggingActionListener implements ActionListener {
+		
+		String prefix;
+		
+		public LoggingActionListener(String prefix) {
+			this.prefix = prefix;
+		}
+
+		@Override
+		public void onFailure(int reason) {
+			Log.e("Wifi-Direct", prefix + " FAILED: " + reason);
+		}
+
+		@Override
+		public void onSuccess() {
+			Log.d("Wifi-Direct", prefix + " SUCCESS!");
+		}
+
+	}
 
 	private static WifiDirectManager instance;
 	private boolean isRunning;
@@ -31,6 +55,8 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	private IntentFilter mWifiDirectIntentFilter;
 	public WifiP2pGroup mCurrentGroup;
 	private boolean alreadyConnecting = false;
+	private ServerStarter serverStarter;
+	private InetAddress myAddress;
 	
 	enum WDMType { CLIENT, SERVER };
 
@@ -73,7 +99,9 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		
 		Log.d("Wifi-Direct", "Got group info!" + group);
 		if (isRunning) {
+
 			WifiP2pDevice device = group.getOwner();
+			Log.d("Wifi-Direct", "Device specifics: " + myAddress);
 			final String groupName = group.getNetworkName();
 			final String password = group.getPassphrase();
 			mCurrentGroup = group;
@@ -86,6 +114,11 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 					Toast.makeText(act, "Created group " + groupName + " with password '" + password + "'", Toast.LENGTH_LONG).show();
 				}
 			});
+			
+			String ipAddress = myAddress.getHostAddress();
+			serverStarter.setWifiDirect(groupName, password);
+			serverStarter.start(ipAddress, null);
+			unregisterReceiver();
 		}
 	}
 
@@ -94,22 +127,9 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		this.dcl = dcl;
 	}
 
-	public void createGroup(final Runnable r) {
-		Log.d("Wifi-Direct", "Creating group...");
-		manager.createGroup(this.channel, new ActionListener() {
-			
-			@Override
-			public void onSuccess() {
-				Log.d("Wifi-Direct", "Group created!");
-				manager.requestGroupInfo(channel, WifiDirectManager.this);
-				r.run();
-			}
-			
-			@Override
-			public void onFailure(int reason) {
-				Log.d("Wifi-Direct", "Group creation failed:" + reason);
-			}
-		});
+	public void createGroup(final ServerStarter startServer) {
+		serverStarter = startServer;
+		registerReceiver();
 	}
 
 	@Override
@@ -148,36 +168,61 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (type != WDMType.CLIENT || !isRunning)
+		if (!isRunning)
 			return;
 		String action = intent.getAction();
-		Log.d("Wifi-Direct", "Receved intent: " + action);
+		Log.d("Wifi-Direct", "Received intent: " + action);
 		if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
+			int enabled = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, 0);
+			if (enabled == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+				if (serverStarter != null) {
+//					Log.d("Wifi-Direct", "Creating group");
+//					manager.createGroup(channel, new LoggingActionListener("Creating group"));
+				}
+			}
+
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // Call WifiP2pManager.requestPeers() to get a list of current peers
-        	manager.requestPeers(this.channel, this);
+//        	manager.requestPeers(this.channel, this);
         } else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
             // Respond to new connection or disconnections
+        	WifiP2pInfo wp2pi = (WifiP2pInfo) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
+        	if (type == WDMType.CLIENT)
+        		return;
+        	
+        	if (wp2pi.groupFormed && wp2pi.isGroupOwner) {
+        		myAddress = wp2pi.groupOwnerAddress;
+        		manager.requestGroupInfo(channel, this);
+        		return;
+        	}
+        	
+        	if (!wp2pi.groupFormed) {
+        		Log.d("Wifi-Direct", "Creating group");
+        		manager.createGroup(channel, new LoggingActionListener("Group creation"));
+        		return;
+        	}
+       	
+        	manager.removeGroup(channel, new ActionListener() {
+				
+				@Override
+				public void onSuccess() {
+					Log.d("Wifi-Direct", "Group removal succeeded, creating new group...");
+					manager.createGroup(channel, null);
+				}
+				
+				@Override
+				public void onFailure(int reason) {
+					Log.d("Wifi-Direct", "Could not remove group:" + reason);
+				}
+			});
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            // Respond to this device's wifi state changing
+        	// Respond to this device's wifi state changing
         }
 	}
 	
 	public void registerReceiver() {
 		act.registerReceiver(this, mWifiDirectIntentFilter);
-		manager.discoverPeers(channel, new ActionListener() {
-			
-			@Override
-			public void onSuccess() {
-				Log.d("Wifi-Direct", "Started peer discovery...");
-			}
-			
-			@Override
-			public void onFailure(int reason) {
-				Log.d("Wifi-Direct", "Peer discovery failed: " + reason);
-			}
-		});
 	}
 	
 	public void unregisterReceiver() {

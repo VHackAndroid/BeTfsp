@@ -2,6 +2,12 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.Writer;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
@@ -15,19 +21,37 @@ import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 @TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
 	
+	public interface ServerStarter {
+		public void start(String ipAddress, String broadcastAddress);
+
+		public void setWifiDirect(String groupName, String password);
+	}
+
 	@SuppressLint("UseSparseArrays")
-	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>(); 
+	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
+	protected String currentWifiGroupName;
+	protected String currentWifiPassword; 
+
+	private boolean isWifiDirect;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,34 +59,117 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	final boolean isDedicated = tablet_layout != null;
-    	final boolean isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
+    	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
     	
-		Runnable startServer = new Runnable() {
+		ServerStarter startServer = new ServerStarter() {
 			
 			@Override
-			public void run() {
-				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated);
-				cps.start();					
+			public void start(String ipAddress, String broadcastAddress) {
+				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
+				cps.start();				
+			}
+
+			@Override
+			public void setWifiDirect(String groupName, String password) {
+				// TODO setup NFC tag.
+				currentWifiGroupName = groupName;
+				currentWifiPassword  = password;
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						showWifiConnectionDialog();
+					}
+				});
 			}
 		};
-    	
     	
 		if (isWifiDirect) {
     		WifiDirectManager wdm = WifiDirectManager.create(this, getMainLooper(), true);
     		wdm.createGroup(startServer);
     	} else {
-    		startServer.run();
+    		String ipAddress = CommLib.getIpAddress(this);
+    		String broadcastAddress = CommLib.getBroadcastAddress(this);
+    		startServer.start(ipAddress, broadcastAddress);
     	}
     }
 
     @Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+    	if (item.getItemId() == R.id.show_wifi_settings) {
+    		showWifiConnectionDialog();
+    	}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_server, menu);
         return true;
     }
     
-    int nextToReveal = 0;
+    // Taken from the ZXing source code.
+    private static final int WHITE = 0xFFFFFFFF;
+    private static final int BLACK = 0xFF000000;
     
+    private Bitmap encodeBitmap(String contents) throws WriterException {
+    	int width = 200;
+    	int height = 200;
+		BitMatrix result = new QRCodeWriter().encode(contents, BarcodeFormat.QR_CODE, width, height);
+        int[] pixels = new int[width * height];
+        for (int y = 0; y < height; y++) {
+          int offset = y * width;
+          for (int x = 0; x < width; x++) {
+            pixels[offset + x] = result.get(x, y) ? BLACK : WHITE;
+          }
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
+        return bitmap;
+    }
+
+    private Dialog wifiConnectionDialog;
+    
+	private void showWifiConnectionDialog() {
+		if (wifiConnectionDialog == null) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			View dialogGuts = getLayoutInflater().inflate(R.layout.wifi_connection_dialog, null);
+			
+			TextView networkNameTV = (TextView) dialogGuts.findViewById(R.id.network_name);
+			networkNameTV.setText(this.currentWifiGroupName);
+			TextView passwordTV = (TextView) dialogGuts.findViewById(R.id.password);
+			passwordTV.setText(currentWifiPassword);
+			Button dismissButton = (Button) dialogGuts.findViewById(R.id.dismiss_btn);
+			dismissButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					wifiConnectionDialog.dismiss();	
+				}
+			});
+			
+			try {
+				// TODO: Proper URL.
+				String connectionString = "wePoker\t" + currentWifiGroupName + "\t" + currentWifiPassword;
+				Bitmap qrCode = encodeBitmap(connectionString);
+				ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
+				qrCodeIV.setImageBitmap(qrCode);
+			} catch (WriterException e) {
+				Log.e("ServerActivity", "Could not create QR code", e);
+			}
+			
+			
+			wifiConnectionDialog = 
+				builder.setTitle("Connection details")
+				       .setCancelable(true)
+				       .setView(dialogGuts)
+				       .create();
+		}
+		
+		wifiConnectionDialog.show();
+	}
+	
+    int nextToReveal = 0;
+
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
 			public void run() {

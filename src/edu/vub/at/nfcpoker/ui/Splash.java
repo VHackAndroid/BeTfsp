@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -99,7 +100,7 @@ public class Splash extends ThingActivity<TableThing> {
 	
 	// UI
 	public static Handler messageHandler;
-	private static boolean isTablet;
+	private boolean isTablet = false;
 	private int startClientServerTimerTimeout = 10000;
 	private int startClientServerTimerTimeout2 = 30000;
 
@@ -116,7 +117,8 @@ public class Splash extends ThingActivity<TableThing> {
 		Settings.loadSettings(this);
 		
 		View tablet_layout = findViewById(R.id.tablet_layout);
-		if (tablet_layout != null) isTablet = true;
+		if (tablet_layout != null)
+			isTablet = true;
 		
 		Button server = (Button) findViewById(R.id.server);
 		if (server != null)
@@ -155,39 +157,6 @@ public class Splash extends ThingActivity<TableThing> {
 		
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			if (isWifiDirectSupported()) {
-				mWifiDirectManager = WifiDirectManager.create(this, Looper.getMainLooper(), false);
-				mWifiDirectManager.discover(dcl);
-			}
-//			discoveryTask = new DiscoveryAsyncTask(this, dcl);
-//			discoveryTask.execute();
-			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
-//			scheduleAskStartClientServer(startClientServerTimerTimeout);
-		} else {
-			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-			final Button disc = (Button) findViewById(R.id.discover_button);
-			disc.setOnClickListener(new OnClickListener() {
-				public void onClick(View v) {
-					startDiscovery(dcl);
-					disc.setEnabled(false);
-				}
-
-
-			});
-			
-			final Button wifi_direct = (Button) findViewById(R.id.wifi_direct_button);
-			if (isWifiDirectSupported()) {
-				wifi_direct.setOnClickListener(new OnClickListener() {
-					
-					@Override
-					public void onClick(View v) {
-						startWifiDirectServer();
-					}
-				});
-			} else {
-				wifi_direct.setEnabled(false);
-				wifi_direct.setText("Wi-Fi Direct N/A");
-			}
 			
 			// NFC
 			Button nfc = (Button) findViewById(R.id.nfc);
@@ -195,7 +164,7 @@ public class Splash extends ThingActivity<TableThing> {
 			if (isNFCSupported()) {
 				nfc.setOnClickListener(new OnClickListener() {
 					Dialog nfc_dialog;
-					
+
 					@Override
 					public void onClick(View v) {
 						if (nfc_dialog == null)
@@ -206,6 +175,23 @@ public class Splash extends ThingActivity<TableThing> {
 			} else {
 				nfc.setText("NFC disabled");
 			}
+
+			//TODO: Only try Wifi-direct if available and no wifi is found.
+			
+			discoveryTask = new DiscoveryAsyncTask(this, dcl);
+			discoveryTask.execute();
+			
+			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
+			scheduleAskStartClientServer(startClientServerTimerTimeout);
+		} else {
+			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			final Button disc = (Button) findViewById(R.id.discover_button);
+			disc.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					startDiscovery(dcl);
+					disc.setEnabled(false);
+				}
+			});			
 		}
 	}
 	
@@ -217,14 +203,14 @@ public class Splash extends ThingActivity<TableThing> {
 	public void onResume() {
 		super.onResume();
 //		registerWifiWatcher();
-		mWifiDirectManager.registerReceiver();
+//		mWifiDirectManager.registerReceiver();
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		unregisterReceiver(wifiWatcher); wifiWatcher = null;
-		mWifiDirectManager.unregisterReceiver();
+//		unregisterReceiver(wifiWatcher); wifiWatcher = null;
+//		mWifiDirectManager.unregisterReceiver();
 		// TODO pause discovery 
 	}
 	
@@ -332,8 +318,10 @@ public class Splash extends ThingActivity<TableThing> {
 						new Thread() {
 							@Override
 							public void run() {
+					    		String ipAddress = CommLib.getIpAddress(Splash.this);
+					    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
 						    	ConcretePokerServer cps = new ConcretePokerServer(
-						    			new DummServerView(), false);
+						    			new DummServerView(), false, ipAddress, broadcastAddress);
 						    	cps.start();
 							}
 						}.start();
@@ -436,14 +424,14 @@ public class Splash extends ThingActivity<TableThing> {
 			discoveryTask.cancel(true);
 			discoveryTask = null;
 		}
+		
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		WifiInfo connInfo = wm.getConnectionInfo();
+		boolean enabled = wm.isWifiEnabled();
+		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
+		
 		Intent i = new Intent(this, ServerActivity.class);
-		startActivity(i);
-		finish();
-	}
-
-	private void startWifiDirectServer() {
-		Intent i = new Intent(this, ServerActivity.class);
-		i.putExtra("wifiDirect", true);
+		i.putExtra("wifiDirect", isWifiDirectSupported() && !(enabled && connected));
 		startActivity(i);
 		finish();
 	}
