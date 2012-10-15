@@ -114,15 +114,6 @@ public class Splash extends ThingActivity<TableThing> {
 
 		// Settings
 		Settings.loadSettings(this);
-
-//		Button beamButton = (Button) findViewById(R.id.beamInviteButton);
-//		beamButton.setEnabled(false);
-//		beamButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				((TableThing) lastScannedTag_).broadcast();
-//			}
-//		});
 		
 		View tablet_layout = findViewById(R.id.tablet_layout);
 		if (tablet_layout != null) isTablet = true;
@@ -136,26 +127,6 @@ public class Splash extends ThingActivity<TableThing> {
 				}
 			});
 
-		// NFC
-		Button nfc = (Button) findViewById(R.id.nfc);
-		if (nfc != null) {
-			if (isNFCSupported()) {
-				final Dialog nfc_dialog = createNFCDialog();
-				nfc.setEnabled(false);
-				nfc.setOnClickListener(new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						nfc_dialog.show();
-					}
-				});
-			} else {
-				nfc.setText("NFC disabled");
-				nfc.setEnabled(false);
-			}
-		}
-		
-
-
 		// UI
 		messageHandler = new IncomingHandler(this);
 		
@@ -166,9 +137,7 @@ public class Splash extends ThingActivity<TableThing> {
 			startActivity(i);
 			return;
 		}
-		
-//		registerWifiWatcher();
-		
+				
 		final DiscoveryAsyncTask.DiscoveryCompletionListener dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
 			@Override
 			public void onDiscovered(CommLibConnectionInfo result) {
@@ -184,7 +153,6 @@ public class Splash extends ThingActivity<TableThing> {
 			}
 		};
 		
-
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			if (isWifiDirectSupported()) {
@@ -208,14 +176,36 @@ public class Splash extends ThingActivity<TableThing> {
 			});
 			
 			final Button wifi_direct = (Button) findViewById(R.id.wifi_direct_button);
-			wifi_direct.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					startWifiDirectServer();
-
-				}
-			});
+			if (isWifiDirectSupported()) {
+				wifi_direct.setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						startWifiDirectServer();
+					}
+				});
+			} else {
+				wifi_direct.setEnabled(false);
+				wifi_direct.setText("Wi-Fi Direct N/A");
+			}
+			
+			// NFC
+			Button nfc = (Button) findViewById(R.id.nfc);
+			nfc.setEnabled(false);
+			if (isNFCSupported()) {
+				nfc.setOnClickListener(new OnClickListener() {
+					Dialog nfc_dialog;
+					
+					@Override
+					public void onClick(View v) {
+						if (nfc_dialog == null)
+							nfc_dialog = createNFCDialog();
+						nfc_dialog.show();
+					}
+				});
+			} else {
+				nfc.setText("NFC disabled");
+			}
 		}
 	}
 	
