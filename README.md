@@ -13,5 +13,5 @@ About the authors
 wePoker is being developed by the AmbientTalk team at the Vrije Universiteit Brussel.
 We are a research group that specializes in connectivity and communication for mobile devices, especially on a small scale.
 Check out our other apps at the Google Play Store:
- - weScribble: A collaborative drawing application for Android devices (Play Store Link: https://play.google.com/store/apps/details?id=edu.vub.at.weScribble)
+ - weScribble: A collaborative drawing application for Android devices (Play Store Link: http://bit.ly/RZD9kz)
  - The AmbientTalk interpreter: An interpreter for our language, AmbientTalk. You can read more about the language at http://code.google.com/p/ambienttalk. (Play Store link: http://bit.ly/HM7Kzv)
