@@ -47,6 +47,12 @@
             android:name=".ui.ClientActivity"
             android:screenOrientation="portrait"
 						android:label="@string/title_activity_client">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="https" android:host="code.google.com" android:pathPrefix="/p/ambienttalk/wiki/WePoker" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ui.ServerActivity"

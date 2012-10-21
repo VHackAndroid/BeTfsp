@@ -3,7 +3,6 @@ package edu.vub.at.nfcpoker.ui;
 import java.util.HashMap;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.Writer;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -13,6 +12,8 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
+import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -22,9 +23,9 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Menu;
@@ -50,6 +51,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
 	protected String currentWifiGroupName;
 	protected String currentWifiPassword; 
+	protected String currentIpAddress;
 
 	private boolean isWifiDirect;
 
@@ -66,6 +68,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
 				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
+				currentIpAddress = ipAddress; 
 				cps.start();				
 			}
 
@@ -87,6 +90,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     		WifiDirectManager wdm = WifiDirectManager.create(this, getMainLooper(), true);
     		wdm.createGroup(startServer);
     	} else {
+    		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+    		currentWifiGroupName = wm.getConnectionInfo().getSSID();
+    		currentWifiPassword = "********";
+    		
     		String ipAddress = CommLib.getIpAddress(this);
     		String broadcastAddress = CommLib.getBroadcastAddress(this);
     		startServer.start(ipAddress, broadcastAddress);
@@ -148,8 +155,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			});
 			
 			try {
-				// TODO: Proper URL.
-				String connectionString = "wePoker\t" + currentWifiGroupName + "\t" + currentWifiPassword;
+				String connectionString = createJoinUri();
 				Bitmap qrCode = encodeBitmap(connectionString);
 				ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 				qrCodeIV.setImageBitmap(qrCode);
@@ -168,7 +174,19 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		wifiConnectionDialog.show();
 	}
 	
-    int nextToReveal = 0;
+    private String createJoinUri() {
+    	Uri uri = Uri.parse("https://code.google.com/p/ambienttalk/wiki/WePoker")
+    			     .buildUpon()
+    			     .appendQueryParameter("wifiName", currentWifiGroupName)
+    			     .appendQueryParameter("wifiPass", currentWifiPassword)
+    			     .appendQueryParameter("serverIp", currentIpAddress)
+    			     .build();
+    	
+    	return uri.toString();
+
+	}
+
+	int nextToReveal = 0;
 
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
