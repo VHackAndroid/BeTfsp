@@ -209,7 +209,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public boolean onTouch(View arg0, MotionEvent arg1) {
 				if (firstSwipe) {
 					firstSwipe = false;
-					Toast.makeText(ClientActivity.this, "Swipe up or down to add or remove money", Toast.LENGTH_SHORT).show();
+					Toast t = Toast.makeText(ClientActivity.this, "Swipe up or down to add or remove money", Toast.LENGTH_SHORT);
+					t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+					t.show();
 				}
 				int viewSwiped = arg0.getId();
 				switch(viewSwiped) {
