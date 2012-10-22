@@ -283,9 +283,18 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			public void onClick(View v) {
 				runOnNotUiThread(new Runnable() {
 					public void run() {
-						currentBet = 0;
-						ClientAction ca = new ClientAction(ClientActionType.Check);
-						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						if (checkIfBetIsOk()) {
+							currentBet = 0;
+							ClientAction ca = new ClientAction(ClientActionType.Check);
+							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						} else {
+							currentBet = minimumBet;
+							currentMoney -= currentBet;
+							currentTotalBet += currentBet;
+							ClientAction ca = new ClientAction(ClientActionType.Bet, currentBet);
+							currentBet = 0;
+							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						}
 					}
 				});
 				disableActions();
@@ -331,6 +340,23 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
 	}
+	
+	private boolean checkIfBetIsOk() {
+		runOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (currentBet < minimumBet) {
+					check.setText("Call");
+					check.setEnabled(true);
+					bet.setEnabled(false);
+					//check.setEnabled(false);
+					fold.setEnabled(true);
+				} 
+			}
+		});
+		return (currentBet >= minimumBet);
+	}
 
 	private void enableActions() {
 		runOnUiThread(new Runnable() {
@@ -354,6 +380,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				check.setEnabled(false);
 				fold.setEnabled(false);
 				updateMoneyTitle();
+				check.setText("Check");
 			}
 		});
 	}
@@ -472,6 +499,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						runOnUiThread(new Runnable() {
 							public void run() {
 								updateMinBetAmount(amount);
+								checkIfBetIsOk();
 							}
 						});
 					}
@@ -709,6 +737,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
 		textCurrentBet.setText(" " + currentBet);
 		updateMoneyTitle();
+		checkIfBetIsOk();
 	}
 
 	private void updateMinBetAmount(int value) {
@@ -716,6 +745,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
 		textCurrentBet.setText(" " + minimumBet);
 		updateMoneyTitle();
+		checkIfBetIsOk();
 	}
 
 	// Interactivity
