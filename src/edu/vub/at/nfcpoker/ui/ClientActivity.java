@@ -34,6 +34,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -216,6 +217,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					Log.v("AMBIENTPOKER", "wrong view swipped" + viewSwiped);
 					touchedCard = false;
 				}
+				ImageView chip = (ImageView) findViewById(viewSwiped);
+				chip.startAnimation(AnimationUtils.loadAnimation(ClientActivity.this, R.anim.rotate_full));
 				return gestureDetector.onTouchEvent(arg1);
 			}
 		};
@@ -310,6 +313,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 					}
 				});
+				updateBetAmount();
+				updateMinBetAmount(0);
 				disableActions();
 			}
 		});
@@ -447,6 +452,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
+							updateBetAmount();
+							updateMinBetAmount(0);
 						}});
 					break;
 				}
@@ -733,6 +740,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		updateMoneyTitle();
 	}
 
+	private void updateBetAmount() {
+		final TextView currentBet = (TextView) findViewById(R.id.currentBet);
+		currentBet.setText(" " + this.currentBet);
+	}
+	
 	private void updateMinBetAmount(int value) {
 		minimumBet = value;
 		final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
