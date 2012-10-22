@@ -1,6 +1,5 @@
 package edu.vub.at.nfcpoker.ui;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -18,7 +17,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,52 +37,6 @@ import edu.vub.nfc.thing.ThingActivity;
 import edu.vub.nfc.thing.listener.ThingSavedListener;
 
 public class Splash extends ThingActivity<TableThing> {
-
-	public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
-		
-		@Override
-		protected CommLibConnectionInfo doInBackground(Void... arg0) {
-			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-			MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
-			ml.acquire();
-			while (true) {
-				try {
-					Log.d("Discovery", "Discovering... (" + broadcastAddress + ")");
-					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
-					ml.release();
-					return c;
-				} catch (IOException e) {
-					Log.d("Discovery", "Could not start discovery", e);
-				}
-				try { Thread.sleep(2000);
-				} catch (InterruptedException e1) { }
-			}
-		}
-
-		@Override
-		protected void onPostExecute(CommLibConnectionInfo result) {
-			super.onPostExecute(result);
-			if (result != null) {
-				if (client_startClientServerTimer != null) {
-					client_startClientServerTimer.cancel();
-					client_startClientServerTimer = null;
-					if (client_startClientServerAsk != null) {
-						client_startClientServerAsk.dismiss();
-						client_startClientServerAsk = null;
-					}
-				}
-				Intent i = new Intent(Splash.this, ClientActivity.class);
-				i.putExtra("ip", result.getAddress());
-				i.putExtra("port", Integer.parseInt(result.getPort()));
-				i.putExtra("isDedicated", result.isDedicated());
-				startActivity(i);
-			} else {
-				Toast.makeText(Splash.this, "Could not discover hosts", Toast.LENGTH_SHORT).show();
-			}
-		}
-	}
-
-
 	private static final boolean LODE = false;
 
 	// Shared globals
@@ -106,7 +58,6 @@ public class Splash extends ThingActivity<TableThing> {
 
 	// NFC
 	private Object lastScannedTag_;
-	private WifiDirectManager mWifiDirectManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
