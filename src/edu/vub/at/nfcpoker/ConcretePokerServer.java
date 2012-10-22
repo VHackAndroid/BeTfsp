@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import android.util.Log;
 
@@ -179,11 +180,11 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 
-		public TreeMap<Integer, Connection> newClients = new TreeMap<Integer, Connection>();
-		public TreeMap<Integer, Connection> clientsInGame = new TreeMap<Integer, Connection>();
-		public TreeMap<Integer, Future<ClientAction>> actionFutures = new TreeMap<Integer, Future<ClientAction>>();  
-		public TreeMap<Integer, Integer> playerMoney = new TreeMap<Integer, Integer>();
-		public TreeMap<Integer, String> playerNames = new TreeMap<Integer, String>();
+		public ConcurrentSkipListMap<Integer, Connection> newClients = new ConcurrentSkipListMap<Integer, Connection>();
+		public ConcurrentSkipListMap<Integer, Connection> clientsInGame = new ConcurrentSkipListMap<Integer, Connection>();
+		public ConcurrentSkipListMap<Integer, Future<ClientAction>> actionFutures = new ConcurrentSkipListMap<Integer, Future<ClientAction>>();  
+		public ConcurrentSkipListMap<Integer, Integer> playerMoney = new ConcurrentSkipListMap<Integer, Integer>();
+		public ConcurrentSkipListMap<Integer, String> playerNames = new ConcurrentSkipListMap<Integer, String>();
 
 		public GameState gameState;
 		int chipsPool = 0;
@@ -227,7 +228,6 @@ public class ConcretePokerServer extends PokerServer  {
 						c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 					}
 					newState(GameState.PREFLOP);
-					createActionFutures();
 					roundTable();
 					
 					
@@ -235,27 +235,24 @@ public class ConcretePokerServer extends PokerServer  {
 					Card[] flop = deck.drawCards(3);
 					cardPool.addAll(Arrays.asList(flop));
 					gui.revealCards(flop);
-					newState(GameState.FLOP);
 					broadcast(new ReceivePublicCards(flop));
-					createActionFutures();
+					newState(GameState.FLOP);
 					roundTable();
 
 					// turn cards
 					Card[] turn = deck.drawCards(1);
 					cardPool.add(turn[0]);
 					gui.revealCards(turn);
-					newState(GameState.TURN);
 					broadcast(new ReceivePublicCards(turn));
-					createActionFutures();
+					newState(GameState.TURN);
 					roundTable();
 					
 					// river cards
 					Card[] river = deck.drawCards(1);
 					cardPool.add(river[0]);
 					gui.revealCards(river);
-					newState(GameState.RIVER);
 					broadcast(new ReceivePublicCards(river));
-					createActionFutures();
+					newState(GameState.RIVER);
 					roundTable();					
 				} catch (RoundEndedException e1) {
 					/* ignore */
@@ -337,44 +334,56 @@ public class ConcretePokerServer extends PokerServer  {
 			
 			clientsInGame.put(id, connection);
 		}
-
-		public void createActionFutures() {
-			for (Integer i : clientsInGame.navigableKeySet()) {
-				Future<ClientAction> oldFut = actionFutures.get(i);
-				if (oldFut != null && oldFut.isResolved() && oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
-					actionFutures.put(i, oldFut);
-				} else {
-					Future<ClientAction> fut = CommLib.createFuture();
-					actionFutures.put(i, fut);
-					Log.d("PokerServer", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
-					clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut));
-					if (oldFut != null && !oldFut.isResolved())
-						oldFut.setFutureListener(null);
-				}
-			}
-		}
-
-		@SuppressWarnings("unchecked")
+		
 		public void roundTable() throws RoundEndedException {
-			TreeMap<Integer, Future<ClientAction>> clonedFutures;
-			synchronized (this) {
-				clonedFutures = (TreeMap<Integer, Future<ClientAction>>) actionFutures.clone(); 
-			}
 			
+			int minBet = 0;
 			int playersRemaining = 0;
+			boolean increasedBet = true;
 			
-			for (Integer i: clonedFutures.navigableKeySet()) {
-				Future<ClientAction> fut = clonedFutures.get(i);
-				ClientAction ca = fut.get();
-				broadcast(new ClientActionMessage(ca, i));
-				switch (ca.type) { // todo
-				case Fold: 
-					break;
-				case Bet:
-					addMoney(i, -ca.getExtra());
-					addChipsToPool(ca.getExtra());
-				default:
-					playersRemaining++;
+			// Two round
+			for (int r = 0; r < 2 && increasedBet; r++) {
+				for (Integer i : clientsInGame.navigableKeySet()) {
+					while (true) {
+						ClientAction ca;
+						Future<ClientAction> oldFut = actionFutures.get(i);
+						if (oldFut != null && oldFut.isResolved() && oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
+							ca = oldFut.unsafeGet();
+						} else {
+							Future<ClientAction> fut = CommLib.createFuture();
+							actionFutures.put(i, fut);
+							Log.d("PokerServer", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
+							clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut, r));
+							if (oldFut != null && !oldFut.isResolved())
+								oldFut.setFutureListener(null);
+							ca = fut.get();
+						}
+						if (ca == null) continue;
+						switch (ca.type) {
+						case Fold: 
+							broadcast(new ClientActionMessage(ca, i));
+							break;
+						case Check:
+						case Bet:
+							if (minBet > ca.getExtra()) {
+								actionFutures.remove(i);
+								continue; // ask for a new bet
+							}
+							playersRemaining++;
+							broadcast(new ClientActionMessage(ca, i));
+							if (minBet > 0 && ca.getExtra() > minBet) {
+								increasedBet = true; // ask for call or fold in second round
+							}
+							minBet = ca.getExtra();
+							addMoney(i, -ca.getExtra());
+							addChipsToPool(ca.getExtra());
+							break;
+						default:
+							Log.d("PokerServer", "Unknown client action message");
+							broadcast(new ClientActionMessage(ca, i));
+						}
+						break;
+					}
 				}
 			}
 			if (playersRemaining <= 1)

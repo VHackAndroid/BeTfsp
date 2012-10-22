@@ -135,17 +135,19 @@ public interface Message {
 	
 	public static class RequestClientActionFutureMessage extends TimestampedMessage {
 		public UUID futureId;
+		public int round;
 		
-		public RequestClientActionFutureMessage(Future<?> f) {
+		public RequestClientActionFutureMessage(Future<?> f, int round_) {
 			futureId = f.getFutureId();
+			round = round_;
 		}
-		
+
 		// kryo
 		public RequestClientActionFutureMessage() {}
 		
 		@Override
 		public String toString() {
-			return super.toString() + ": Future message for " + futureId;
+			return super.toString() + ": Future message for " + futureId + ". Round: " + round;
 		}
 	}
 

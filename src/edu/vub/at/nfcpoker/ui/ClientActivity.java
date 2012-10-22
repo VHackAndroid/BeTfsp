@@ -124,9 +124,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 
 
-
-
-
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
 	private static int currentMoney = 2000;
@@ -135,7 +132,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private int minimumBet = 0;
 	private int currentChipSwiped = 0;
 	private boolean touchedCard = false;
-	private ReceiveHoleCardsMessage lastReceivedCards;
+	private ReceiveHoleCardsMessage lastReceivedHoleCards;
 
 	// Dedicated
 	private int nextToReveal = 0;
@@ -288,16 +285,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		bet.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				runOnNotUiThread(new Runnable() {
-					public void run() {
-						currentMoney -= currentBet;
-						currentTotalBet += currentBet;
-						ClientAction ca = new ClientAction(ClientActionType.Bet, currentBet);
-						currentBet = 0;
-						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-					}
-				});
-				disableActions();
+				performBet();
 			}
 		});
 
@@ -305,7 +293,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			@Override
 			public void onClick(View v) {
 				performCheck();
-				disableActions();
 			}
 		});
 
@@ -320,7 +307,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		currentTotalBet = 0;
 		currentChipSwiped = 0;
 		nextToReveal = 0;
-		lastReceivedCards = null;
+		lastReceivedHoleCards = null;
 
 		listenToGameServer();
 	}
@@ -343,29 +330,36 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		}
 	}
 	
+	private void performBet() {
+		if (!bet.isEnabled()) return;
+		if (currentBet < minimumBet) {
+			Toast.makeText(this, "At least bet "+minimumBet, Toast.LENGTH_SHORT).show();
+			return;
+		}
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				currentMoney -= currentBet;
+				currentTotalBet += currentBet;
+				ClientAction ca = new ClientAction(ClientActionType.Bet, currentBet);
+				currentBet = 0;
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		disableActions();	
+	}
+	
 	private void performCheck() {
 		if (!check.isEnabled()) return;
-
-		currentBet = 0;
-		// If Bet is OK
-		if (currentBet >= minimumBet) {
-			runOnNotUiThread(new Runnable() {
-				public void run() {
-					ClientAction ca = new ClientAction(ClientActionType.Check);
-					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-				}
-			});
-		} else {
-			currentBet = minimumBet;
-			currentMoney -= minimumBet;
-			currentTotalBet += minimumBet;
-			runOnNotUiThread(new Runnable() {
-				public void run() {
-					ClientAction ca = new ClientAction(ClientActionType.Bet, minimumBet);
-					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-				}
-			});
-		}
+		currentBet = minimumBet;
+		currentMoney -= minimumBet;
+		currentTotalBet += minimumBet; // TODO check if raise after bet (round 2)
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Bet, minimumBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		disableActions();
 	}
 	
 	private void performFold() {
@@ -382,12 +376,23 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		disableActions();
 	}
 
-	private void enableActions() {
+	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				bet.setEnabled(true);
-				check.setEnabled(true);
+				if (round >= 1) {
+					// Undo previous bet
+					currentMoney += currentBet;
+					currentTotalBet -= currentBet;
+					currentBet = minimumBet;
+					bet.setEnabled(false);
+					check.setText("Call");
+					check.setEnabled(true);
+				} else {
+					bet.setEnabled(true);
+					check.setText("Check");
+					check.setEnabled(true);
+				}
 				fold.setEnabled(true);
 				updateMoneyTitle();
 				updateCheckCallText();
@@ -396,10 +401,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 	
 	private void updateCheckCallText() {
-		if (currentBet <= minimumBet) {
+		if (minimumBet > 0) {
 			check.setText("Call");
 		} else {
-			check.setText("Bet");
+			check.setText("Check");
 		}
 	}
 
@@ -407,11 +412,12 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
+				bet.setText("Bet");
 				bet.setEnabled(false);
+				check.setText("Check");
 				check.setEnabled(false);
 				fold.setEnabled(false);
 				updateMoneyTitle();
-				check.setText("Check");
 			}
 		});
 	}
@@ -461,10 +467,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					runOnUiThread(new Runnable() {
 						public void run() {
 							hideBarrier();
-							if (lastReceivedCards == null) {
+							if (lastReceivedHoleCards == null) {
 								showBarrier("Waiting for next round");
-							} else {
-								showCards();
 							}
 						}});
 					break;
@@ -486,7 +490,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 					currentTotalBet = 0;
 					currentChipSwiped = 0;
 					nextToReveal = 0;
-					lastReceivedCards = null;
+					lastReceivedHoleCards = null;
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -519,6 +523,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			if (m instanceof ReceiveHoleCardsMessage) {
 				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
 				Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+				lastReceivedHoleCards = newHoleCards;
 				ClientActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -551,7 +556,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 				runOnUiThread(new Runnable() {
 					public void run() {
-						enableActions();
+						enableActions(rcafm.round);
 					}});
 			}
 
@@ -590,8 +595,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 
 	private void updateHandGui(ReceiveHoleCardsMessage cards) {
-
-		lastReceivedCards = cards;
 		
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
@@ -814,10 +817,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		public void onSensorChanged(SensorEvent event) {
 			if (event.sensor.getType()==Sensor.TYPE_GRAVITY) {
 				final float g = SensorManager.GRAVITY_EARTH;
-				event.values[0] /= g; event.values[1] /= g; event.values[2] /= g;
 				// Log.d("foldGravitySensorEventListener", String.format("g_vec: (%f,%f,%f)", event.values[0], event.values[1], event.values[2]));
 				float dx = event.values[2];
-				if (dx < 0.9) {
+				if (dx < -9) {
 					if (foldGravity == 0) foldGravity = System.currentTimeMillis();
 					Log.d("foldGravitySensorEventListener", "Phone on its back");
 				} else {
