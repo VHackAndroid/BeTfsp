@@ -51,14 +51,14 @@ public class ConcretePokerServer extends PokerServer  {
 		@Override
 		public void run() {
 			while (true) {
-				Log.d("PokerServer", "Starting exportR");
 				String port = "" + CommLib.SERVER_PORT;
 				String dedicated = "" + isDedicated;
+				Log.d("PokerServer", "Starting export thread, advertising " + broadcastAddress + ":" + port);
 				CommLibConnectionInfo clci = new CommLibConnectionInfo(
 						PokerServer.class.getCanonicalName(),
-						new String[] {Splash.ipAddress, port, dedicated});
+						new String[] {serverAddress, port, dedicated});
 				try {
-					CommLib.export(clci, Splash.broadcastAddress);
+					CommLib.export(clci, broadcastAddress);
 				} catch (IOException e) {
 					Log.e("PokerServer", "Export failed", e);
 				}
@@ -71,7 +71,7 @@ public class ConcretePokerServer extends PokerServer  {
 	Runnable serverR = new Runnable() {
 		public void run() {
 			try {
-				Log.d("PokerServer", "Starting serverR");
+				Log.d("PokerServer", "Starting server thread");
 				Server s = new Server();
 				Kryo k = s.getKryo();
 				k.setRegistrationRequired(false);
@@ -109,6 +109,9 @@ public class ConcretePokerServer extends PokerServer  {
 		};
 	};
 	
+	private String broadcastAddress;
+	private String serverAddress;
+	
 	public enum GameState {
 		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 		
@@ -135,14 +138,18 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	};
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated) {
+	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String serverAddress, String broadcastAddress) {
 		this.gui = gui;
 		this.isDedicated = isDedicated;
+    	this.serverAddress = serverAddress;
+    	this.broadcastAddress = broadcastAddress;
 	}
 	
 	public void start() {		
+		Log.d("PokerServer", "Starting server and exporter threads...");
 		new Thread(serverR).start();
-		new Thread(exporterR).start();
+		if (broadcastAddress != null)
+			new Thread(exporterR).start();
 	}
 	
 	private GameLoop gameLoop = new GameLoop();

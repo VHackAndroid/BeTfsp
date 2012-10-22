@@ -13,30 +13,26 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import edu.vub.at.commlib.CommLib;
-import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.nfcpoker.ConcretePokerServer;
-import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.settings.Settings;
+import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiManager.MulticastLock;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings.Secure;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import edu.vub.at.commlib.CommLib;
+import edu.vub.at.commlib.CommLibConnectionInfo;
+import edu.vub.at.nfcpoker.ConcretePokerServer;
+import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.TableThing;
+import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.nfc.thing.EmptyRecord;
 import edu.vub.nfc.thing.Thing;
 import edu.vub.nfc.thing.ThingActivity;
@@ -95,8 +91,6 @@ public class Splash extends ThingActivity<TableThing> {
 	public static final String WEPOKER_WEBSITE = "http://wepoker.info";
 
 	// Connectivity state
-	public static volatile String ipAddress;
-	public static volatile String broadcastAddress;
 	private BroadcastReceiver wifiWatcher;
 	
 	// Discovery
@@ -106,12 +100,13 @@ public class Splash extends ThingActivity<TableThing> {
 	
 	// UI
 	public static Handler messageHandler;
-	private static boolean isTablet;
+	private boolean isTablet = false;
 	private int startClientServerTimerTimeout = 10000;
 	private int startClientServerTimerTimeout2 = 30000;
 
 	// NFC
 	private Object lastScannedTag_;
+	private WifiDirectManager mWifiDirectManager;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -120,18 +115,10 @@ public class Splash extends ThingActivity<TableThing> {
 
 		// Settings
 		Settings.loadSettings(this);
-
-//		Button beamButton = (Button) findViewById(R.id.beamInviteButton);
-//		beamButton.setEnabled(false);
-//		beamButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				((TableThing) lastScannedTag_).broadcast();
-//			}
-//		});
 		
 		View tablet_layout = findViewById(R.id.tablet_layout);
-		if (tablet_layout != null) isTablet = true;
+		if (tablet_layout != null)
+			isTablet = true;
 		
 		Button server = (Button) findViewById(R.id.server);
 		if (server != null)
@@ -141,19 +128,6 @@ public class Splash extends ThingActivity<TableThing> {
 					startServer();
 				}
 			});
-
-		// NFC
-		Button nfc = (Button) findViewById(R.id.nfc);
-		if (nfc != null) {
-			final Dialog nfc_dialog = createNFCDialog();
-			nfc.setEnabled(false);
-			nfc.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					nfc_dialog.show();
-				}
-			});
-		}
 
 		// UI
 		messageHandler = new IncomingHandler(this);
@@ -165,14 +139,48 @@ public class Splash extends ThingActivity<TableThing> {
 			startActivity(i);
 			return;
 		}
+				
+		final DiscoveryAsyncTask.DiscoveryCompletionListener dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
+			@Override
+			public void onDiscovered(CommLibConnectionInfo result) {
+				if (client_startClientServerTimer != null) {
+					client_startClientServerTimer.cancel();
+					client_startClientServerTimer = null;
+					if (client_startClientServerAsk != null) {
+						client_startClientServerAsk.dismiss();
+						client_startClientServerAsk = null;
+					}
+				}
+				startClient(result);
+			}
+		};
 		
-		registerWifiWatcher();
-		updateIpAddress(this);
-
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-			discoveryTask = new DiscoveryAsyncTask();
+			
+			// NFC
+			Button nfc = (Button) findViewById(R.id.nfc);
+			nfc.setEnabled(false);
+			if (isNFCSupported()) {
+				nfc.setOnClickListener(new OnClickListener() {
+					Dialog nfc_dialog;
+
+					@Override
+					public void onClick(View v) {
+						if (nfc_dialog == null)
+							nfc_dialog = createNFCDialog();
+						nfc_dialog.show();
+					}
+				});
+			} else {
+				nfc.setText("NFC disabled");
+			}
+
+			//TODO: Only try Wifi-direct if available and no wifi is found.
+			
+			discoveryTask = new DiscoveryAsyncTask(this, dcl);
 			discoveryTask.execute();
+			
 			// If there is no server responding after 10 seconds, ask the user to start one without a dedicated table
 			scheduleAskStartClientServer(startClientServerTimerTimeout);
 		} else {
@@ -180,23 +188,29 @@ public class Splash extends ThingActivity<TableThing> {
 			final Button disc = (Button) findViewById(R.id.discover_button);
 			disc.setOnClickListener(new OnClickListener() {
 				public void onClick(View v) {
-					new DiscoveryAsyncTask().execute();
+					startDiscovery(dcl);
 					disc.setEnabled(false);
 				}
-			});
+			});			
 		}
 	}
 	
+	public boolean isWifiDirectSupported() {
+		return getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_DIRECT);
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
-		registerWifiWatcher();
+//		registerWifiWatcher();
+//		mWifiDirectManager.registerReceiver();
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-		unregisterReceiver(wifiWatcher); wifiWatcher = null;
+//		unregisterReceiver(wifiWatcher); wifiWatcher = null;
+//		mWifiDirectManager.unregisterReceiver();
 		// TODO pause discovery 
 	}
 	
@@ -209,8 +223,7 @@ public class Splash extends ThingActivity<TableThing> {
 	// Connectivity
 	private class ConnectionChangeReceiver extends BroadcastReceiver {
 		public void onReceive(Context context, Intent intent ) {
-			Log.d("wePoker", "Wifi Broadcast Reciever");
-			updateIpAddress(context);
+			Log.d("wePoker", "My IP Address changed!");
 		}
 	}
 	
@@ -224,12 +237,6 @@ public class Splash extends ThingActivity<TableThing> {
 		intentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
 		registerReceiver(wifiWatcher, intentFilter);
 	}
-	
-	private void updateIpAddress(Context ctx) {
-		ipAddress = CommLib.getIpAddress(this);
-		broadcastAddress = CommLib.getBroadcastAddress(this);
-	}
-
 	
 	// UI
 	static class IncomingHandler extends Handler {
@@ -257,6 +264,15 @@ public class Splash extends ThingActivity<TableThing> {
 			}
 		}
 	}
+	
+	public void startClient(CommLibConnectionInfo clci) {
+		Intent i = new Intent(this, ClientActivity.class);
+		i.putExtra("ip", clci.getAddress());
+		i.putExtra("port", Integer.parseInt(clci.getPort()));
+		i.putExtra("isDedicated", clci.isDedicated());
+		startActivity(i);
+		finish();
+	}
 	    
 	
 	// Discovery
@@ -275,6 +291,21 @@ public class Splash extends ThingActivity<TableThing> {
 		}, timeout);
 	}
 	
+	public void startDiscovery(DiscoveryAsyncTask.DiscoveryCompletionListener dcl) {
+		if (discoveryTask != null)
+			discoveryTask.cancel(true);
+		
+		discoveryTask = new DiscoveryAsyncTask(Splash.this, dcl);
+		discoveryTask.execute();
+	}
+	
+	public void restartDiscovery() {
+		if (discoveryTask == null)
+			return;
+		
+		startDiscovery(discoveryTask.dcl);
+	}
+	
 	private void askStartClientServer() {
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
@@ -287,8 +318,10 @@ public class Splash extends ThingActivity<TableThing> {
 						new Thread() {
 							@Override
 							public void run() {
+					    		String ipAddress = CommLib.getIpAddress(Splash.this);
+					    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
 						    	ConcretePokerServer cps = new ConcretePokerServer(
-						    			new DummServerView(), false);
+						    			new DummServerView(), false, ipAddress, broadcastAddress);
 						    	cps.start();
 							}
 						}.start();
@@ -391,7 +424,14 @@ public class Splash extends ThingActivity<TableThing> {
 			discoveryTask.cancel(true);
 			discoveryTask = null;
 		}
+		
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		WifiInfo connInfo = wm.getConnectionInfo();
+		boolean enabled = wm.isWifiEnabled();
+		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
+		
 		Intent i = new Intent(this, ServerActivity.class);
+		i.putExtra("wifiDirect", isWifiDirectSupported() && !(enabled && connected));
 		startActivity(i);
 		finish();
 	}

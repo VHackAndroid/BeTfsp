@@ -1042,4 +1042,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		// TODO Auto-generated method stub
 
 	}
+
+	@Override
+	public Context getContext() {
+		return this;
+	}
 }
