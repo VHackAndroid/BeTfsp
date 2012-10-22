@@ -220,13 +220,13 @@ public class ConcretePokerServer extends PokerServer  {
 					Deck deck = new Deck();
 					
 					// hole cards
-					newState(GameState.PREFLOP);
 					for (Integer clientNum : clientsInGame.navigableKeySet()) {
 						Card preflop[] = deck.drawCards(2);
 						holeCards.put(clientNum, preflop);
 						Connection c = clientsInGame.get(clientNum);
 						c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 					}
+					newState(GameState.PREFLOP);
 					createActionFutures();
 					roundTable();
 					
