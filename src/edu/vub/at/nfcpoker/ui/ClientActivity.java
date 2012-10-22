@@ -145,11 +145,12 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private CurlView mCardView1;
 	private CurlView mCardView2;
 
+	public static final String WEPOKER_TAG = "wePoker";
 	//private int POKER_GREEN = Color.rgb(44, 103, 46);
 	public static final int POKER_GREEN = 0xFF2C672E;
 	private static final int[] DEFAULT_CARDS = new int[] { R.drawable.backside, R.drawable.backside };
 
-	// Interactivity
+	// Interactivity (Incognito)
 	public static boolean incognitoMode;
 	private static final boolean useIncognitoMode = true;
 	private static final boolean useIncognitoLight = false;
@@ -158,16 +159,23 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private long incognitoProximity;
 	private Timer incognitoDelay;
 	private SensorManager sensorManager;
+	
+	// Interactivity(Fold&Gravity)
+	private static final boolean useFoldOnGravity = true;
+	private Timer foldDelay;
+	private long foldProximity;
+	private long foldGravity;
 
-	// Help
-	private boolean firstSwipe = true;
-
-	// egb: added for gestures.
+	// Interactivity(Gestures)
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 	private GestureDetector gestureDetector;
-	View.OnTouchListener gestureListener;
+	private View.OnTouchListener gestureListener;
+
+	// Help
+	private boolean firstSwipe = true;
+	
 	private Button bet;
 	private Button check;
 	private Button fold;
@@ -189,11 +197,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 		// Interactivity
 		incognitoMode = false;
-		incognitoLight = -1;
-		incognitoProximity = -1;
-		incognitoDelay = new Timer();
+		incognitoLight = 0;
+		incognitoProximity = 0;
+		incognitoDelay = null;
+		foldProximity = 0;
+		foldGravity = 0;
+		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
 
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -294,11 +304,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		check.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				runOnNotUiThread(new Runnable() {
-					public void run() {
-						checkAction();
-					}
-				});
+				performCheck();
 				disableActions();
 			}
 		});
@@ -306,16 +312,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		fold.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				runOnNotUiThread(new Runnable() {
-					public void run() {
-						currentBet = 0;
-						ClientAction ca = new ClientAction(ClientActionType.Fold);
-						serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-					}
-				});
-				updateBetAmount();
-				updateMinBetAmount(0);
-				disableActions();
+				performFold();
 			}
 		});
 
@@ -346,24 +343,64 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		}
 	}
 	
-	private void checkAction() {
+	private void performCheck() {
 		if (!check.isEnabled()) return;
+
 		currentBet = 0;
-		ClientAction ca = new ClientAction(ClientActionType.Check);
-		serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+		// If Bet is OK
+		if (currentBet >= minimumBet) {
+			runOnNotUiThread(new Runnable() {
+				public void run() {
+					ClientAction ca = new ClientAction(ClientActionType.Check);
+					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				}
+			});
+		} else {
+			currentBet = minimumBet;
+			currentMoney -= minimumBet;
+			currentTotalBet += minimumBet;
+			runOnNotUiThread(new Runnable() {
+				public void run() {
+					ClientAction ca = new ClientAction(ClientActionType.Bet, minimumBet);
+					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+				}
+			});
+		}
+	}
+	
+	private void performFold() {
+		if (!fold.isEnabled()) return;
+		currentBet = 0;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Fold);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		updateBetAmount();
+		updateMinBetAmount(0);
+		disableActions();
 	}
 
 	private void enableActions() {
 		runOnUiThread(new Runnable() {
-
 			@Override
 			public void run() {
 				bet.setEnabled(true);
 				check.setEnabled(true);
 				fold.setEnabled(true);
 				updateMoneyTitle();
+				updateCheckCallText();
 			}
 		});
+	}
+	
+	private void updateCheckCallText() {
+		if (currentBet <= minimumBet) {
+			check.setText("Call");
+		} else {
+			check.setText("Bet");
+		}
 	}
 
 	private void disableActions() {
@@ -374,6 +411,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				check.setEnabled(false);
 				fold.setEnabled(false);
 				updateMoneyTitle();
+				check.setText("Check");
 			}
 		});
 	}
@@ -593,6 +631,20 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				}
 			}
 		}
+		if (useFoldOnGravity) {
+			Sensor gravitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+			if (gravitySensor != null) {
+				sensorManager.registerListener(foldGravitySensorEventListener,
+						gravitySensor,
+						SensorManager.SENSOR_DELAY_NORMAL);
+			}
+			Sensor proximitySensor = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+			if (proximitySensor != null) {
+				sensorManager.registerListener(foldGravitySensorEventListener,
+						proximitySensor,
+						SensorManager.SENSOR_DELAY_NORMAL);
+			}
+		}
 		mCardView1.onResume();
 		mCardView2.onResume();
 		super.onResume();
@@ -601,6 +653,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	@Override
 	protected void onPause() {
 		sensorManager.unregisterListener(incognitoSensorEventListener);
+		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
 		super.onPause();
@@ -738,11 +791,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
 		textCurrentBet.setText(" " + currentBet);
 		updateMoneyTitle();
+		updateCheckCallText();
 	}
 
 	private void updateBetAmount() {
 		final TextView currentBet = (TextView) findViewById(R.id.currentBet);
 		currentBet.setText(" " + this.currentBet);
+		updateCheckCallText();
 	}
 	
 	private void updateMinBetAmount(int value) {
@@ -750,35 +805,81 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		final TextView textCurrentBet = (TextView) findViewById(R.id.minBet);
 		textCurrentBet.setText(" " + minimumBet);
 		updateMoneyTitle();
+		updateCheckCallText();
 	}
 
 	// Interactivity
-	SensorEventListener incognitoSensorEventListener = new SensorEventListener() {
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-		}
-
+	SensorEventListener foldGravitySensorEventListener = new SensorEventListener() {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
-			if (event.sensor.getType()==Sensor.TYPE_LIGHT){
+			if (event.sensor.getType()==Sensor.TYPE_GRAVITY) {
+				final float g = SensorManager.GRAVITY_EARTH;
+				event.values[0] /= g; event.values[1] /= g; event.values[2] /= g;
+				// Log.d("foldGravitySensorEventListener", String.format("g_vec: (%f,%f,%f)", event.values[0], event.values[1], event.values[2]));
+				float dx = event.values[2];
+				if (dx < 0.9) {
+					if (foldGravity == 0) foldGravity = System.currentTimeMillis();
+					Log.d("foldGravitySensorEventListener", "Phone on its back");
+				} else {
+					foldGravity = 0;
+				}
+			}
+			if (event.sensor.getType()==Sensor.TYPE_PROXIMITY) {
+				float currentReading = event.values[0];
+				if (currentReading < 1) {
+					if (foldProximity == 0) foldProximity = System.currentTimeMillis();
+					Log.d("foldGravitySensorEventListener", "I found a table!" + currentReading);
+				} else {
+					foldProximity = 0;
+					Log.d("foldGravitySensorEventListener", "All clear!" + currentReading);
+				}
+			}
+			if ((foldProximity != 0) && (foldGravity != 0)) {
+				if (foldDelay != null) return;
+				foldDelay = new Timer();
+				foldDelay.schedule(new TimerTask() {
+					public void run() {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								Log.d("foldGravitySensorEventListener", "Folding!");
+								performFold();
+							}
+						});
+					}}, 750);
+			} else {
+				if (foldDelay != null) {
+					foldDelay.cancel();
+					foldDelay = null;
+				}
+			}
+		}
+		@Override
+		public void onAccuracyChanged(Sensor arg0, int arg1) { }
+	};
+	
+	// Interactivity
+	SensorEventListener incognitoSensorEventListener = new SensorEventListener() {
+		@Override
+		public void onSensorChanged(SensorEvent event) {
+			if (event.sensor.getType()==Sensor.TYPE_LIGHT) {
 				float currentReading = event.values[0];
 				if (currentReading < 10) {
 					if (incognitoLight == 0) incognitoLight = System.currentTimeMillis();
-					Log.d("Light SENSOR", "It's dark!" + currentReading);
+					Log.d("incognitoSensorEventListener", "It's dark!" + currentReading);
 				} else {
 					incognitoLight = 0;
-					Log.d("Light SENSOR", "It's bright!" + currentReading);
+					Log.d("incognitoSensorEventListener", "It's bright!" + currentReading);
 				}
 			}
-			if (event.sensor.getType()==Sensor.TYPE_PROXIMITY){
+			if (event.sensor.getType()==Sensor.TYPE_PROXIMITY) {
 				float currentReading = event.values[0];
 				if (currentReading < 1) {
 					if (incognitoProximity == 0) incognitoProximity = System.currentTimeMillis();
-					Log.d("Proximity SENSOR", "I found a hand!" + currentReading);
+					Log.d("incognitoSensorEventListener", "I found a hand!" + currentReading);
 				} else {
 					incognitoProximity = 0;
-					Log.d("Proximity SENSOR", "All clear!" + currentReading);
+					Log.d("incognitoSensorEventListener", "All clear!" + currentReading);
 				}
 			}
 			if ((incognitoLight != 0) && (incognitoProximity != 0)) {
@@ -790,6 +891,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 							runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
+									Log.d("incognitoSensorEventListener", "Showing cards!");
 									showCards();
 								}
 							});
@@ -811,6 +913,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				}
 			}
 		}
+		@Override
+		public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 	};
 
 	// UI
@@ -887,7 +991,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
             if (touchedCard) {
             	// Double tap on cards means check
             	touchedCard = false;
-            	checkAction();
+            	performCheck();
             }
             return true;
         }
