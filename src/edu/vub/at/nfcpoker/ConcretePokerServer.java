@@ -343,6 +343,7 @@ public class ConcretePokerServer extends PokerServer  {
 			
 			// Two round
 			for (int r = 0; r < 2 && increasedBet; r++) {
+				increasedBet = false;
 				for (Integer i : clientsInGame.navigableKeySet()) {
 					while (true) {
 						ClientAction ca;
