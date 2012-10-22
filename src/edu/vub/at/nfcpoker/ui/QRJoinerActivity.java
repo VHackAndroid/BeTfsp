@@ -4,6 +4,8 @@ package edu.vub.at.nfcpoker.ui;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.R;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.State;
 import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -52,7 +54,16 @@ public class QRJoinerActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
+			Log.d("QRJoiner", "Received intent " + intent);
 			String newStatus = null;
+			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
+				NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+				WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
+				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifiInfo.getSSID().equals(wifi_name)) {
+					publishProgress("Joining game!");
+					startClientActivity();
+				}
+			}
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				int new_wifi_status = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 				newStatus = status_strings[new_wifi_status];
@@ -70,10 +81,7 @@ public class QRJoinerActivity extends Activity {
 					if (ssid != null)
 						new_network_name = ssid;
 					
-					if (currentlyJoining && ssid.equals(wifi_name)) {
-						publishProgress("Starting game!");
-						startClientActivity();
-					} else if (currentlyJoining) {
+					if (currentlyJoining) {
 						publishProgress("Connecting to network...");
 						if (wifi_isWD) {
 							WifiConfiguration config = new WifiConfiguration();
@@ -143,6 +151,7 @@ public class QRJoinerActivity extends Activity {
         
         intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 		
 		Button joinerButton = (Button) findViewById(R.id.connect_btn);
 		joinerButton.setOnClickListener(joinerButtonOCL);
@@ -151,8 +160,9 @@ public class QRJoinerActivity extends Activity {
     
 
     protected void publishProgress(String string) {
-		// TODO Auto-generated method stub
-		
+    	Button connectButton = (Button) findViewById(R.id.connect_btn);
+    	connectButton.setText(string);
+    	Log.d("QRJoiner", "Progress update: " + string);
 	}
 
 
