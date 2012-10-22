@@ -11,6 +11,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.R;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -40,7 +41,7 @@ import android.widget.TextView;
 
 @TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
-	
+
 	public interface ServerStarter {
 		public void start(String ipAddress, String broadcastAddress);
 
@@ -175,11 +176,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 	
     private String createJoinUri() {
-    	Uri uri = Uri.parse("https://code.google.com/p/ambienttalk/wiki/WePoker")
+    	Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
     			     .buildUpon()
-    			     .appendQueryParameter("wifiName", currentWifiGroupName)
-    			     .appendQueryParameter("wifiPass", currentWifiPassword)
-    			     .appendQueryParameter("serverIp", currentIpAddress)
+    			     .appendQueryParameter(Constants.INTENT_WIFI_NAME, currentWifiGroupName)
+    			     .appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, currentWifiPassword)
+    			     .appendQueryParameter(Constants.INTENT_WIFI_IS_DIRECT, "" + isWifiDirect)
+    			     .appendQueryParameter(Constants.INTENT_SERVER_IP, currentIpAddress)
     			     .build();
     	
     	return uri.toString();
