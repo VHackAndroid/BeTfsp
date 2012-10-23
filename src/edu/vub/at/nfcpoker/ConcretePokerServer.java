@@ -29,6 +29,7 @@ import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.NicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
@@ -94,6 +95,12 @@ public class ConcretePokerServer extends PokerServer  {
 							FutureMessage fm = (FutureMessage) msg;
 							Log.d("PokerServer", "Resolving future " + fm.futureId + "(" + CommLib.futures.get(fm.futureId) + ") with value " + fm.futureValue);
 							CommLib.resolveFuture(fm.futureId, fm.futureValue);
+						}
+						if (msg instanceof NicknameMessage) {
+							NicknameMessage nm = (NicknameMessage) msg;
+							Log.d("PokerServer", "");
+							gameLoop.broadcast(nm);
+							gameLoop.updatePlayerName(c, nm.nickname);
 						}
 					}
 					
@@ -163,6 +170,14 @@ public class ConcretePokerServer extends PokerServer  {
 		public GameLoop() {
 			gameState = GameState.STOPPED;
 			Collections.shuffle(names);
+		}
+
+		public void updatePlayerName(Connection c, String nickname) {
+			for (Integer i : clientsInGame.keySet()) {
+				if (clientsInGame.get(i) == c) {
+					playerNames.put(i, nickname);
+				}
+			}
 		}
 
 		// todo: what if client disconnects before next round?
