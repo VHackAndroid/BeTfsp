@@ -99,7 +99,7 @@ public class ConcretePokerServer extends PokerServer  {
 					@Override
 					public void disconnected(Connection c) {
 						super.disconnected(c);
-						Log.d("PokerServer", "Client disconnected: " + c.getRemoteAddressTCP());
+						Log.d("PokerServer", "Client disconnected: " + c);
 						gameLoop.removeClient(c);
 					}
 				});
@@ -165,7 +165,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 		// todo: what if client disconnects before next round?
 		public void removeClient(Connection c) {
-			Log.d("PokerServer", "Client disconnected: " + c);
+			Log.d("PokerServer", "Client removed: " + c);
 			synchronized(this) {
 				for (Integer i : clientsInGame.keySet()) {
 					if (clientsInGame.get(i) == c) {
