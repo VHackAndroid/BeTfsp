@@ -282,6 +282,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	@Override
+	public void updatePoolMoney(int chipsPool) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
 	public void removePlayer(final Integer player) {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -298,5 +304,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	@Override
 	public Context getContext() {
 		return this;
-	};
+	}
+
 }

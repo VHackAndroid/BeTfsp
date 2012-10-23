@@ -817,6 +817,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		updateMoneyTitle();
 		updateCheckCallText();
 	}
+	
+	@Override
+	public void updatePoolMoney(int chipsPool) {
+		final TextView textPool = (TextView) findViewById(R.id.pool);
+		if (textPool == null) return;
+		textPool.setText(" " + chipsPool);
+	}
 
 	// Interactivity
 	SensorEventListener foldGravitySensorEventListener = new SensorEventListener() {

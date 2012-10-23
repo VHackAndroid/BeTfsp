@@ -201,8 +201,9 @@ public class ConcretePokerServer extends PokerServer  {
 			
 		public void run() {
 			while (true) {
-				gui.resetCards();
 				chipsPool = 0;
+				gui.resetCards();
+				gui.updatePoolMoney(chipsPool);
 				synchronized(this) {
 					actionFutures.clear();
 					for (Integer id : newClients.navigableKeySet()) {
@@ -408,6 +409,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 		private void addChipsToPool(int extra) {
 			chipsPool += extra;
+			gui.updatePoolMoney(chipsPool);
 		}
 
 		private void newState(GameState newState) {

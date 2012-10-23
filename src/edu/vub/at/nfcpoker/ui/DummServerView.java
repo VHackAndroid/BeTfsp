@@ -22,6 +22,9 @@ public class DummServerView implements ServerViewInterface {
 	public void setPlayerMoney(Integer player, int current) { }
 
 	@Override
+	public void updatePoolMoney(int chipsPool) { }
+
+	@Override
 	public void removePlayer(Integer i) { }
 
 	@Override
