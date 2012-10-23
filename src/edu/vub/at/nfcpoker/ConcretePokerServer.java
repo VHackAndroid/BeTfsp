@@ -194,6 +194,7 @@ public class ConcretePokerServer extends PokerServer  {
 		public ConcurrentSkipListMap<Integer, Future<ClientAction>> actionFutures = new ConcurrentSkipListMap<Integer, Future<ClientAction>>();  
 		public ConcurrentSkipListMap<Integer, Integer> playerMoney = new ConcurrentSkipListMap<Integer, Integer>();
 		public ConcurrentSkipListMap<Integer, String> playerNames = new ConcurrentSkipListMap<Integer, String>();
+		public ConcurrentSkipListMap<String, Integer> reconnectIdentification = new ConcurrentSkipListMap<String, Integer>(); // Android-ID -> Client-ID
 
 		public GameState gameState;
 		int chipsPool = 0;
