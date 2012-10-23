@@ -365,7 +365,13 @@ public class ConcretePokerServer extends PokerServer  {
 							Future<ClientAction> fut = CommLib.createFuture();
 							actionFutures.put(i, fut);
 							Log.d("PokerServer", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
-							clientsInGame.get(i).sendTCP(new RequestClientActionFutureMessage(fut, r));
+							Connection c = clientsInGame.get(i);
+							if (c == null) {
+								// If client disconnected -> Fold
+								broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold), i));
+								break;
+							}
+							c.sendTCP(new RequestClientActionFutureMessage(fut, r));
 							if (oldFut != null && !oldFut.isResolved())
 								oldFut.setFutureListener(null);
 							ca = fut.get();
