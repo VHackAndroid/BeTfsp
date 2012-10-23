@@ -825,28 +825,31 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		switch (requestCode) {
 			case RESULT_SPEECH: {
 				if (resultCode == RESULT_OK && null != data) {
-					ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-					Log.d("Text2Speech", "Got: " + text);
-					if (text.size() <= 0) return;
-					if (text.size() > 3) return;
-					String msg = text.get(0);
-					int amount = 0;
-					for (int i = 1; i < text.size(); i++) {
-						amount = txtToInteger(text.get(i));
-						if (amount >= 0) {
-							break;
-						} else {
-							msg += " " + text.get(i);
-						}
-					}
-					String actions[] = { "bet", "check", "call", "fold", "all in" };
-					double bestScore = 0;
+					ArrayList<String> candidates = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+					Log.d("Text2Speech", "Got: " + candidates);
+					double bestScore = 1;
 					int bestActionI = -1;
-					for (int i = 0; i < actions.length; i++) {
-						double score = Levenshtein.ratioScore(actions[i], msg);
-						if (score < 0.4 && score > bestScore) { // 40% of the chars do not match
-							bestScore = score;
-							bestActionI = i;
+					int amount = 0;
+					for (int i = 0; i < candidates.size(); i++) {
+						String candidate[] = candidates.get(i).split(" ");
+						if (candidate.length <= 0) return;
+						if (candidate.length > 3) return;
+						String msg = candidate[0];
+						for (int j = 1; j < candidate.length; j++) {
+							amount = txtToInteger(candidate[j]);
+							if (amount >= 0) {
+								break;
+							} else {
+								msg += " " + candidate[j];
+							}
+						}
+						String actions[] = { "bet", "check", "call", "fold", "all in" };
+						for (int j = 0; j < actions.length; j++) {
+							double score = Levenshtein.ratioScore(actions[j], msg);
+							if (score < 0.4 && score < bestScore) { // 40% of the chars do not match
+								bestScore = score;
+								bestActionI = j;
+							}
 						}
 					}
 					switch (bestActionI) {
