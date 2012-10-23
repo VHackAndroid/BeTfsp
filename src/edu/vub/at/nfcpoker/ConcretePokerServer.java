@@ -374,7 +374,12 @@ public class ConcretePokerServer extends PokerServer  {
 						case Fold: 
 							broadcast(new ClientActionMessage(ca, i));
 							break;
-						case Check:
+						case Check: // And CALL (client sends diffMoney!)
+							playersRemaining++;
+							broadcast(new ClientActionMessage(ca, i));
+							addMoney(i, -ca.getExtra());
+							addChipsToPool(ca.getExtra());
+							break;
 						case Bet:
 							if (minBet > ca.getExtra()) {
 								actionFutures.remove(i);

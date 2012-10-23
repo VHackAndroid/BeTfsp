@@ -147,7 +147,7 @@ public interface Message {
 		
 		@Override
 		public String toString() {
-			return super.toString() + ": Future message for " + futureId + ". Round: " + round;
+			return super.toString() + ": Future message for " + futureId + ". Round: " + round + ".";
 		}
 	}
 
