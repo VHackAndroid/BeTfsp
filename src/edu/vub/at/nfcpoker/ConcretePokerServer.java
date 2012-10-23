@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -35,7 +37,6 @@ import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
-import edu.vub.at.nfcpoker.ui.Splash;
 
 public class ConcretePokerServer extends PokerServer  {
 	
@@ -157,6 +158,7 @@ public class ConcretePokerServer extends PokerServer  {
 	class GameLoop implements Runnable {
 		
 		private static final int INITIAL_MONEY = 2000;
+		private static final int DELAY_GAME_START = 5000;
 
 		public GameLoop() {
 			gameState = GameState.STOPPED;
@@ -195,6 +197,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 		public GameState gameState;
 		int chipsPool = 0;
+		Timer delayGameStart;
 			
 		public void run() {
 			while (true) {
@@ -348,7 +351,7 @@ public class ConcretePokerServer extends PokerServer  {
 			int playersRemaining = 0;
 			boolean increasedBet = true;
 			
-			// Two round
+			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
 				increasedBet = false;
 				for (Integer i : clientsInGame.navigableKeySet()) {
@@ -416,16 +419,26 @@ public class ConcretePokerServer extends PokerServer  {
 
 		public void addClient(Connection c) {
 			Log.d("PokerServer", "Adding client " + c.getRemoteAddressTCP());
-			synchronized(this) {
-				newClients.put(nextClientID, c);
-			}
+			newClients.put(nextClientID, c);
 			c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 			c.sendTCP(new SetIDMessage(nextClientID));
 			nextClientID++;
 			if (newClients.size() >= 2) {
 				if (gameState == GameState.STOPPED) {
-					Log.d("PokerServer", "Two or more clients connected, game can start");
-					new Thread(this).start();
+					Log.d("PokerServer", "Two or more clients connected, game can start (delay "+DELAY_GAME_START+"s)");
+					if (delayGameStart != null) {
+						delayGameStart.cancel();
+						delayGameStart = null;
+					}
+					delayGameStart = new Timer();
+					final Runnable gameLoop = this;
+					delayGameStart.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							Log.d("PokerServer", "Starting the game");
+							new Thread(gameLoop).start();
+						}
+					}, DELAY_GAME_START);
 				} else if (gameState == GameState.WAITING_FOR_PLAYERS) {
 					synchronized(this) { this.notifyAll(); }
 				}
