@@ -16,6 +16,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
 import android.text.InputType;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -176,6 +179,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	
 	// Interactivity(Speech)
 	private static final int RESULT_SPEECH = 1;
+	
+	// Interactivity(Audio)
+	private static final boolean audioFeedback = false;
+	private TextToSpeech tts = null;
+	private boolean ttsInitialised = false;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -208,7 +216,8 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		foldGravity = 0;
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-
+		tts = new TextToSpeech(this, txtToSpeechListener);
+		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
 		gestureListener = new View.OnTouchListener() {
@@ -355,6 +364,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
+		outputTextToSpeech("Bet "+currentStateBet);
 		disableActions();	
 	}
 
@@ -379,6 +389,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
+		outputTextToSpeech("Following for "+currentStateBet);
 		disableActions();
 	}
 
@@ -390,6 +401,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
+		outputTextToSpeech("Fold");
 		updateBetAmount();
 		disableActions();
 	}
@@ -412,6 +424,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
+		outputTextToSpeech("All in for "+currentStateBet);
 		updateBetAmount();
 		disableActions();
 	}
@@ -710,6 +723,17 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		super.onStop();
 		Settings.saveSettings(this);
 	}
+	
+	@Override
+	public void onDestroy() {
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+            tts = null;
+            ttsInitialised = false;
+        }
+        super.onDestroy();
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -745,7 +769,33 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	TextToSpeech.OnInitListener txtToSpeechListener = new TextToSpeech.OnInitListener() {
+		@Override
+		public void onInit(int status) {
+            ttsInitialised = true;
+			if (status == TextToSpeech.SUCCESS) {
+	            int result = tts.setLanguage(Locale.US);
+	            if (result == TextToSpeech.LANG_MISSING_DATA
+	                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+	                Log.e("TTS", "This Language is not supported");
+	                tts = null;
+	            }
+	        } else {
+	            Log.e("TTS", "Initilization Failed!");
+                tts = null;
+	        }
+
+		}
+	};
+	
 	private void outputTextToSpeech(String msg) {
+		if (!audioFeedback) return;
+		if (tts == null) return;
+		if (!ttsInitialised) return;
+        tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+	}
+	
 	private void askSpeechInput() {
 		if (!fold.isEnabled()) return;
 		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
