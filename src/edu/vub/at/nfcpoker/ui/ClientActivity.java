@@ -1,6 +1,8 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -65,6 +67,7 @@ import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
+import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
 
@@ -170,6 +173,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 	private GestureDetector gestureDetector;
 	private View.OnTouchListener gestureListener;
+	
+	// Interactivity(Speech)
+	private static final int RESULT_SPEECH = 1;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -720,6 +726,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
+		case R.id.speech:
+			askSpeechInput();
+			return true;
 		case R.id.allIn:
 			performAllIn();
 			return true;
@@ -734,6 +743,85 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+	private void outputTextToSpeech(String msg) {
+	private void askSpeechInput() {
+		if (!fold.isEnabled()) return;
+		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, "en-US");
+        try {
+            startActivityForResult(intent, RESULT_SPEECH);
+        } catch (ActivityNotFoundException a) {
+            Toast t = Toast.makeText(this,
+                    "Oops! Your device doesn't support Speech to Text",
+                    Toast.LENGTH_SHORT);
+            t.show();
+            outputTextToSpeech("Oops! Your device doesn't support Speech to Text");
+        }
+	}
+	
+	private int txtToInteger(String msg) {
+	   try {  
+	      return Integer.parseInt(msg);   
+	   } catch(Exception e) {  
+	      return -1;  
+	   }
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+			case RESULT_SPEECH: {
+				if (resultCode == RESULT_OK && null != data) {
+					ArrayList<String> text = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+					Log.d("Text2Speech", "Got: " + text);
+					if (text.size() <= 0) return;
+					if (text.size() > 3) return;
+					String msg = text.get(0);
+					int amount = 0;
+					for (int i = 1; i < text.size(); i++) {
+						amount = txtToInteger(text.get(i));
+						if (amount >= 0) {
+							break;
+						} else {
+							msg += " " + text.get(i);
+						}
+					}
+					String actions[] = { "bet", "check", "call", "fold", "all in" };
+					double bestScore = 0;
+					int bestActionI = -1;
+					for (int i = 0; i < actions.length; i++) {
+						double score = Levenshtein.ratioScore(actions[i], msg);
+						if (score < 0.4 && score > bestScore) { // 40% of the chars do not match
+							bestScore = score;
+							bestActionI = i;
+						}
+					}
+					switch (bestActionI) {
+					case 0: // Bet
+						currentSelectedBet = amount;
+						performBet();
+						break;
+					case 1: // Check
+					case 2: // Call
+						performCheck();
+						break;
+					case 3: // Fold
+						performFold();
+						break;
+					case 4: // All in
+						performAllIn();
+						break;
+					default:
+						Log.d("Text2Speech", "No action found");
+						outputTextToSpeech("No command recognised.");
+						break;
+					}
+				}
+				break;
+			}
 		}
 	}
 
