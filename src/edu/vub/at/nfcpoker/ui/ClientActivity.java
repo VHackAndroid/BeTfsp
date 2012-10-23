@@ -781,20 +781,17 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		Toast t;
 		switch (toast) {
 		case Positive:
-			t = Toast.makeText(ClientActivity.this, "Adding " + currentChipSwiped + "\u20AC to the bet", Toast.LENGTH_SHORT);
-			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-			t.show();
-			break;
 		case Negative:
-			t = Toast.makeText(ClientActivity.this, "Reducing bet with " + currentChipSwiped + "\u20AC", Toast.LENGTH_SHORT);
-			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-			t.show();
 			break;
 		case OutOfMoney:
-			Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT).show();
+			t = Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT);
+			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+			t.show();
 			break;
 		case MinimumBet:
-			Toast.makeText(ClientActivity.this, "Minimum bet required", Toast.LENGTH_SHORT).show();
+			t = Toast.makeText(ClientActivity.this, "Minimum bet required", Toast.LENGTH_SHORT);
+			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+			t.show();
 			break;
 		}
 
