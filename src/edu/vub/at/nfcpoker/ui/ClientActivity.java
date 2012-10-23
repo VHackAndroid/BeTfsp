@@ -354,9 +354,13 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	private void performCheck() {
 		if (!check.isEnabled()) return;
+		if (minimumBet >= currentStateBet + currentMoney) { // All in
+			performAllIn();
+			return;
+		}
 		int diffMoney = 0;
 		if (currentStateBet > 0) {
-			diffMoney = Math.max(0, minimumBet - currentStateBet); // Call
+			diffMoney = minimumBet - currentStateBet; // 2nd round
 		}
 		currentSelectedBet = minimumBet;
 		currentStateBet = minimumBet;
@@ -383,6 +387,28 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		updateBetAmount();
 		disableActions();
 	}
+	
+	// TODO: force all in if not enough money for blind / bet / ...
+	private void performAllIn() {
+		if (!fold.isEnabled()) return;
+		int diffMoney = 0;
+		if (currentStateBet > 0) {
+			diffMoney = Math.max(0, currentMoney - currentStateBet); // All-in (after previous bet)
+		}
+		currentSelectedBet = currentMoney;
+		currentStateBet = currentMoney;
+		currentMoney -= diffMoney;
+		currentTotalBet += diffMoney;
+		final int fDiffMoney = diffMoney;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.AllIn, fDiffMoney);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		updateBetAmount();
+		disableActions();
+	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -403,7 +429,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	private void updateCheckCallText() {
 		if (minimumBet > 0) {
-			check.setText("Call");
+			if (minimumBet >= currentStateBet + currentMoney) {
+				check.setText("All in");
+			} else {
+				check.setText("Call");
+			}
 		} else {
 			check.setText("Check");
 		}
@@ -571,7 +601,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				final SetIDMessage sidm = (SetIDMessage) m;
 				myClientID = sidm.id;
 			}
-
+			
 			if (m instanceof RoundWinnersDeclarationMessage) {
 				final RoundWinnersDeclarationMessage rwdm = (RoundWinnersDeclarationMessage) m;
 				final Set<Integer> players = rwdm.bestPlayers;
@@ -690,6 +720,9 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle item selection
 		switch (item.getItemId()) {
+		case R.id.allIn:
+			performAllIn();
+			return true;
 		case R.id.itemSetName:
 			askNickName();
 			return true;
@@ -717,7 +750,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				try {
 					String nickname = input.getText().toString();
 					Settings.saveSettings(ctx);
-					// TODO Server: User X added #{extra}
 					NicknameMessage ca = new NicknameMessage(nickname);
 					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 				} catch (Exception e) {	}

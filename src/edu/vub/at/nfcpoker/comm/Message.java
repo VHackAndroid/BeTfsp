@@ -11,7 +11,7 @@ import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
-	enum ClientActionType { Bet, Fold, Check };
+	enum ClientActionType { Bet, Fold, Check, AllIn };
 
 	public static final class ClientAction {
 		public ClientActionType type;

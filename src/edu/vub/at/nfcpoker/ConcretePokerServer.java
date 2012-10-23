@@ -375,7 +375,9 @@ public class ConcretePokerServer extends PokerServer  {
 					while (true) {
 						ClientAction ca;
 						Future<ClientAction> oldFut = actionFutures.get(i);
-						if (oldFut != null && oldFut.isResolved() && oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
+						if (oldFut != null &&
+								oldFut.isResolved() &&
+								oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
 							ca = oldFut.unsafeGet();
 						} else {
 							Future<ClientAction> fut = CommLib.createFuture();
@@ -398,6 +400,12 @@ public class ConcretePokerServer extends PokerServer  {
 							broadcast(new ClientActionMessage(ca, i));
 							break;
 						case Check: // And CALL (client sends diffMoney!)
+							playersRemaining++;
+							broadcast(new ClientActionMessage(ca, i));
+							addMoney(i, -ca.getExtra());
+							addChipsToPool(ca.getExtra());
+							break;
+						case AllIn: // Client sends diffMoney
 							playersRemaining++;
 							broadcast(new ClientActionMessage(ca, i));
 							addMoney(i, -ca.getExtra());
