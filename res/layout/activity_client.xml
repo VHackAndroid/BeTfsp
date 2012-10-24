@@ -3,13 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="#2c672e"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:baselineAligned="false" >
 
     <LinearLayout
         android:id="@+id/cards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:baselineAligned="false"
         android:gravity="center|center_vertical"
         android:orientation="horizontal" >
 
@@ -74,7 +76,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	android:baselineAligned="false" >
         
 		<!-- 
 		<edu.vub.at.nfcpoker.ui.tools.PageCurlView
@@ -109,6 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="160dip"
             android:layout_weight="1"
+    		android:baselineAligned="false"
             android:scaleType="fitXY" />
 		
 		<fi.harism.curl.CurlView
@@ -116,6 +120,7 @@
             android:layout_width="wrap_content"
             android:layout_height="160dip"
             android:layout_weight="1"
+    		android:baselineAligned="false"
             android:scaleType="fitXY" />
 
     </LinearLayout>
@@ -124,6 +129,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+    	android:baselineAligned="false"
      >
 
      <ImageView
@@ -131,6 +137,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+    	android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
@@ -141,6 +148,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+    	 android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
@@ -151,6 +159,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+    	 android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
@@ -161,6 +170,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+    	 android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
@@ -171,6 +181,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
+    	 android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
@@ -182,12 +193,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	android:baselineAligned="false" >
 
         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	android:baselineAligned="false" >
 
             <TextView
                 android:id="@+id/labelCurrentBet"
@@ -218,7 +231,8 @@
   <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	 android:baselineAligned="false" >
         
         <TextView
             android:id="@+id/labelMinBet"
@@ -249,7 +263,8 @@
   <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	android:baselineAligned="false" >
         
         <TextView
             android:id="@+id/labelPool"
@@ -282,7 +297,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+    	android:baselineAligned="false" >
 
         <Button
             android:id="@+id/Bet"

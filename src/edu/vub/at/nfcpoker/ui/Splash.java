@@ -52,9 +52,6 @@ public class Splash extends Activity {
 	private int startClientServerTimerTimeout = 10000;
 	private int startClientServerTimerTimeout2 = 30000;
 
-	// NFC
-	private Object lastScannedTag_;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

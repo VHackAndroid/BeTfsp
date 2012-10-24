@@ -21,6 +21,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
+import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -417,7 +418,7 @@ public class CurlView extends GLSurfaceView implements View.OnTouchListener,
 		}
 
 		// Finally normalize direction vector and do rendering.
-		double dist = Math.sqrt(curlDir.x * curlDir.x + curlDir.y * curlDir.y);
+		double dist = FloatMath.sqrt(curlDir.x * curlDir.x + curlDir.y * curlDir.y);
 		if (dist != 0) {
 			curlDir.x /= dist;
 			curlDir.y /= dist;
@@ -650,7 +651,7 @@ public class CurlView extends GLSurfaceView implements View.OnTouchListener,
 
 			mCurlDir.x = mCurlPos.x - mDragStartPos.x;
 			mCurlDir.y = mCurlPos.y - mDragStartPos.y;
-			float dist = (float) Math.sqrt(mCurlDir.x * mCurlDir.x + mCurlDir.y
+			float dist = (float) FloatMath.sqrt(mCurlDir.x * mCurlDir.x + mCurlDir.y
 					* mCurlDir.y);
 
 			// Adjust curl radius so that if page is dragged far enough on
@@ -676,7 +677,7 @@ public class CurlView extends GLSurfaceView implements View.OnTouchListener,
 				}
 				mCurlPos.y -= mCurlDir.y * translate / dist;
 			} else {
-				double angle = Math.PI * Math.sqrt(dist / curlLen);
+				double angle = Math.PI * FloatMath.sqrt(dist / curlLen);
 				double translate = radius * Math.sin(angle);
 				mCurlPos.x += mCurlDir.x * translate / dist;
 				mCurlPos.y += mCurlDir.y * translate / dist;

@@ -11,7 +11,6 @@ import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.ui.DiscoveryAsyncTask.DiscoveryCompletionListener;
 
 public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
 	public interface DiscoveryCompletionListener {

@@ -3,14 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="#2c672e"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:baselineAligned="false" >
 
     <LinearLayout
         android:id="@+id/layoutCards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:baselineAligned="false" >
         
 		<!-- 
 		<edu.vub.at.nfcpoker.ui.tools.PageCurlView
@@ -60,6 +62,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:baselineAligned="false"
      >
 
      <ImageView
@@ -118,12 +121,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:baselineAligned="false" >
 
         <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:baselineAligned="false" >
 
         <TextView
             android:id="@+id/labelCurrentBet"
@@ -153,7 +158,8 @@
   <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:baselineAligned="false" >
         
         <TextView
             android:id="@+id/labelMinBet"
@@ -185,7 +191,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:layout_weight="1"
+        android:baselineAligned="false" >
 
         <Button
             android:id="@+id/Bet"
