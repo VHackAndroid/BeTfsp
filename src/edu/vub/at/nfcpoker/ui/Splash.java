@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -29,14 +30,9 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.R;
-import edu.vub.at.nfcpoker.TableThing;
 import edu.vub.at.nfcpoker.settings.Settings;
-import edu.vub.nfc.thing.EmptyRecord;
-import edu.vub.nfc.thing.Thing;
-import edu.vub.nfc.thing.ThingActivity;
-import edu.vub.nfc.thing.listener.ThingSavedListener;
 
-public class Splash extends ThingActivity<TableThing> {
+public class Splash extends Activity {
 	private static final boolean LODE = false;
 
 	// Shared globals
@@ -148,6 +144,10 @@ public class Splash extends ThingActivity<TableThing> {
 	
 	public boolean isWifiDirectSupported() {
 		return getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_DIRECT);
+	}
+	
+	public boolean isNFCSupported() {
+		return false;
 	}
 
 	@Override
@@ -309,7 +309,8 @@ public class Splash extends ThingActivity<TableThing> {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		LayoutInflater inflater = this.getLayoutInflater();
 		builder.setView(inflater.inflate(R.layout.dialog_signin, null));
-		final AlertDialog dialog = builder.create();
+		return null;
+/*		final AlertDialog dialog = builder.create();
 		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Write", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface d, int id) {
@@ -351,23 +352,7 @@ public class Splash extends ThingActivity<TableThing> {
 			}
 		});
 		return dialog;
-	}
-
-	@Override
-	public void whenDiscovered(TableThing tableThing) {
-		super.whenDiscovered(tableThing);
-		Button nfcButton = (Button) findViewById(R.id.nfc);
-		nfcButton.setEnabled(true);
-		lastScannedTag_ = tableThing;
-		startClientNFC(tableThing);
-	}
-
-	@Override
-	public void whenDiscovered(EmptyRecord r) {
-		super.whenDiscovered(r);
-		Button nfcButton = (Button) findViewById(R.id.nfc);
-		nfcButton.setEnabled(true);
-		lastScannedTag_ = r;
+*/
 	}
 
 	protected void startServer() {
@@ -386,25 +371,6 @@ public class Splash extends ThingActivity<TableThing> {
 		startActivity(i);
 		finish();
 	}
-	
-	protected void startClientNFC(TableThing tag) {
-		if (tag != null) {
-			if (discoveryTask != null) {
-				discoveryTask.cancel(true);
-				discoveryTask = null;
-			}
-			Intent i = new Intent(this, ClientActivity.class);
-			i.putExtra("ip", tag.ip_);
-			i.putExtra("port", tag.port_);
-			i.putExtra("isDedicated", false);
-			startActivity(i);
-			finish();
-		}
-	}
 
-	@Override
-	public Class<? extends Thing> getThingType() {
-		return TableThing.class;
-	}
 }
 
