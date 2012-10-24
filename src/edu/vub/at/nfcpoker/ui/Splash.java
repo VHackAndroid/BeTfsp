@@ -263,7 +263,16 @@ public class Splash extends Activity {
 					if (client_startClientServerTimer != null) {
 						client_startClientServerTimer.cancel();
 						client_startClientServerTimer = null;
-						startServer();
+						new Thread() {
+							@Override
+							public void run() {
+					    		String ipAddress = CommLib.getIpAddress(Splash.this);
+					    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
+						    	ConcretePokerServer cps = new ConcretePokerServer(
+						    			new DummServerView(), false, ipAddress, broadcastAddress);
+						    	cps.start();
+							}
+						}.start();
 					}
 					break;
 				case DialogInterface.BUTTON_NEGATIVE:
