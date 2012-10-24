@@ -5,7 +5,7 @@
         android:showAsAction="ifRoom" />
     <item android:id="@+id/allIn"
         android:title="All in"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="never" />
     <item android:id="@+id/itemSetName"
         android:title="Set Nickname" />
     <item android:id="@+id/itemAddMoney"
