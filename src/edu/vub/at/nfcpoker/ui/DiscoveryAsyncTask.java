@@ -37,7 +37,7 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
 					return c;
 				} catch (IOException e) {
-					Log.d("Discovery", "Could not start discovery", e);
+					Log.d("wePoker - Discovery", "Could not start discovery", e);
 				}
 				Thread.sleep(2000);
 			}

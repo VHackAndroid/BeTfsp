@@ -244,10 +244,10 @@ public class PageCurlView extends View {
 			mInitialEdgeOffset = a.getInt(R.styleable.PageCurlView_initialEdgeOffset, mInitialEdgeOffset);
 			mCurlMode = a.getInt(R.styleable.PageCurlView_curlMode, mCurlMode);
 			
-			Log.i(TAG, "mCurlSpeed: " + mCurlSpeed);
-			Log.i(TAG, "mUpdateRate: " + mUpdateRate);
-			Log.i(TAG, "mInitialEdgeOffset: " + mInitialEdgeOffset);
-			Log.i(TAG, "mCurlMode: " + mCurlMode);
+			Log.i("wePoker - "+TAG, "mCurlSpeed: " + mCurlSpeed);
+			Log.i("wePoker - "+TAG, "mUpdateRate: " + mUpdateRate);
+			Log.i("wePoker - "+TAG, "mInitialEdgeOffset: " + mInitialEdgeOffset);
+			Log.i("wePoker - "+TAG, "mCurlMode: " + mCurlMode);
 			
 			// recycle object (so it can be used by others)
 			a.recycle();

@@ -161,7 +161,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 				qrCodeIV.setImageBitmap(qrCode);
 			} catch (WriterException e) {
-				Log.e("ServerActivity", "Could not create QR code", e);
+				Log.e("wePoker - Server", "Could not create QR code", e);
 			}
 			
 			
@@ -194,7 +194,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (Card c : cards) {
-					Log.d("PokerServer", "Revealing card " + c);
+					Log.d("wePoker - Server", "Revealing card " + c);
 					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 					ib.setImageResource(cardToResourceID(c));
@@ -212,7 +212,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	
 
 	public void resetCards() {
-		Log.d("PokerServer", "Hiding cards again");
+		Log.d("wePoker - Server", "Hiding cards again");
 		nextToReveal = 0;
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -253,7 +253,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				Log.d("PokerServer", "Adding player name " + clientName);
+				Log.d("wePoker - Server", "Adding player name " + clientName);
 				LinearLayout users = (LinearLayout) findViewById(R.id.users);
 				View badge = getLayoutInflater().inflate(R.layout.user, null);
 				

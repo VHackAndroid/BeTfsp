@@ -55,14 +55,14 @@ public class ConcretePokerServer extends PokerServer  {
 			while (true) {
 				String port = "" + CommLib.SERVER_PORT;
 				String dedicated = "" + isDedicated;
-				Log.d("PokerServer", "Starting export thread, advertising " + broadcastAddress + ":" + port);
+				Log.d("wePoker - Server", "Starting export thread, advertising " + broadcastAddress + ":" + port);
 				CommLibConnectionInfo clci = new CommLibConnectionInfo(
 						PokerServer.class.getCanonicalName(),
 						new String[] {serverAddress, port, dedicated});
 				try {
 					CommLib.export(clci, broadcastAddress);
 				} catch (IOException e) {
-					Log.e("PokerServer", "Export failed", e);
+					Log.e("wePoker - Server", "Export failed", e);
 				}
 				try { Thread.sleep(2000);
 				} catch (InterruptedException e) { }
@@ -73,7 +73,7 @@ public class ConcretePokerServer extends PokerServer  {
 	Runnable serverR = new Runnable() {
 		public void run() {
 			try {
-				Log.d("PokerServer", "Starting server thread");
+				Log.d("wePoker - Server", "Starting server thread");
 				Server s = new Server();
 				Kryo k = s.getKryo();
 				k.setRegistrationRequired(false);
@@ -84,7 +84,7 @@ public class ConcretePokerServer extends PokerServer  {
 					@Override
 					public void connected(Connection c) {
 						super.connected(c);
-						Log.d("PokerServer", "Client connected: " + c.getRemoteAddressTCP());
+						Log.d("wePoker - Server", "Client connected: " + c.getRemoteAddressTCP());
 						gameLoop.addClient(c);
 					}
 					
@@ -93,12 +93,12 @@ public class ConcretePokerServer extends PokerServer  {
 						super.received(c, msg);
 						if (msg instanceof FutureMessage) {
 							FutureMessage fm = (FutureMessage) msg;
-							Log.d("PokerServer", "Resolving future " + fm.futureId + "(" + CommLib.futures.get(fm.futureId) + ") with value " + fm.futureValue);
+							Log.d("wePoker - Server", "Resolving future " + fm.futureId + "(" + CommLib.futures.get(fm.futureId) + ") with value " + fm.futureValue);
 							CommLib.resolveFuture(fm.futureId, fm.futureValue);
 						}
 						if (msg instanceof NicknameMessage) {
 							NicknameMessage nm = (NicknameMessage) msg;
-							Log.d("PokerServer", "");
+							Log.d("wePoker - Server", "");
 							gameLoop.broadcast(nm);
 							gameLoop.updatePlayerName(c, nm.nickname);
 						}
@@ -107,12 +107,12 @@ public class ConcretePokerServer extends PokerServer  {
 					@Override
 					public void disconnected(Connection c) {
 						super.disconnected(c);
-						Log.d("PokerServer", "Client disconnected: " + c);
+						Log.d("wePoker - Server", "Client disconnected: " + c);
 						gameLoop.removeClient(c);
 					}
 				});
 			} catch (IOException e) {
-				Log.e("PokerServer", "Server thread crashed", e);
+				Log.e("wePoker - Server", "Server thread crashed", e);
 			}
 		};
 	};
@@ -154,7 +154,7 @@ public class ConcretePokerServer extends PokerServer  {
 	}
 	
 	public void start() {		
-		Log.d("PokerServer", "Starting server and exporter threads...");
+		Log.d("wePoker - Server", "Starting server and exporter threads...");
 		new Thread(serverR).start();
 		if (broadcastAddress != null)
 			new Thread(exporterR).start();
@@ -182,7 +182,7 @@ public class ConcretePokerServer extends PokerServer  {
 
 		// todo: what if client disconnects before next round?
 		public void removeClient(Connection c) {
-			Log.d("PokerServer", "Client removed: " + c);
+			Log.d("wePoker - Server", "Client removed: " + c);
 			synchronized(this) {
 				for (Integer i : clientsInGame.keySet()) {
 					if (clientsInGame.get(i) == c) {
@@ -232,11 +232,11 @@ public class ConcretePokerServer extends PokerServer  {
 					}
 					if (clientsInGame.size() < 2) {
 						try {
-							Log.d("PokerServer", "# of clients < 2, changing state to stopped");
+							Log.d("wePoker - Server", "# of clients < 2, changing state to stopped");
 							newState(GameState.WAITING_FOR_PLAYERS);
 							this.wait();
 						} catch (InterruptedException e) {
-							Log.wtf("PokerServer", "Thread was interrupted");
+							Log.wtf("wePoker - Server", "Thread was interrupted");
 						}
 					}
 					//todo what if clientsInGame.size drops below two?
@@ -283,7 +283,7 @@ public class ConcretePokerServer extends PokerServer  {
 					roundTable();					
 				} catch (RoundEndedException e1) {
 					/* ignore */
-					Log.d("PokerServer", "Everybody folded at round " + gameState);
+					Log.d("wePoker - Server", "Everybody folded at round " + gameState);
 				}
 				
 				// results
@@ -341,7 +341,7 @@ public class ConcretePokerServer extends PokerServer  {
 				try {
 					Thread.sleep(10000);
 				} catch (InterruptedException e) {
-					Log.wtf("PokerServer", "Thread.sleep was interrupted", e);
+					Log.wtf("wePoker - Server", "Thread.sleep was interrupted", e);
 				}
 			}
 		}
@@ -382,7 +382,7 @@ public class ConcretePokerServer extends PokerServer  {
 						} else {
 							Future<ClientAction> fut = CommLib.createFuture();
 							actionFutures.put(i, fut);
-							Log.d("PokerServer", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
+							Log.d("wePoker - Server", "Creating & Sending new future " + fut.getFutureId() + " to " + i);
 							Connection c = clientsInGame.get(i);
 							if (c == null) {
 								// If client disconnected -> Fold
@@ -426,7 +426,7 @@ public class ConcretePokerServer extends PokerServer  {
 							addChipsToPool(ca.getExtra());
 							break;
 						default:
-							Log.d("PokerServer", "Unknown client action message");
+							Log.d("wePoker - Server", "Unknown client action message");
 							broadcast(new ClientActionMessage(ca, i));
 						}
 						break;
@@ -455,14 +455,14 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 
 		public void addClient(Connection c) {
-			Log.d("PokerServer", "Adding client " + c.getRemoteAddressTCP());
+			Log.d("wePoker - Server", "Adding client " + c.getRemoteAddressTCP());
 			newClients.put(nextClientID, c);
 			c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 			c.sendTCP(new SetIDMessage(nextClientID));
 			nextClientID++;
 			if (newClients.size() >= 2) {
 				if (gameState == GameState.STOPPED) {
-					Log.d("PokerServer", "Two or more clients connected, game can start (delay "+DELAY_GAME_START+"s)");
+					Log.d("wePoker - Server", "Two or more clients connected, game can start (delay "+DELAY_GAME_START+"s)");
 					if (delayGameStart != null) {
 						delayGameStart.cancel();
 						delayGameStart = null;
@@ -472,7 +472,7 @@ public class ConcretePokerServer extends PokerServer  {
 					delayGameStart.schedule(new TimerTask() {
 						@Override
 						public void run() {
-							Log.d("PokerServer", "Starting the game");
+							Log.d("wePoker - Server", "Starting the game");
 							new Thread(gameLoop).start();
 						}
 					}, DELAY_GAME_START);

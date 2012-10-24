@@ -171,7 +171,7 @@ public class Splash extends Activity {
 	// Connectivity
 	private class ConnectionChangeReceiver extends BroadcastReceiver {
 		public void onReceive(Context context, Intent intent ) {
-			Log.d("wePoker", "My IP Address changed!");
+			Log.d("wePoker - Splash", "My IP Address changed!");
 		}
 	}
 	
@@ -263,16 +263,7 @@ public class Splash extends Activity {
 					if (client_startClientServerTimer != null) {
 						client_startClientServerTimer.cancel();
 						client_startClientServerTimer = null;
-						new Thread() {
-							@Override
-							public void run() {
-					    		String ipAddress = CommLib.getIpAddress(Splash.this);
-					    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
-						    	ConcretePokerServer cps = new ConcretePokerServer(
-						    			new DummServerView(), false, ipAddress, broadcastAddress);
-						    	cps.start();
-							}
-						}.start();
+						startServer();
 					}
 					break;
 				case DialogInterface.BUTTON_NEGATIVE:
@@ -339,7 +330,7 @@ public class Splash extends Activity {
 					}
 				} catch (Exception e) {
 					Toast.makeText(theActivity, "Failed to write NFC tag, verify IP and port information", Toast.LENGTH_SHORT).show();
-					Log.d("NFC-TAG", "Failed to write NFC tag", e);
+					Log.d("wePoker - NFC-TAG", "Failed to write NFC tag", e);
 				}
 			}
 		});
@@ -359,6 +350,7 @@ public class Splash extends Activity {
 		}
 		
 		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		wm.setWifiEnabled(true);
 		WifiInfo connInfo = wm.getConnectionInfo();
 		boolean enabled = wm.isWifiEnabled();
 		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;

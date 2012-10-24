@@ -100,7 +100,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			try {
 				return CommLibConnectionInfo.connect(address, port, listener);
 			} catch (IOException e) {
-				Log.d("AMBIENTPOKER", "Could not connect to server", e);
+				Log.d("wePoker - Client", "Could not connect to server", e);
 			}
 			return null;
 		}
@@ -239,7 +239,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				case R.id.Card1: touchedCard = true; break;
 				case R.id.Card2: touchedCard = true; break;
 				default:
-					Log.v("AMBIENTPOKER", "wrong view swipped" + viewSwiped);
+					Log.v("wePoker - Client", "wrong view swipped" + viewSwiped);
 					touchedCard = false;
 				}
 				ImageView chip = (ImageView) findViewById(viewSwiped);
@@ -485,14 +485,14 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		String toastToShow = null;
 		switch (newGameState) {
 		case STOPPED:
-			Log.v("AMBIENTPOKER", "Game state changed to STOPPED");
+			Log.v("wePoker - Client", "Game state changed to STOPPED");
 			runOnUiThread(new Runnable() {
 				public void run() {
 					showBarrier("Waiting for players");
 				}});
 			break;
 		case WAITING_FOR_PLAYERS:
-			Log.v("AMBIENTPOKER", "Game state changed to WAITING_FOR_PLAYERS");
+			Log.v("wePoker - Client", "Game state changed to WAITING_FOR_PLAYERS");
 			runOnUiThread(new Runnable() {
 				public void run() {
 					showBarrier("Waiting for players");
@@ -501,7 +501,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			break;
 		case PREFLOP:
 			toastToShow = "Any preflop bet?";
-			Log.v("AMBIENTPOKER", "Game state changed to PREFLOP");
+			Log.v("wePoker - Client", "Game state changed to PREFLOP");
 			runOnUiThread(new Runnable() {
 				public void run() {
 					hideBarrier();
@@ -512,18 +512,18 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			break;
 		case FLOP:
 			toastToShow = "Flopping cards...";
-			Log.v("AMBIENTPOKER", "Game state changed to FLOP");
+			Log.v("wePoker - Client", "Game state changed to FLOP");
 			break;
 		case TURN:
 			toastToShow = "Here is the turn";
-			Log.v("AMBIENTPOKER", "Game state changed to TURN");
+			Log.v("wePoker - Client", "Game state changed to TURN");
 			break;
 		case RIVER:
 			toastToShow = "River card visible";
-			Log.v("AMBIENTPOKER", "Game state changed to RIVER");
+			Log.v("wePoker - Client", "Game state changed to RIVER");
 			break;
 		case END_OF_ROUND:
-			Log.v("AMBIENTPOKER", "Game state changed to END_OF_ROUND");
+			Log.v("wePoker - Client", "Game state changed to END_OF_ROUND");
 			currentSelectedBet = 0;
 			currentStateBet = 0;
 			currentTotalBet = 0;
@@ -555,7 +555,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		public void connected(Connection arg0) {
 			super.connected(arg0);
 			setServerConnection(arg0);
-			Log.d("AMBIENTPOKER","Connected to server!");
+			Log.d("wePoker - Client","Connected to server!");
 		}
 
 
@@ -563,7 +563,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		public void received(Connection c, Object m) {
 			super.received(c, m);
 
-			Log.v("AMBIENTPOKER", "Received message " + m.toString());
+			Log.v("wePoker - Client", "Received message " + m.toString());
 
 			if (m instanceof StateChangeMessage) {
 				processStateChangeMessage(c, m);
@@ -571,16 +571,16 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 			if (m instanceof ReceivePublicCards) {
 				ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
-				Log.v("AMBIENTPOKER", "Received public cards: ");
+				Log.v("wePoker - Client", "Received public cards: ");
 				Card[] cards = newPublicCards.cards;
 				for (int i = 0; i < cards.length; i++) {
-					Log.v("AMBIENTPOKER", cards[i].toString() + ", ");
+					Log.v("wePoker - Client", cards[i].toString() + ", ");
 				}
 			}
 
 			if (m instanceof ReceiveHoleCardsMessage) {
 				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
-				Log.v("AMBIENTPOKER", "Received hand cards: " + newHoleCards.toString());
+				Log.v("wePoker - Client", "Received hand cards: " + newHoleCards.toString());
 				lastReceivedHoleCards = newHoleCards;
 				ClientActivity.this.runOnUiThread(new Runnable() {
 					@Override
@@ -593,7 +593,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			if (m instanceof ClientActionMessage) {
 				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
 				final ClientAction action = newClientActionMessage.getClientAction();
-				Log.v("AMBIENTPOKER", "Received client action message" + newClientActionMessage.toString());
+				Log.v("wePoker - Client", "Received client action message" + newClientActionMessage.toString());
 				if (action.getClientActionType() == Message.ClientActionType.Bet) {
 					final int amount = action.getExtra();
 					if (amount > minimumBet) {
@@ -609,7 +609,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			if (m instanceof RequestClientActionFutureMessage) {
 				final RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
 				pendingFuture = rcafm.futureId;
-				Log.d("AMBIENTPOKER", "Pending future: " + pendingFuture);
+				Log.d("wePoker - Client", "Pending future: " + pendingFuture);
 				runOnUiThread(new Runnable() {
 					public void run() {
 						enableActions(rcafm.round);
@@ -778,11 +778,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	            int result = tts.setLanguage(Locale.US);
 	            if (result == TextToSpeech.LANG_MISSING_DATA
 	                    || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-	                Log.e("TTS", "This Language is not supported");
+	                Log.e("wePoker - TTS", "This Language is not supported");
 	                tts = null;
 	            }
 	        } else {
-	            Log.e("TTS", "Initilization Failed!");
+	            Log.e("wePoker - TTS", "Initilization Failed!");
                 tts = null;
 	        }
 
@@ -826,7 +826,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 			case RESULT_SPEECH: {
 				if (resultCode == RESULT_OK && null != data) {
 					ArrayList<String> candidates = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-					Log.d("Text2Speech", "Got: " + candidates);
+					Log.d("wePoker - Text2Speech", "Got: " + candidates);
 					double bestScore = 1;
 					int bestActionI = -1;
 					int amount = 0;
@@ -868,7 +868,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						performAllIn();
 						break;
 					default:
-						Log.d("Text2Speech", "No action found");
+						Log.d("wePoker - Text2Speech", "No action found");
 						outputTextToSpeech("No command recognised.");
 						break;
 					}
@@ -1001,11 +1001,11 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		public void onSensorChanged(SensorEvent event) {
 			if (event.sensor.getType()==Sensor.TYPE_GRAVITY) {
 				final float g = SensorManager.GRAVITY_EARTH;
-				// Log.d("foldGravitySensorEventListener", String.format("g_vec: (%f,%f,%f)", event.values[0], event.values[1], event.values[2]));
+				// Log.d("wePoker - foldGravitySensorEventListener", String.format("g_vec: (%f,%f,%f)", event.values[0], event.values[1], event.values[2]));
 				float dx = event.values[2];
 				if (dx < -9) {
 					if (foldGravity == 0) foldGravity = System.currentTimeMillis();
-					Log.d("foldGravitySensorEventListener", "Phone on its back");
+					Log.d("wePoker - foldGravitySensorEventListener", "Phone on its back");
 				} else {
 					foldGravity = 0;
 				}
@@ -1014,10 +1014,10 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				float currentReading = event.values[0];
 				if (currentReading < 1) {
 					if (foldProximity == 0) foldProximity = System.currentTimeMillis();
-					Log.d("foldGravitySensorEventListener", "I found a table!" + currentReading);
+					Log.d("wePoker - foldGravitySensorEventListener", "I found a table!" + currentReading);
 				} else {
 					foldProximity = 0;
-					Log.d("foldGravitySensorEventListener", "All clear!" + currentReading);
+					Log.d("wePoker - foldGravitySensorEventListener", "All clear!" + currentReading);
 				}
 			}
 			if ((foldProximity != 0) && (foldGravity != 0)) {
@@ -1028,7 +1028,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								Log.d("foldGravitySensorEventListener", "Folding!");
+								Log.d("wePoker - foldGravitySensorEventListener", "Folding!");
 								performFold();
 							}
 						});
@@ -1052,20 +1052,20 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 				float currentReading = event.values[0];
 				if (currentReading < 10) {
 					if (incognitoLight == 0) incognitoLight = System.currentTimeMillis();
-					Log.d("incognitoSensorEventListener", "It's dark!" + currentReading);
+					Log.d("wePoker - incognitoSensorEventListener", "It's dark!" + currentReading);
 				} else {
 					incognitoLight = 0;
-					Log.d("incognitoSensorEventListener", "It's bright!" + currentReading);
+					Log.d("wePoker - incognitoSensorEventListener", "It's bright!" + currentReading);
 				}
 			}
 			if (event.sensor.getType()==Sensor.TYPE_PROXIMITY) {
 				float currentReading = event.values[0];
 				if (currentReading < 1) {
 					if (incognitoProximity == 0) incognitoProximity = System.currentTimeMillis();
-					Log.d("incognitoSensorEventListener", "I found a hand!" + currentReading);
+					Log.d("wePoker - incognitoSensorEventListener", "I found a hand!" + currentReading);
 				} else {
 					incognitoProximity = 0;
-					Log.d("incognitoSensorEventListener", "All clear!" + currentReading);
+					Log.d("wePoker - incognitoSensorEventListener", "All clear!" + currentReading);
 				}
 			}
 			if ((incognitoLight != 0) && (incognitoProximity != 0)) {
@@ -1077,7 +1077,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 							runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
-									Log.d("incognitoSensorEventListener", "Showing cards!");
+									Log.d("wePoker - incognitoSensorEventListener", "Showing cards!");
 									showCards();
 								}
 							});
@@ -1118,7 +1118,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		runOnUiThread(new Runnable() {
 			public void run() {
 				for (Card c : cards) {
-					Log.d("PokerServer", "Revealing card " + c);
+					Log.d("wePoker - Server", "Revealing card " + c);
 					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 					ib.setImageResource(cardToResourceID(c));
@@ -1135,7 +1135,7 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 	}
 
 	public void resetCards() {
-		Log.d("PokerServer", "Hiding cards again");
+		Log.d("wePoker - Server", "Hiding cards again");
 		nextToReveal = 0;
 		runOnUiThread(new Runnable() {
 			public void run() {

@@ -35,12 +35,12 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 
 		@Override
 		public void onFailure(int reason) {
-			Log.e("Wifi-Direct", prefix + " FAILED: " + reason);
+			Log.e("wePoker - Wifi-Direct", prefix + " FAILED: " + reason);
 		}
 
 		@Override
 		public void onSuccess() {
-			Log.d("Wifi-Direct", prefix + " SUCCESS!");
+			Log.d("wePoker - Wifi-Direct", prefix + " SUCCESS!");
 		}
 
 	}
@@ -97,16 +97,16 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		if (group == null)
 			return;
 		
-		Log.d("Wifi-Direct", "Got group info!" + group);
+		Log.d("wePoker - Wifi-Direct", "Got group info!" + group);
 		if (isRunning) {
 
 			WifiP2pDevice device = group.getOwner();
-			Log.d("Wifi-Direct", "Device specifics: " + myAddress);
+			Log.d("wePoker - Wifi-Direct", "Device specifics: " + myAddress);
 			final String groupName = group.getNetworkName();
 			final String password = group.getPassphrase();
 			mCurrentGroup = group;
 			//TODO: advertise password for legacy clients.
-			Log.d("Wifi-Direct", "Created group " + groupName + " with password '" + password + "'");
+			Log.d("wePoker - Wifi-Direct", "Created group " + groupName + " with password '" + password + "'");
 			act.runOnUiThread(new Runnable() {
 				
 				@Override
@@ -123,7 +123,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	}
 
 	public void discover(DiscoveryCompletionListener dcl) {
-		Log.d("Wifi-Direct", "Starting discovery...");
+		Log.d("wePoker - Wifi-Direct", "Starting discovery...");
 		this.dcl = dcl;
 	}
 
@@ -135,20 +135,20 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	@Override
 	public void onPeersAvailable(WifiP2pDeviceList peers) {
 		final int numDevices = peers.getDeviceList().size();
-		Log.d("Wifi-Direct", "Got peer list: " + numDevices);
+		Log.d("wePoker - Wifi-Direct", "Got peer list: " + numDevices);
 		if (numDevices != 1 || alreadyConnecting)
 			return;					
 		
 		alreadyConnecting  = true;
 		WifiP2pDevice first = peers.getDeviceList().iterator().next();
-		Log.d("Wifi-Direct", "Single device found: " + first);
+		Log.d("wePoker - Wifi-Direct", "Single device found: " + first);
 		WifiP2pConfig config = new WifiP2pConfig();
 		config.deviceAddress = first.deviceAddress;
 		manager.connect(channel, config, new ActionListener() {
 			
 			@Override
 			public void onSuccess() {
-				Log.d("Wifi-Direct", "Connected to device!");
+				Log.d("wePoker - Wifi-Direct", "Connected to device!");
 				act.runOnUiThread(new Runnable() {
 					
 					@Override
@@ -161,7 +161,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 			
 			@Override
 			public void onFailure(int reason) {
-				Log.d("Wifi-Direct", "Connection to device failed :'(");
+				Log.d("wePoker - Wifi-Direct", "Connection to device failed :'(");
 			}
 		});
 	}
@@ -171,13 +171,13 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		if (!isRunning)
 			return;
 		String action = intent.getAction();
-		Log.d("Wifi-Direct", "Received intent: " + action);
+		Log.d("wePoker - Wifi-Direct", "Received intent: " + action);
 		if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
 			int enabled = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, 0);
 			if (enabled == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
 				if (serverStarter != null) {
-//					Log.d("Wifi-Direct", "Creating group");
+//					Log.d("wePoker - Wifi-Direct", "Creating group");
 //					manager.createGroup(channel, new LoggingActionListener("Creating group"));
 				}
 			}
@@ -198,7 +198,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
         	}
         	
         	if (!wp2pi.groupFormed) {
-        		Log.d("Wifi-Direct", "Creating group");
+        		Log.d("wePoker - Wifi-Direct", "Creating group");
         		manager.createGroup(channel, new LoggingActionListener("Group creation"));
         		return;
         	}
@@ -207,13 +207,13 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 				
 				@Override
 				public void onSuccess() {
-					Log.d("Wifi-Direct", "Group removal succeeded, creating new group...");
+					Log.d("wePoker - Wifi-Direct", "Group removal succeeded, creating new group...");
 					manager.createGroup(channel, null);
 				}
 				
 				@Override
 				public void onFailure(int reason) {
-					Log.d("Wifi-Direct", "Could not remove group:" + reason);
+					Log.d("wePoker - Wifi-Direct", "Could not remove group:" + reason);
 				}
 			});
         } else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {

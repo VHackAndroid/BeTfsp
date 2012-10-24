@@ -53,7 +53,7 @@ public class QRJoinerActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-			Log.d("QRJoiner", "Received intent " + intent);
+			Log.d("wePoker - QRJoiner", "Received intent " + intent);
 			String newStatus = null;
 			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 				NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
@@ -95,21 +95,21 @@ public class QRJoinerActivity extends Activity {
 							config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 							
 							int id = wm.addNetwork(config);
-							Log.d("QRJoiner", "Connecting to network " + wifi_name + ": " + id);
+							Log.d("wePoker - QRJoiner", "Connecting to network " + wifi_name + ": " + id);
 							boolean ret = wm.enableNetwork(id, true);
-							Log.d("QRJoiner", "enableNetwork returned " + ret);
+							Log.d("wePoker - QRJoiner", "enableNetwork returned " + ret);
 						} else {
 							boolean joined = false;
 							for (WifiConfiguration config : wm.getConfiguredNetworks()) {
 								if (config.SSID.equals(wifi_name)) {
-									Log.d("QRJoiner", "Found preconfigured network " + wifi_name);
+									Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifi_name);
 									wm.enableNetwork(config.networkId, true);
 									joined = true;
 									break;
 								}
 							}
 							if (!joined) {
-								Log.d("QRJoiner", "Asking user to connect manually");
+								Log.d("wePoker - QRJoiner", "Asking user to connect manually");
 								new AlertDialog.Builder(QRJoinerActivity.this)
 								    .setMessage("Please connect to the network '" + wifi_name + "' manually and scan the barcode again.")
 								    .setCancelable(false)
@@ -162,9 +162,8 @@ public class QRJoinerActivity extends Activity {
     	Button connectButton = (Button) findViewById(R.id.connect_btn);
     	connectButton.setText(string);
     	Log.d("QRJoiner", "Progress update: " + string);
+    	Log.d("WePoker - QRJoiner", "Progress update: " + string);
 	}
-
-
 
 	protected void startClientActivity() {
 		Intent i = new Intent(this, ClientActivity.class);
@@ -174,8 +173,6 @@ public class QRJoinerActivity extends Activity {
 		startActivity(i);
 		finish();
 	}
-
-
 
 	@Override
 	protected void onPause() {
