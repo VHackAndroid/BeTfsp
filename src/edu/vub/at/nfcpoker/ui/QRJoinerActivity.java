@@ -38,16 +38,6 @@ public class QRJoinerActivity extends Activity {
 		"Wireless state unknown"
 	};
 	
-	private OnClickListener joinerButtonOCL = new OnClickListener() {
-		@Override
-		public void onClick(View v) {
-			currentlyJoining = true;
-			Button connectButton = (Button) findViewById(R.id.connect_btn);
-			connectButton.setEnabled(false);
-			registerReceiver(wifiChangeReceiver, intentFilter);
-		}
-	};
-	
 	private BroadcastReceiver wifiChangeReceiver = new BroadcastReceiver() {
 		
 		@Override
@@ -122,8 +112,8 @@ public class QRJoinerActivity extends Activity {
 				network_name.setText(new_network_name);
 			}
 			if (newStatus != null) {
-				TextView status = (TextView) findViewById(R.id.wifi_status);
-				status.setText(newStatus);
+				TextView progressTxt = (TextView) findViewById(R.id.Discovering);
+				progressTxt.setText(newStatus);
 			}
 		}
 	};
@@ -137,31 +127,37 @@ public class QRJoinerActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_qrjoiner);
+        setContentView(R.layout.activity_splash);
         
         Uri launcher = getIntent().getData();
         wifi_name = launcher.getQueryParameter(Constants.INTENT_WIFI_NAME);
         wifi_pass = launcher.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
         wifi_isWD = launcher.getQueryParameter(Constants.INTENT_WIFI_IS_DIRECT).equals("true");
         wifi_server = launcher.getQueryParameter(Constants.INTENT_SERVER_IP);
-        String join_text = getResources().getString(R.string.qr_code_join_confirmation, wifi_name);
-        TextView join_confirmation = (TextView) findViewById(R.id.qr_code_join_text);
-        join_confirmation.setText(join_text);
         
         intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+
+		Button connectButton = (Button) findViewById(R.id.nfc);
+		connectButton.setEnabled(false);
+
+        String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifi_name);
+        TextView progressTxt = (TextView) findViewById(R.id.Discovering);
+        progressTxt.setText(joinText);
 		
-		Button joinerButton = (Button) findViewById(R.id.connect_btn);
-		joinerButton.setOnClickListener(joinerButtonOCL);
+		joinServer();
     }
     
+    private void joinServer() {
+		currentlyJoining = true;
+		registerReceiver(wifiChangeReceiver, intentFilter);
+    }
     
 
     protected void publishProgress(String string) {
-    	Button connectButton = (Button) findViewById(R.id.connect_btn);
-    	connectButton.setText(string);
-    	Log.d("QRJoiner", "Progress update: " + string);
+    	TextView progressTxt = (TextView) findViewById(R.id.Discovering);
+    	progressTxt.setText(string);
     	Log.d("WePoker - QRJoiner", "Progress update: " + string);
 	}
 
