@@ -61,8 +61,6 @@ public class QRJoinerActivity extends Activity {
 					wm.setWifiEnabled(true);
 				}
 				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED) {
-					WifiInfo wi = wm.getConnectionInfo();
-					String ssid = wi.getSSID();
 					
 					if (currentlyJoining) {
 						publishProgress("Connecting to network...");

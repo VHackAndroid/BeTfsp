@@ -100,7 +100,6 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		Log.d("wePoker - Wifi-Direct", "Got group info!" + group);
 		if (isRunning) {
 
-			WifiP2pDevice device = group.getOwner();
 			Log.d("wePoker - Wifi-Direct", "Device specifics: " + myAddress);
 			final String groupName = group.getNetworkName();
 			final String password = group.getPassphrase();
