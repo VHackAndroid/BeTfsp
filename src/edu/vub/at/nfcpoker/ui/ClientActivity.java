@@ -1027,7 +1027,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		@Override
 		public void onSensorChanged(SensorEvent event) {
 			if (event.sensor.getType()==Sensor.TYPE_GRAVITY) {
-				final float g = SensorManager.GRAVITY_EARTH;
+//				final float g = SensorManager.GRAVITY_EARTH;
 				// Log.d("wePoker - foldGravitySensorEventListener", String.format("g_vec: (%f,%f,%f)", event.values[0], event.values[1], event.values[2]));
 				float dx = event.values[2];
 				if (dx < -9) {

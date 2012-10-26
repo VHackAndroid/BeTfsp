@@ -26,7 +26,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Menu;
@@ -45,7 +44,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public interface ServerStarter {
 		public void start(String ipAddress, String broadcastAddress);
 
-		public void setWifiDirect(String groupName, String password);
+		public void setWifiDirect(String groupName, String password, String ipAddress);
 	}
 
 	@SuppressLint("UseSparseArrays")
@@ -74,10 +73,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 
 			@Override
-			public void setWifiDirect(String groupName, String password) {
+			public void setWifiDirect(String groupName, String password, String ipAddress) {
 				// TODO setup NFC tag.
 				currentWifiGroupName = groupName;
 				currentWifiPassword  = password;
+				currentIpAddress = ipAddress;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {

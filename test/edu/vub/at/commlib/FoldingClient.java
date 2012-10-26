@@ -2,7 +2,6 @@ package edu.vub.at.commlib;
 
 import java.io.IOException;
 
-import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
@@ -21,7 +20,7 @@ public class FoldingClient {
 		try {
 			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class, args[0]);
 			System.out.println("Discovered server at " + clci.getAddress());
-			Client c = clci.connect(new Listener() {
+			clci.connect(new Listener() {
 				@Override
 				public void received(Connection c, Object m) {
 					super.received(c, m);
