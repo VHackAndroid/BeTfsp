@@ -246,6 +246,23 @@ public interface Message {
 			return super.toString() + ": Client nickname information message, client -> " + nickname;
 		}
 	}
+
+	public static class PoolMessage extends TimestampedMessage {
+
+		public int poolMoney;
+		
+		public PoolMessage(int poolMoney) {
+			this.poolMoney = poolMoney;
+		}
+
+		// kryo
+		public PoolMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client pool money information message -> " + poolMoney;
+		}
+	}
 	 
 	 public class SetIDMessage extends TimestampedMessage implements Message {
 
