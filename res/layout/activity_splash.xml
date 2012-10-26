@@ -44,13 +44,6 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/nfc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="200dip"
-            android:text="NFC" />
-
     </LinearLayout>
 
 </RelativeLayout>

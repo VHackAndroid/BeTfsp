@@ -17,6 +17,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -56,8 +57,6 @@ public class QRJoinerActivity extends Activity {
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				int new_wifi_status = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 				newStatus = status_strings[new_wifi_status];
-				String new_network_name = "(Not connected)";
-
 				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 				
 				if (new_wifi_status == WifiManager.WIFI_STATE_DISABLED) {
@@ -67,8 +66,6 @@ public class QRJoinerActivity extends Activity {
 				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED) {
 					WifiInfo wi = wm.getConnectionInfo();
 					String ssid = wi.getSSID();
-					if (ssid != null)
-						new_network_name = ssid;
 					
 					if (currentlyJoining) {
 						publishProgress("Connecting to network...");
@@ -108,8 +105,7 @@ public class QRJoinerActivity extends Activity {
 						}
 					}
 				}
-				TextView network_name = (TextView) findViewById(R.id.network_name);
-				network_name.setText(new_network_name);
+
 			}
 			if (newStatus != null) {
 				TextView progressTxt = (TextView) findViewById(R.id.Discovering);
@@ -127,6 +123,7 @@ public class QRJoinerActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_splash);
         
         Uri launcher = getIntent().getData();
@@ -138,9 +135,6 @@ public class QRJoinerActivity extends Activity {
         intentFilter = new IntentFilter();
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-
-		Button connectButton = (Button) findViewById(R.id.nfc);
-		connectButton.setEnabled(false);
 
         String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifi_name);
         TextView progressTxt = (TextView) findViewById(R.id.Discovering);

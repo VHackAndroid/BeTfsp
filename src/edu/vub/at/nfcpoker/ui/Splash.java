@@ -102,26 +102,7 @@ public class Splash extends Activity {
 		if (!isTablet) {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			
-			// NFC
-			Button nfc = (Button) findViewById(R.id.nfc);
-			nfc.setEnabled(false);
-			if (isNFCSupported()) {
-				nfc.setOnClickListener(new OnClickListener() {
-					Dialog nfc_dialog;
-
-					@Override
-					public void onClick(View v) {
-						if (nfc_dialog == null)
-							nfc_dialog = createNFCDialog();
-						nfc_dialog.show();
-					}
-				});
-			} else {
-				nfc.setText("NFC disabled");
-			}
-
 			//TODO: Only try Wifi-direct if available and no wifi is found.
-			
 			discoveryTask = new DiscoveryAsyncTask(this, dcl);
 			discoveryTask.execute();
 			
@@ -298,58 +279,6 @@ public class Splash extends Activity {
 				.setPositiveButton("Yes", dialogClickListener)
 				.setNegativeButton("No", dialogClickListener).create();
 		client_startClientServerAsk.show();
-	}
-
-	// NFC
-	private Dialog createNFCDialog() {
-		final Splash theActivity = this;
-		final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		LayoutInflater inflater = this.getLayoutInflater();
-		builder.setView(inflater.inflate(R.layout.dialog_signin, null));
-		return null;
-/*		final AlertDialog dialog = builder.create();
-		dialog.setButton(AlertDialog.BUTTON_POSITIVE, "Write", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface d, int id) {
-				try {
-					String iptext = ((EditText) dialog.findViewById(R.id.ip)).getText().toString();
-					Integer port = Integer.parseInt(((EditText) dialog.findViewById(R.id.port)).getText().toString());
-					TableThing tableThing = new TableThing(theActivity, iptext, port.intValue());
-					if (lastScannedTag_ == null) {
-						Toast.makeText(theActivity, "Scan a tag first", Toast.LENGTH_SHORT).show();
-					}
-					if (lastScannedTag_ instanceof EmptyRecord) {
-						((EmptyRecord) lastScannedTag_).initialize(tableThing, new ThingSavedListener<TableThing>() {
-							@Override
-							public void signal(TableThing savedTableThing) {
-								lastScannedTag_ = savedTableThing;
-								Toast.makeText(theActivity, "NFC tag written successfully", Toast.LENGTH_SHORT).show();
-							}
-						});
-					} else {
-						TableThing scannedTableThing = (TableThing) lastScannedTag_;
-						scannedTableThing.ip_ = iptext;
-						scannedTableThing.port_ = port;
-						scannedTableThing.saveAsync(new ThingSavedListener<TableThing>() {
-							@Override
-							public void signal(TableThing savedTableThing) {
-								Toast.makeText(theActivity, "NFC tag written successfully", Toast.LENGTH_SHORT).show();
-							}
-						});
-					}
-				} catch (Exception e) {
-					Toast.makeText(theActivity, "Failed to write NFC tag, verify IP and port information", Toast.LENGTH_SHORT).show();
-					Log.d("wePoker - NFC-TAG", "Failed to write NFC tag", e);
-				}
-			}
-		});
-		dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface d, int id) {
-				dialog.cancel();
-			}
-		});
-		return dialog;
-*/
 	}
 
 	protected void startServer() {
