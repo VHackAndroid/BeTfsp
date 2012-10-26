@@ -16,7 +16,7 @@ public class DummServerView implements ServerViewInterface {
 	public void addPlayer(int clientID, String clientName, int initialMoney) { }
 
 	@Override
-	public void showStatechange(GameState newState) { }
+	public void showStateChange(GameState newState) { }
 
 	@Override
 	public void setPlayerMoney(Integer player, int current) { }

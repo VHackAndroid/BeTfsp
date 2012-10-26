@@ -74,7 +74,7 @@ import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
 
-public class ClientActivity extends Activity implements OnClickListener, ServerViewInterface {
+public class ClientActivity extends Activity implements OnClickListener {
 
 	public class ConnectAsyncTask extends AsyncTask<Void, Void, Client> {
 
@@ -987,13 +987,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		updateMoneyTitle();
 		updateCheckCallText();
 	}
-	
-	@Override
-	public void updatePoolMoney(int chipsPool) {
-		final TextView textPool = (TextView) findViewById(R.id.pool);
-		if (textPool == null) return;
-		textPool.setText(" " + chipsPool);
-	}
 
 	// Interactivity
 	SensorEventListener foldGravitySensorEventListener = new SensorEventListener() {
@@ -1114,26 +1107,6 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 		mCardView2.setCurrentIndex(0);
 	}
 
-	public void revealCards(final Card[] cards) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				for (Card c : cards) {
-					Log.d("wePoker - Server", "Revealing card " + c);
-					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
-					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
-					ib.setImageResource(cardToResourceID(c));
-					ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
-					anim.setDuration(1000);
-					anim.start();
-				}
-			}
-
-			public int cardToResourceID(Card c) {
-				return getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
-			}
-		});
-	}
-
 	public void resetCards() {
 		Log.d("wePoker - Server", "Hiding cards again");
 		nextToReveal = 0;
@@ -1201,32 +1174,12 @@ public class ClientActivity extends Activity implements OnClickListener, ServerV
 
 	}
 
-	@Override
-	public void addPlayer(int clientID, String clientName, int initialMoney) {
-		// TODO Auto-generated method stub
+	}
 
 	}
 
-	@Override
-	public void showStatechange(GameState newState) {
-		// TODO Auto-generated method stub
+	}
 
 	}
 
-	@Override
-	public void setPlayerMoney(Integer player, int current) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void removePlayer(Integer i) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Context getContext() {
-		return this;
-	}
 }

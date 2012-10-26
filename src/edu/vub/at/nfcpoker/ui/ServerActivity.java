@@ -240,7 +240,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-	public void showStatechange(final GameState newState) {
+	public void showStateChange(final GameState newState) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				TextView phase = (TextView)findViewById(R.id.current_phase);
