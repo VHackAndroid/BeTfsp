@@ -61,6 +61,7 @@ import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.NicknameMessage;
+import edu.vub.at.nfcpoker.comm.Message.PoolMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
@@ -236,8 +237,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 				case R.id.greenchip: currentChipSwiped = 20; break;
 				case R.id.bluechip: currentChipSwiped = 50; break;
 				case R.id.blackchip: currentChipSwiped = 100; break;
-				case R.id.Card1: touchedCard = true; break;
-				case R.id.Card2: touchedCard = true; break;
+				case R.id.pCard1: touchedCard = true; break;
+				case R.id.pCard2: touchedCard = true; break;
 				default:
 					Log.v("wePoker - Client", "wrong view swipped" + viewSwiped);
 					touchedCard = false;
@@ -284,13 +285,13 @@ public class ClientActivity extends Activity implements OnClickListener {
 				card2.setPages(mPages2);
 		 */
 
-		mCardView1 = (CurlView) findViewById(R.id.Card1);
+		mCardView1 = (CurlView) findViewById(R.id.pCard1);
 		mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView1.setCurrentIndex(0);
 		mCardView1.setBackgroundColor(POKER_GREEN);
 		mCardView1.setAllowLastPageCurl(false);    
 
-		mCardView2 = (CurlView) findViewById(R.id.Card2);
+		mCardView2 = (CurlView) findViewById(R.id.pCard2);
 		mCardView2.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView2.setCurrentIndex(0);
 		mCardView2.setBackgroundColor(POKER_GREEN);
@@ -566,7 +567,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 			Log.v("wePoker - Client", "Received message " + m.toString());
 
 			if (m instanceof StateChangeMessage) {
+				// Client view
+				Log.v("wePoker - Client", "Procesing state message " + m.toString());
 				processStateChangeMessage(c, m);
+				if (!isDedicated) {
+					// Server view
+					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
+					final StateChangeMessage sm = (StateChangeMessage) m;
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							serverStateChange(sm.newState);
+						}});
+				}
 			}
 
 			if (m instanceof ReceivePublicCards) {
@@ -575,6 +588,16 @@ public class ClientActivity extends Activity implements OnClickListener {
 				Card[] cards = newPublicCards.cards;
 				for (int i = 0; i < cards.length; i++) {
 					Log.v("wePoker - Client", cards[i].toString() + ", ");
+				}
+				if (!isDedicated) {
+					// Server view
+					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
+					final ReceivePublicCards rc = (ReceivePublicCards) m;
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							serverRevealCards(rc.cards);
+						}});
 				}
 			}
 
@@ -613,6 +636,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 				runOnUiThread(new Runnable() {
 					public void run() {
 						enableActions(rcafm.round);
+					}});
+			}
+			
+			if (m instanceof PoolMessage) {
+				final PoolMessage pm = (PoolMessage) m;
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						serverUpdatePoolMoney(pm.poolMoney);
 					}});
 			}
 
@@ -1171,15 +1203,57 @@ public class ClientActivity extends Activity implements OnClickListener {
 			}
 			return false;
 		}
-
 	}
 
+	public void serverStateChange(GameState newState) {
+		if (isDedicated) return;
+		final ImageView card1 = (ImageView) findViewById(R.id.card1);
+		final ImageView card2 = (ImageView) findViewById(R.id.card2);
+		final ImageView card3 = (ImageView) findViewById(R.id.card3);
+		final ImageView card4 = (ImageView) findViewById(R.id.card4);
+		final ImageView card5 = (ImageView) findViewById(R.id.card5);
+		switch (newState) {
+		case WAITING_FOR_PLAYERS:
+		case END_OF_ROUND:
+		case STOPPED:
+			card1.setImageResource(R.drawable.backside);
+			card2.setImageResource(R.drawable.backside);
+			card3.setImageResource(R.drawable.backside);
+			card4.setImageResource(R.drawable.backside);
+			card5.setImageResource(R.drawable.backside);
+			break;
+		case PREFLOP:
+		case FLOP:
+		case TURN:
+		case RIVER:
+			break;
+		default:
+			Log.v("wePoker - Client-Server", "Invalid state for showStateChange");
+			break;
+		}
 	}
 
+	private void serverUpdatePoolMoney(int poolMoney) {
+		if (isDedicated) return;
+		final TextView textPool = (TextView) findViewById(R.id.pool);
+		if (textPool == null) return;
+		textPool.setText(" " + poolMoney);
 	}
 
+	private int cardToResourceID(Card c) {
+		return getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
 	}
 
+	public void serverRevealCards(final Card[] cards) {
+		for (Card c : cards) {
+			Log.d("wePoker - Client-Server", "Revealing card " + c);
+			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
+			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
+			ib.setImageResource(cardToResourceID(c));
+			ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
+			anim.setDuration(1000);
+			anim.start();
+		}
 	}
 
 }
