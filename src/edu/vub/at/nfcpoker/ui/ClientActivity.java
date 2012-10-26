@@ -928,6 +928,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				} catch (Exception e) {	}
 			}
 		});
+		builder.setCancelable(true);
 		moneyDialog = builder.create();
 		moneyDialog.show();
 	}
@@ -950,6 +951,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				} catch (Exception e) {	}
 			}
 		});
+		builder.setCancelable(true);
 		moneyDialog = builder.create();
 		moneyDialog.show();
 	}
