@@ -45,7 +45,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public interface ServerStarter {
 		public void start(String ipAddress, String broadcastAddress);
 
-		public void setWifiDirect(String groupName, String password);
+		public void setWifiDirect(String groupName, String password, String ipAddress);
 	}
 
 	@SuppressLint("UseSparseArrays")
@@ -74,10 +74,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 
 			@Override
-			public void setWifiDirect(String groupName, String password) {
+			public void setWifiDirect(String groupName, String password, String ipAddress) {
 				// TODO setup NFC tag.
 				currentWifiGroupName = groupName;
 				currentWifiPassword  = password;
+				currentIpAddress = ipAddress;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {

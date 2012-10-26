@@ -116,7 +116,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 			});
 			
 			String ipAddress = myAddress.getHostAddress();
-			serverStarter.setWifiDirect(groupName, password);
+			serverStarter.setWifiDirect(groupName, password, ipAddress);
 			serverStarter.start(ipAddress, null);
 			unregisterReceiver();
 		}
