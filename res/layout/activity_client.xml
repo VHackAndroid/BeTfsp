@@ -16,7 +16,7 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/imageButton1"
+            android:id="@+id/card1"
             android:layout_width="49dip"
             android:layout_height="70dip"
             android:background="@null"
@@ -27,7 +27,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/card2"
             android:layout_width="49dip"
             android:layout_height="70dip"
             android:background="@null"
@@ -38,7 +38,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton3"
+            android:id="@+id/card3"
             android:layout_width="49dip"
             android:layout_height="70dip"
             android:background="@null"
@@ -49,7 +49,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton4"
+            android:id="@+id/card4"
             android:layout_width="49dip"
             android:layout_height="70dip"
             android:background="@null"
@@ -60,7 +60,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton5"
+            android:id="@+id/card5"
             android:layout_width="49dip"
             android:layout_height="70dip"
             android:background="@null"
@@ -108,15 +108,15 @@
 		-->
 		
 		<fi.harism.curl.CurlView
-            android:id="@+id/Card1"
-            android:layout_width="wrap_content"
-            android:layout_height="160dip"
-            android:layout_weight="1"
-    		android:baselineAligned="false"
-            android:scaleType="fitXY" />
+		    android:id="@+id/pCard1"
+		    android:layout_width="wrap_content"
+		    android:layout_height="160dip"
+		    android:layout_weight="1"
+		    android:baselineAligned="false"
+		    android:scaleType="fitXY" />
 		
 		<fi.harism.curl.CurlView
-            android:id="@+id/Card2"
+            android:id="@+id/pCard2"
             android:layout_width="wrap_content"
             android:layout_height="160dip"
             android:layout_weight="1"

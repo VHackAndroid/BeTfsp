@@ -24,7 +24,7 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/imageButton1"
+            android:id="@+id/card1"
             android:layout_width="107dip"
             android:layout_height="150dip"
             android:background="@null"
@@ -35,7 +35,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/imageButton2"
+            android:id="@+id/card2"
             android:layout_width="107dip"
             android:layout_height="150dip"
             android:background="@null"
@@ -46,7 +46,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton3"
+            android:id="@+id/card3"
             android:layout_width="107dip"
             android:layout_height="150dip"
             android:background="@null"
@@ -57,7 +57,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton4"
+            android:id="@+id/card4"
             android:layout_width="107dip"
             android:layout_height="150dip"
             android:background="@null"
@@ -68,7 +68,7 @@
             android:src="@drawable/backside" />
 
         <ImageButton
-            android:id="@+id/ImageButton5"
+            android:id="@+id/card5"
             android:layout_width="107dip"
             android:layout_height="150dip"
             android:background="@null"

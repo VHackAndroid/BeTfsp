@@ -43,14 +43,14 @@
 		-->
 		
 		<fi.harism.curl.CurlView
-            android:id="@+id/Card1"
+            android:id="@+id/pCard1"
             android:layout_width="wrap_content"
             android:layout_height="250dip"
             android:layout_weight="1"
             android:scaleType="fitXY" />
 		
 		<fi.harism.curl.CurlView
-            android:id="@+id/Card2"
+            android:id="@+id/pCard2"
             android:layout_width="wrap_content"
             android:layout_height="250dip"
             android:layout_weight="1"
