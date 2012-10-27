@@ -117,6 +117,9 @@ public class QRFunctions {
 		return new NdefMessage(new NdefRecord[]{ r });
 	}
 
+	public static String getUriFromNdefMessage(NdefMessage message) {
+		return new String((message.getRecords()[0]).getPayload());
+	}
 
 	public static Uri readUriFromNFCTag(Tag tag) {
 		try {

@@ -14,9 +14,11 @@ import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
@@ -159,6 +161,13 @@ public class QRJoinerActivity extends Activity {
 		if ((mAdapter != null) && NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
 			Tag tag = getIntent().getParcelableExtra(NfcAdapter.EXTRA_TAG);
 			uri = QRFunctions.readUriFromNFCTag(tag);
+			// Beam
+			if (uri == null) {
+				Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+		        // only one message sent during the beam
+		        NdefMessage msg = (NdefMessage) rawMsgs[0];
+		        QRFunctions.getUriFromNdefMessage(msg);
+			}
 		} else {
 			uri = getIntent().getData();
 		}
