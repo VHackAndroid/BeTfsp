@@ -154,9 +154,9 @@ public class QRJoinerActivity extends Activity {
 
 	protected void startClientActivity() {
 		Intent i = new Intent(this, ClientActivity.class);
-		i.putExtra("ip", wifi_server);
-		i.putExtra("port", CommLib.SERVER_PORT);
-		i.putExtra("isDedicated", wifi_isDedicated);
+		i.putExtra(Constants.INTENT_SERVER_IP, wifi_server);
+		i.putExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
+		i.putExtra(Constants.INTENT_IS_DEDICATED, wifi_isDedicated);
 		startActivity(i);
 		finish();
 	}

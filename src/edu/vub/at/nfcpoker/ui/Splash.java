@@ -84,14 +84,6 @@ public class Splash extends Activity {
 
 		// UI
 		messageHandler = new IncomingHandler(this);
-		
-		
-		if (LODE) {
-			Intent i = new Intent(this, ClientActivity.class);
-			i.putExtra("isDedicated", false);
-			startActivity(i);
-			return;
-		}
 				
 		final DiscoveryAsyncTask.DiscoveryCompletionListener dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
 			@Override
@@ -104,7 +96,7 @@ public class Splash extends Activity {
 						client_startClientServerAsk = null;
 					}
 				}
-				int port = 0;
+				int port = CommLib.SERVER_PORT;
 				try {
 					Integer.parseInt(result.getPort());
 				} catch (Exception e) { }

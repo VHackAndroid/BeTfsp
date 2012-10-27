@@ -100,6 +100,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		protected void onPreExecute() {
 			super.onPreExecute();
 			showBarrier("Connecting to server");
+			Log.v("wePoker - Client", "Connecting to "+address+" "+port);
 		}
 
 		@Override
@@ -234,7 +235,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// Game state
+		// Connectivity
+		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
+		serverPort = getIntent().getIntExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
 		isDedicated = getIntent().getBooleanExtra(Constants.INTENT_IS_DEDICATED, false);
 		if (isDedicated) {
 			setContentView(R.layout.activity_client_is_dedicated);
@@ -245,8 +248,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		// Start server on a client
 		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
 		if (isServer) {
-			serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
-			serverPort = getIntent().getIntExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
 			serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
 			serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
 			serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
@@ -398,7 +399,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		nextToReveal = 0;
 		lastReceivedHoleCards = null;
 
-		listenToGameServer();
+		new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 		
 		// adding the hallo wePoker to the watch
 		clientGameState = ClientGameState.PLAYING;
@@ -813,13 +814,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 			}
 		}
 	};
-
-
-	private void listenToGameServer() {
-		final String ip = getIntent().getStringExtra("ip");
-		final int port = getIntent().getIntExtra("port", 0);
-		new ConnectAsyncTask(ip, port, listener).execute();
-	}
 
 	private void updateHandGui(ReceiveHoleCardsMessage cards) {
 

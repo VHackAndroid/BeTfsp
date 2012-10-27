@@ -92,7 +92,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	}
     	
 		ServerStarter startServer = new ServerStarter() {
-			
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
 				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
