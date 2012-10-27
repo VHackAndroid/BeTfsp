@@ -210,11 +210,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				LinearLayout users = (LinearLayout) findViewById(R.id.users_bottom);
 				View badge = getLayoutInflater().inflate(R.layout.user, null);
 				
-//				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
-//				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar();
-//				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
-//				int id = getResources().getIdentifier(avatarField, null, null);
-//				avatar.setImageDrawable(getResources().getDrawable(id));
+				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
+				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar();
+				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
+				int id = getResources().getIdentifier(avatarField, null, null);
+				avatar.setImageDrawable(getResources().getDrawable(id));
 				
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
 				name.setText(clientName);
