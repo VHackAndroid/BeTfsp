@@ -245,10 +245,10 @@ public class ClientActivity extends Activity implements OnClickListener {
 		
 		// Start server on a client
 		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
+		serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
+		serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
+		serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
 		if (isServer) {
-			serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
-			serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
-			serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
 			ConcretePokerServer cps = new ConcretePokerServer(
 					new DummServerView(), false,
 					serverIpAddress, serverBroadcast);
@@ -316,11 +316,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 				return gestureDetector.onTouchEvent(arg1);
 			}
 		};
-		
-		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-	    if (nfcAdapter != null) {
-	    	nfcAdapter.setNdefPushMessage(getServerInfoNdefMessage(), this);
-	    }
 		
 		final ImageView whitechip = (ImageView) findViewById(R.id.whitechip);
 		whitechip.setOnClickListener(ClientActivity.this);
@@ -411,6 +406,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 //		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, this.getPackageName());
 //		intent.setPackage("com.sonyericsson.extras.smartwatch");
 //		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
+		
+		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+	    if (nfcAdapter != null) {
+	    	nfcAdapter.setNdefPushMessage(getServerInfoNdefMessage(), this);
+	    }
 //		
 	}
 
@@ -428,6 +428,7 @@ public class ClientActivity extends Activity implements OnClickListener {
     			NdefRecord.RTD_TEXT, 
     			new byte[0], // No id.
     			s.getBytes(Charset.forName("UTF-8")));
+		Log.v("wePoker - NFC", "Beaming Uri: " + s);
         return new NdefMessage(new NdefRecord[]{ r });
 	}
 

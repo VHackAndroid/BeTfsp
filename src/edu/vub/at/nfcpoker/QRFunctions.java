@@ -118,6 +118,7 @@ public class QRFunctions {
 	}
 
 	public static Uri getUriFromNdefMessage(NdefMessage message) {
+		Log.v("wePoker - NFC", "NDEFMSG received: " + Constants.INTENT_BASE_URL + new String((message.getRecords()[0]).getPayload()));
 		return Uri.parse(Constants.INTENT_BASE_URL + new String((message.getRecords()[0]).getPayload()));
 	}
 
