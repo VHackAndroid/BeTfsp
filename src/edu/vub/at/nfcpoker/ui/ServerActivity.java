@@ -155,6 +155,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public boolean onOptionsItemSelected(MenuItem item) {
     	if (item.getItemId() == R.id.show_wifi_settings) {
     		QRFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, true);
+    		return true;
     	}
 		return super.onOptionsItemSelected(item);
 	}

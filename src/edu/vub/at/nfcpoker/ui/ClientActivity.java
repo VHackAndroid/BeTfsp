@@ -998,8 +998,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void showQrCode() {
-		if (isDedicated) return;
-		// TODO QRFunctions.createJoinUri(wifiGroupName, wifiPassword, ipAddress, isDedicated)
+    	QRFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, true);
 	}
 	
 	private int txtToInteger(String msg) {
