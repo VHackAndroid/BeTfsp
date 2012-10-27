@@ -117,31 +117,9 @@ public class QRFunctions {
 		return new NdefMessage(new NdefRecord[]{ r });
 	}
 
-	public static String getUriFromNdefMessage(NdefMessage message) {
-		return new String((message.getRecords()[0]).getPayload());
+	public static Uri getUriFromNdefMessage(NdefMessage message) {
+		return Uri.parse(Constants.INTENT_BASE_URL + new String((message.getRecords()[0]).getPayload()));
 	}
-
-	public static Uri readUriFromNFCTag(Tag tag) {
-		try {
-			Ndef ndef = Ndef.get(tag);
-			ndef.connect();
-			NdefMessage message = ndef.getNdefMessage();
-			ndef.close();
-			String s = new String((message.getRecords()[0]).getPayload());
-			return Uri.parse(Constants.INTENT_BASE_URL + s);
-		} catch(Exception e) {
-			try {
-				Ndef ndef = Ndef.get(tag);
-				if (ndef != null) { 
-					ndef.close();
-				}
-			} catch(Exception exc) {
-				Log.wtf("wePoker - NFC", "Nothing to see here, move along.");
-			}
-		}
-		return null;
-	}
-
 
 	public static boolean writeJoinInfoOnNFCTag(Activity act, Tag tag, String info) {
 		String s = info.substring(Constants.INTENT_BASE_URL.length() - 1);

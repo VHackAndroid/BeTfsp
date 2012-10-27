@@ -159,15 +159,10 @@ public class QRJoinerActivity extends Activity {
 		NfcAdapter mAdapter = NfcAdapter.getDefaultAdapter(this);
 		Uri uri = null;
 		if ((mAdapter != null) && NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())) {
-			Tag tag = getIntent().getParcelableExtra(NfcAdapter.EXTRA_TAG);
-			uri = QRFunctions.readUriFromNFCTag(tag);
-			// Beam
-			if (uri == null) {
 				Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 		        // only one message sent during the beam
 		        NdefMessage msg = (NdefMessage) rawMsgs[0];
-		        QRFunctions.getUriFromNdefMessage(msg);
-			}
+		        uri = QRFunctions.getUriFromNdefMessage(msg);
 		} else {
 			uri = getIntent().getData();
 		}
