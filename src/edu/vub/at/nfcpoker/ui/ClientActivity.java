@@ -51,6 +51,8 @@ import android.widget.Toast;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.sonyericsson.extras.liveware.aef.control.Control;
+import com.sonyericsson.extras.liveware.aef.registration.Registration;
 
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
@@ -133,6 +135,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 
 	// Game state
 	//public static GameState GAME_STATE = GameState.INIT;
+	public enum ClientGameState {
+        INIT, PLAYING, FINISHED_SHOW_IMAGE, FINISHED_SHOW_MENU, ACTION_MENU,
+    }
+	
+	public ClientGameState clientGameState = ClientGameState.PLAYING;
+	
 	private static int currentMoney = 2000;
 	private int currentSelectedBet = 0;
 	private int currentStateBet = 0;
@@ -332,7 +340,13 @@ public class ClientActivity extends Activity implements OnClickListener {
 		listenToGameServer();
 		
 		// adding the hallo wePoker to the watch
+		clientGameState = ClientGameState.PLAYING;
 		
+//		Intent intent = new Intent(Control.Intents.CONTROL_START_REQUEST_INTENT);
+//		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, this.getPackageName());
+//		intent.setPackage("com.sonyericsson.extras.smartwatch");
+//		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
+//		
 	}
 
 
