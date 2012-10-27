@@ -172,6 +172,11 @@ public class QRJoinerActivity extends Activity {
 			uri = getIntent().getData();
 		}
 		
+		if (uri == null) {
+			Log.v("wePoker - QRJoiner", "URI is null");
+			return;
+		}
+		
 	    wifi_name = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
 	    wifi_pass = uri.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
 	    wifi_server = uri.getQueryParameter(Constants.INTENT_SERVER_IP);
