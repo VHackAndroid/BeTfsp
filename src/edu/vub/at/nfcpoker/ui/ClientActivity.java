@@ -8,11 +8,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -27,7 +22,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
@@ -1150,7 +1144,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 				for (int i = 0; i < 5; i++) {
 					final ImageButton ib = (ImageButton) ll.getChildAt(i);
-					setCardImage(ib, R.drawable.backside);
+					CardAnimation.setCardImage(ib, R.drawable.backside);
 				}
 			}
 		});
@@ -1238,39 +1232,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 			Log.d("wePoker - Client-Server", "Revealing card " + c);
 			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
-			setCardImage(ib, cardToResourceID(c));
+			CardAnimation.setCardImage(ib, cardToResourceID(c));
 		}
-	}
-	
-	
-	static boolean isHoneyComb = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB);
-
-	protected void setCardImage(ImageButton ib, int drawable) {
-		if (isHoneyComb) {
-			setCardImageHC(ib, drawable);
-		} else {
-			ib.setImageResource(drawable);
-		}
-	}
-
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	public void setCardImageHC(final ImageButton ib, int drawable) {
-		ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
-		ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
-		animX.setDuration(500); animY.setDuration(500);
-		final AnimatorSet scalers = new AnimatorSet();
-		scalers.play(animX).with(animY);
-		scalers.addListener(new AnimatorListenerAdapter() {
-
-			@Override
-			public void onAnimationEnd(Animator animation) {
-				ib.setScaleX(1.f);
-				ib.setScaleY(1.f);
-				ib.setImageResource(R.drawable.backside);
-			}
-
-		});
-		scalers.start();
 	}
 
 }
