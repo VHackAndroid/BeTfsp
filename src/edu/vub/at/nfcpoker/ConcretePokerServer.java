@@ -214,7 +214,7 @@ public class ConcretePokerServer extends PokerServer  {
 		public GameState gameState;
 		int chipsPool = 0;
 		Timer delayGameStart;
-			
+		
 		public void run() {
 			while (true) {
 				chipsPool = 0;
@@ -368,6 +368,22 @@ public class ConcretePokerServer extends PokerServer  {
 			int playersRemaining = 0;
 			boolean increasedBet = true;
 			
+			// Reset the previous action (unless folded)
+			for (Integer i : clientsInGame.navigableKeySet()) {
+				Future<ClientAction> oldFut = actionFutures.get(i);
+				if (oldFut != null &&
+					oldFut.isResolved() &&
+					oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
+					// Keep fold
+				} else if (oldFut != null &&
+					oldFut.isResolved() &&
+					oldFut.unsafeGet().getClientActionType() == ClientActionType.AllIn) {
+					// Keep all in
+				} else {
+					actionFutures.remove(i);
+				}
+			}
+			
 			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
 				increasedBet = false;
@@ -375,9 +391,22 @@ public class ConcretePokerServer extends PokerServer  {
 					while (true) {
 						ClientAction ca;
 						Future<ClientAction> oldFut = actionFutures.get(i);
+						// Check if the previous action is still valid
 						if (oldFut != null &&
 								oldFut.isResolved() &&
 								oldFut.unsafeGet().getClientActionType() == ClientActionType.Fold) {
+							// If the player folds, keep fold
+							ca = oldFut.unsafeGet();
+						} else if (oldFut != null &&
+								oldFut.isResolved() &&
+								oldFut.unsafeGet().getClientActionType() == ClientActionType.Bet &&
+								oldFut.unsafeGet().extra >= minBet) {
+							// If the player bet is OK, keep it
+							ca = oldFut.unsafeGet();
+						} else if (oldFut != null &&
+								oldFut.isResolved() &&
+								oldFut.unsafeGet().getClientActionType() == ClientActionType.AllIn) {
+							// If the player is all in, keep it
 							ca = oldFut.unsafeGet();
 						} else {
 							Future<ClientAction> fut = CommLib.createFuture();
