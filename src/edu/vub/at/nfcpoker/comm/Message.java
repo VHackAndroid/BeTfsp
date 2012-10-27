@@ -11,7 +11,7 @@ import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
-	enum ClientActionType { Bet, Fold, Check, AllIn, SmallBlind, BigBlind };
+	enum ClientActionType { Bet, Fold, Check, AllIn };
 
 	public static final class ClientAction {
 		public ClientActionType type;
@@ -244,6 +244,44 @@ public interface Message {
 		@Override
 		public String toString() {
 			return super.toString() + ": Client nickname information message, client -> " + nickname;
+		}
+	}
+
+	public static class SmallBlindMessage extends TimestampedMessage {
+
+		public int clientId;
+		public int amount;
+		
+		public SmallBlindMessage(int clientId, int amount) {
+			this.clientId = clientId;
+			this.amount = amount;
+		}
+
+		// kryo
+		public SmallBlindMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client small blind information message, client -> " + amount;
+		}
+	}
+
+	public static class BigBlindMessage extends TimestampedMessage {
+
+		public int clientId;
+		public int amount;
+		
+		public BigBlindMessage(int clientId, int amount) {
+			this.clientId = clientId;
+			this.amount = amount;
+		}
+
+		// kryo
+		public BigBlindMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Client big blind information message, client -> " + amount;
 		}
 	}
 
