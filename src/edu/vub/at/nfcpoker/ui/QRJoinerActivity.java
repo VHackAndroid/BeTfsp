@@ -62,7 +62,7 @@ public class QRJoinerActivity extends Activity {
 				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED) {
 					if (currentlyJoining) {
 						publishProgress("Connecting to network...");
-						if (!wifi_pass.equals("")) {
+						if ((wifi_pass != null) && (!wifi_pass.equals(""))) {
 							// If we have the password
 							WifiConfiguration config = new WifiConfiguration();
 							config.SSID = '"' + wifi_name + '"';
@@ -103,10 +103,10 @@ public class QRJoinerActivity extends Activity {
 		}
 	};
 
-	protected String wifi_name;
-	protected String wifi_pass;
-	protected String wifi_server;
-	protected boolean wifi_isDedicated;
+	protected String wifi_name = "";
+	protected String wifi_pass = "";
+	protected String wifi_server = "";
+	protected boolean wifi_isDedicated = false;
 	protected Uri lastScannedNfcUri;
 
     @Override
@@ -175,7 +175,8 @@ public class QRJoinerActivity extends Activity {
 	    wifi_name = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
 	    wifi_pass = uri.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
 	    wifi_server = uri.getQueryParameter(Constants.INTENT_SERVER_IP);
-	    wifi_isDedicated = uri.getQueryParameter(Constants.INTENT_IS_DEDICATED).equals("true");	
+	    wifi_isDedicated = uri.getQueryParameter(Constants.INTENT_IS_DEDICATED).equals("true");
+	    Log.v("wePoker - QRJoiner", "New wifi details: "+wifi_name+", "+wifi_pass);
 	}
 
 	@Override
