@@ -50,6 +50,10 @@ public class ConcretePokerServer extends PokerServer  {
 	private ServerViewInterface gui;
 	private boolean isDedicated = false;
 
+	// Blinds
+	private static final int SMALL_BLIND = 5;
+	private static final int BIG_BLIND = 10;
+
 	Runnable exporterR = new Runnable() {	
 		@Override
 		public void run() {
@@ -398,26 +402,35 @@ public class ConcretePokerServer extends PokerServer  {
 					oldFut.isResolved() &&
 					oldFut.unsafeGet().getClientActionType() == ClientActionType.AllIn) {
 					// Keep all in
-				} else if (oldFut != null &&
-						oldFut.isResolved() &&
-						oldFut.unsafeGet().getClientActionType() == ClientActionType.SmallBlind) {
-					addMoney(i, -(oldFut.unsafeGet().getExtra()));
-					addChipsToPool(oldFut.unsafeGet().getExtra());
-				} else if (oldFut != null &&
-							oldFut.isResolved() &&
-							oldFut.unsafeGet().getClientActionType() == ClientActionType.BigBlind) {
-						addMoney(i, -(oldFut.unsafeGet().getExtra()));
-						addChipsToPool(oldFut.unsafeGet().getExtra());
 				} else {
 					actionFutures.remove(i);
 				}
 			}
 			
+			if (clientsIdsInRoundOrder.size() < 2) {
+				throw new RoundEndedException();
+			}
+			
+			// Small and big blind
+			addMoney(clientsIdsInRoundOrder.get(0), -SMALL_BLIND);
+			addChipsToPool(SMALL_BLIND);
+			broadcast(new Message.SmallBlindMessage(clientsIdsInRoundOrder.get(0), SMALL_BLIND));
+			addMoney(clientsIdsInRoundOrder.get(1), -BIG_BLIND);
+			addChipsToPool(BIG_BLIND);
+			broadcast(new Message.BigBlindMessage(clientsIdsInRoundOrder.get(1), BIG_BLIND));
+
+			// Skip the blind players
+			Vector<Integer> clientsIdsInRoundOrderAfterBlinds = (Vector<Integer>) clientsIdsInRoundOrder.clone();
+			clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
+			clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
+			clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
+			clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
+			
 			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
 				increasedBet = false;
-				int playersRemaining = clientsIdsInRoundOrder.size();
-				Iterator<Integer> clientsIterator2 = clientsIdsInRoundOrder.iterator();
+				int playersRemaining = clientsIdsInRoundOrderAfterBlinds.size();
+				Iterator<Integer> clientsIterator2 = clientsIdsInRoundOrderAfterBlinds.iterator();
 				while (clientsIterator2.hasNext()) {
 					Integer i = clientsIterator2.next();
 					while (true) {
