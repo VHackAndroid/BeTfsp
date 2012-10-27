@@ -181,6 +181,10 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// Interactivity(Speech)
 	private static final int RESULT_SPEECH = 1;
 	
+	// Blinds
+	private static final int SMALL_BLIND = 5;
+	private static final int BIG_BLIND = 10;
+	
 	// Interactivity(Audio)
 	private static final boolean audioFeedback = false;
 	private TextToSpeech tts = null;
@@ -348,6 +352,34 @@ public class ClientActivity extends Activity implements OnClickListener {
 		} else {
 			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
+	}
+	
+	private void putSmallBlind() {
+		currentStateBet = SMALL_BLIND;
+		currentMoney -= currentSelectedBet;
+		currentTotalBet += currentSelectedBet;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		outputTextToSpeech("Small blind: " + currentStateBet);
+		disableActions();	
+	}
+	
+	private void putBigBlind() {
+		currentStateBet = BIG_BLIND;
+		currentMoney -= currentSelectedBet;
+		currentTotalBet += currentSelectedBet;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		outputTextToSpeech("Big blind: " + currentStateBet);
+		disableActions();	
 	}
 
 	private void performBet() {
