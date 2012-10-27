@@ -47,8 +47,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 	public interface ServerStarter {
 		public void start(String ipAddress, String broadcastAddress);
-
-		public void setWifiDirect(String groupName, String password, String ipAddress);
+		public void setWifiDirect(String groupName, String password, String ipAddress, int port);
 	}
 
 	@SuppressLint("UseSparseArrays")
@@ -56,6 +55,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	protected String currentWifiGroupName;
 	protected String currentWifiPassword; 
 	protected String currentIpAddress;
+	protected int currentPort;
 
 	private boolean isWifiDirect;
 	
@@ -101,15 +101,16 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 
 			@Override
-			public void setWifiDirect(final String groupName, final String password, final String ipAddress) {
+			public void setWifiDirect(final String groupName, final String password, final String ipAddress, final int port) {
 				// TODO setup NFC tag.
 				currentWifiGroupName = groupName;
 				currentWifiPassword  = password;
 				currentIpAddress = ipAddress;
+				currentPort = port;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						QRFunctions.showWifiConnectionDialog(act, groupName, password, ipAddress, true);
+						QRFunctions.showWifiConnectionDialog(act, groupName, password, ipAddress, port, true);
 					}
 				});
 			}
@@ -154,7 +155,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
     	if (item.getItemId() == R.id.show_wifi_settings) {
-    		QRFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, true);
+    		QRFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
     		return true;
     	}
 		return super.onOptionsItemSelected(item);

@@ -56,19 +56,20 @@ public class QRFunctions {
 		return bitmap;
 	}
 
-	public static String createJoinUri(String wifiGroupName, String wifiPassword, String ipAddress, boolean isDedicated) {
+	public static String createJoinUri(String wifiGroupName, String wifiPassword, String ipAddress, int port, boolean isDedicated) {
 		Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
 				.buildUpon()
 				.appendQueryParameter(Constants.INTENT_WIFI_NAME, wifiGroupName)
 				.appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, wifiPassword)
 				.appendQueryParameter(Constants.INTENT_SERVER_IP, ipAddress)
+				.appendQueryParameter(Constants.INTENT_PORT, ""+port)
 				.appendQueryParameter(Constants.INTENT_IS_DEDICATED, "" + true)
 				.build();
 
 		return uri.toString();
 	}
 
-	public static void showWifiConnectionDialog(final Activity act, final String wifiName, final String wifiPassword, final String ipAddress, boolean isDedicated) {
+	public static void showWifiConnectionDialog(final Activity act, final String wifiName, final String wifiPassword, final String ipAddress, final int port, boolean isDedicated) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(act);
 		View dialogGuts = act.getLayoutInflater().inflate(R.layout.wifi_connection_dialog, null);
 		
@@ -81,7 +82,8 @@ public class QRFunctions {
 		nfcWriteButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				QRFunctions.writeJoinInfoOnNFCTag(act, lastSeenNFCTag, QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, true));
+				QRFunctions.writeJoinInfoOnNFCTag(act, lastSeenNFCTag,
+						QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true));
 			}
 		});
 		NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(act);
@@ -93,7 +95,7 @@ public class QRFunctions {
         builder.setCancelable(true);
         
 		try {
-			String connectionString = QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, true);
+			String connectionString = QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true);
 			Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
 			ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 			qrCodeIV.setImageBitmap(qrCode);

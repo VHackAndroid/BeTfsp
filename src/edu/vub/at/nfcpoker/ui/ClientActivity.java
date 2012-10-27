@@ -415,14 +415,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 
 	private NdefMessage getServerInfoNdefMessage() {
-		Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
-			     .buildUpon()
-			     .appendQueryParameter(Constants.INTENT_WIFI_NAME, serverWifiName)
-			     .appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, serverWifiPassword)
-			     .appendQueryParameter(Constants.INTENT_SERVER_IP, serverIpAddress)
-			     .appendQueryParameter(Constants.INTENT_IS_DEDICATED, "" + isDedicated)
-			     .build();
-		String s = uri.toString().substring(Constants.INTENT_BASE_URL.length() - 1);
+		String uri = QRFunctions.createJoinUri(serverWifiName, serverWifiPassword, serverIpAddress, serverPort, isDedicated);
+		String s = uri.substring(Constants.INTENT_BASE_URL.length() - 1);
 		NdefRecord r = new NdefRecord(
     			NdefRecord.TNF_WELL_KNOWN, 
     			NdefRecord.RTD_TEXT, 
@@ -1012,7 +1006,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void showQrCode() {
-    	QRFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, true);
+    	QRFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, serverPort, true);
 	}
 	
 	private int txtToInteger(String msg) {

@@ -287,7 +287,7 @@ public class Splash extends Activity {
 						    			}
 
 						    			@Override
-						    			public void setWifiDirect(String groupName, String password, final String ipAddress) {
+						    			public void setWifiDirect(String groupName, String password, final String ipAddress, final int port) {
 						    				// TODO setup NFC tag.
 						    				this.wifiGroupName = groupName;
 						    				this.wifiPassword = password;
@@ -295,7 +295,7 @@ public class Splash extends Activity {
 						    				runOnUiThread(new Runnable() {
 						    					@Override
 						    					public void run() {
-						    						QRFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, false);
+						    						QRFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, port, false);
 						    					}
 						    				});
 						    			}

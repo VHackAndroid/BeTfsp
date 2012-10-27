@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
+import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.ui.DiscoveryAsyncTask.DiscoveryCompletionListener;
 import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
@@ -135,7 +136,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 			});
 			
 			String ipAddress = myAddress.getHostAddress();
-			serverStarter.setWifiDirect(groupName, password, ipAddress);
+			serverStarter.setWifiDirect(groupName, password, ipAddress, CommLib.SERVER_PORT);
 			serverStarter.start(ipAddress, null);
 			unregisterReceiver();
 		}

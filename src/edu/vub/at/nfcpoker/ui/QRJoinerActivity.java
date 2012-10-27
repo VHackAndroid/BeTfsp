@@ -106,6 +106,7 @@ public class QRJoinerActivity extends Activity {
 	protected String wifi_name = "";
 	protected String wifi_pass = "";
 	protected String wifi_server = "";
+	protected int wifi_port = CommLib.SERVER_PORT;
 	protected boolean wifi_isDedicated = false;
 	protected Uri lastScannedNfcUri;
 
@@ -175,8 +176,11 @@ public class QRJoinerActivity extends Activity {
 	    wifi_name = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
 	    wifi_pass = uri.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
 	    wifi_server = uri.getQueryParameter(Constants.INTENT_SERVER_IP);
+	    try {
+	    	wifi_port = Integer.parseInt(uri.getQueryParameter(Constants.INTENT_PORT));
+	    } catch (Exception e) { }
 	    wifi_isDedicated = uri.getQueryParameter(Constants.INTENT_IS_DEDICATED).equals("true");
-	    Log.v("wePoker - QRJoiner", "New wifi details: "+wifi_name+", "+wifi_pass);
+	    Log.v("wePoker - QRJoiner", "New wifi details. ip: "+wifi_server+" port: "+wifi_port+" name:"+wifi_name+" dedicated:"+wifi_isDedicated);
 	}
 
 	@Override
