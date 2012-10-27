@@ -137,6 +137,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private int currentChipSwiped = 0;
 	private boolean touchedCard = false;
 	private ReceiveHoleCardsMessage lastReceivedHoleCards;
+	
+	private static int playerIndexInGame = -1;
 
 	// Dedicated
 	private int nextToReveal = 0;
@@ -351,6 +353,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void putSmallBlind() {
+		updateBetAmount(SMALL_BLIND);
 		currentStateBet = SMALL_BLIND;
 		currentMoney -= currentSelectedBet;
 		currentTotalBet += currentSelectedBet;
@@ -365,6 +368,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void putBigBlind() {
+		updateBetAmount(BIG_BLIND);
 		currentStateBet = BIG_BLIND;
 		currentMoney -= currentSelectedBet;
 		currentTotalBet += currentSelectedBet;
@@ -375,7 +379,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			}
 		});
 		outputTextToSpeech("Big blind: " + currentStateBet);
-		disableActions();	
+		disableActions();
 	}
 
 	private void performBet() {
@@ -528,7 +532,21 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}});
 			break;
 		case PREFLOP:
-			toastToShow = "Any preflop bet?";
+			playerIndexInGame++;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (playerIndexInGame == 0) {
+						putSmallBlind();
+					}
+					if (playerIndexInGame == 1) {
+						putBigBlind();
+					}
+				}
+			});
+			if (playerIndexInGame > 1) {
+				toastToShow = "Any preflop bet?";
+			}
 			Log.v("wePoker - Client", "Game state changed to PREFLOP");
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -558,6 +576,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			currentChipSwiped = 0;
 			nextToReveal = 0;
 			lastReceivedHoleCards = null;
+			playerIndexInGame = -1;
 			runOnUiThread(new Runnable() {
 				public void run() {
 					updateMoneyTitle();
@@ -579,6 +598,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 
 	Listener listener = new Listener() {
+		
 		@Override
 		public void connected(Connection arg0) {
 			super.connected(arg0);
