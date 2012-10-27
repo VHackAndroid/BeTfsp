@@ -920,14 +920,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		input.setText(Settings.nickname);
 		builder.setView(input);
 		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface di, int arg1) {
 				try {
-					String nickname = input.getText().toString();
+					Settings.nickname = input.getText().toString();
 					Settings.saveSettings(ctx);
-					NicknameMessage ca = new NicknameMessage(nickname);
+					NicknameMessage ca = new NicknameMessage(Settings.nickname);
 					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 				} catch (Exception e) {	}
 			}
