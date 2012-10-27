@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tablet_layout"
+    android:id="@+id/server_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
-    android:background="#2c672e"
+    android:background="#000000"
     android:gravity="center"
     android:orientation="vertical" >
 
+   <LinearLayout
+        android:id="@+id/users_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:orientation="horizontal" >
+    </LinearLayout>
+    
+ <LinearLayout
+    android:id="@+id/table_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@drawable/table"
+    android:gravity="center"
+    android:orientation="vertical" >
+        
+     
     <TextView
         android:id="@+id/current_phase"
         android:layout_width="wrap_content"
@@ -79,15 +98,15 @@
             android:src="@drawable/backside" />
 
     </LinearLayout>
+ </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/users"
+        android:id="@+id/users_bottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:orientation="horizontal" >
-
     </LinearLayout>
 
 </LinearLayout>

@@ -43,7 +43,7 @@ public class CardAnimation {
 	public static class CardAnimationHC implements ICardAnimation {
 
 		@Override
-		public void setCardImage(final ImageButton ib, int drawable) {
+		public void setCardImage(final ImageButton ib, final int drawable) {
 			ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
 			ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
 			animX.setDuration(500); animY.setDuration(500);
@@ -55,7 +55,7 @@ public class CardAnimation {
 				public void onAnimationEnd(Animator animation) {
 					ib.setScaleX(1.f);
 					ib.setScaleY(1.f);
-					ib.setImageResource(R.drawable.backside);
+					ib.setImageResource(drawable);
 				}
 
 			});

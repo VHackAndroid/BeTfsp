@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -41,7 +42,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 		public void setWifiDirect(String groupName, String password, String ipAddress);
 	}
-
+	
+	private final int MIN_AVATAR_ID = 1;
+	private final int MAX_AVATAR_ID = 15;
+	
 	@SuppressLint("UseSparseArrays")
 	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
 	protected String currentWifiGroupName;
@@ -192,13 +196,25 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
+	public String getNewAvatar(){
+		Random random = new Random();
+		int rndNumberInRange = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
+		Log.d("wePoker - Server", "Avatar for player " + rndNumberInRange);
+		return "avatar_" + rndNumberInRange;
+	}
 	@Override
 	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				Log.d("wePoker - Server", "Adding player name " + clientName);
-				LinearLayout users = (LinearLayout) findViewById(R.id.users);
+				LinearLayout users = (LinearLayout) findViewById(R.id.users_bottom);
 				View badge = getLayoutInflater().inflate(R.layout.user, null);
+				
+//				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
+//				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar();
+//				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
+//				int id = getResources().getIdentifier(avatarField, null, null);
+//				avatar.setImageDrawable(getResources().getDrawable(id));
 				
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
 				name.setText(clientName);
@@ -236,7 +252,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				View badge = playerBadges.get(player);
 				if (badge != null) {
-					LinearLayout users = (LinearLayout) findViewById(R.id.users);
+					LinearLayout users = (LinearLayout) findViewById(R.id.users_bottom);
 					users.removeView(badge);
 					playerBadges.remove(player);
 				}
