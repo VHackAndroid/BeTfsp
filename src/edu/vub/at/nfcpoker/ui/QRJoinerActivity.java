@@ -47,7 +47,7 @@ public class QRJoinerActivity extends Activity {
 				WifiInfo wifiInfo = wm.getConnectionInfo();
 				if (netInfo == null || wifiInfo == null)
 					return;
-				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifi_name.equals(wifiInfo.getSSID())) {
+				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifiName.equals(wifiInfo.getSSID())) {
 					publishProgress("Joining game!");
 					startClientActivity();
 				}
@@ -62,11 +62,11 @@ public class QRJoinerActivity extends Activity {
 				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED) {
 					if (currentlyJoining) {
 						publishProgress("Connecting to network...");
-						if ((wifi_pass != null) && (!wifi_pass.equals(""))) {
+						if ((wifiPassword != null) && (!wifiPassword.equals(""))) {
 							// If we have the password
 							WifiConfiguration config = new WifiConfiguration();
-							config.SSID = '"' + wifi_name + '"';
-							config.preSharedKey = '"' + wifi_pass + '"';
+							config.SSID = '"' + wifiName + '"';
+							config.preSharedKey = '"' + wifiPassword + '"';
 							config.hiddenSSID = true;
 							config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
 							config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
@@ -76,14 +76,14 @@ public class QRJoinerActivity extends Activity {
 							config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
 							
 							int id = wm.addNetwork(config);
-							Log.d("wePoker - QRJoiner", "Connecting to network " + wifi_name + ": " + id);
+							Log.d("wePoker - QRJoiner", "Connecting to network " + wifiName + ": " + id);
 							boolean ret = wm.enableNetwork(id, true);
 							Log.d("wePoker - QRJoiner", "enableNetwork returned " + ret);
 						} else {
 							boolean joined = false;
 							for (WifiConfiguration config : wm.getConfiguredNetworks()) {
-								if (config.SSID.equals(wifi_name)) {
-									Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifi_name);
+								if (config.SSID.equals(wifiName)) {
+									Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifiName);
 									wm.enableNetwork(config.networkId, true);
 									joined = true;
 									break;
@@ -92,7 +92,7 @@ public class QRJoinerActivity extends Activity {
 							if (!joined) {
 								Log.d("wePoker - QRJoiner", "Asking user to connect manually");
 								new AlertDialog.Builder(QRJoinerActivity.this)
-								    .setMessage("Please connect to the network '" + wifi_name + "' manually and scan the barcode again.")
+								    .setMessage("Please connect to the network '" + wifiName + "' manually and scan the barcode again.")
 								    .setCancelable(false)
 								    .show();
 							}
@@ -103,11 +103,15 @@ public class QRJoinerActivity extends Activity {
 		}
 	};
 
-	protected String wifi_name = "";
-	protected String wifi_pass = "";
-	protected String wifi_server = "";
-	protected int wifi_port = CommLib.SERVER_PORT;
-	protected boolean wifi_isDedicated = false;
+	protected String wifiServerIp = "";
+	protected int wifiPort = CommLib.SERVER_PORT;
+	protected String wifiName = "";
+	protected String wifiPassword = "";
+	protected boolean wifiIsDedicated = false;
+	protected boolean wifiIsServer = false;
+	protected String wifiBroadcast = "";
+	protected boolean wifiWifiDirect = false;
+	
 	protected Uri lastScannedNfcUri;
 
     @Override
@@ -122,7 +126,7 @@ public class QRJoinerActivity extends Activity {
 		intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
 		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
-        String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifi_name);
+        String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifiName);
         TextView progressTxt = (TextView) findViewById(R.id.Discovering);
         progressTxt.setText(joinText);
 		
@@ -143,9 +147,14 @@ public class QRJoinerActivity extends Activity {
 
 	protected void startClientActivity() {
 		Intent i = new Intent(this, ClientActivity.class);
-		i.putExtra(Constants.INTENT_SERVER_IP, wifi_server);
-		i.putExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
-		i.putExtra(Constants.INTENT_IS_DEDICATED, wifi_isDedicated);
+		i.putExtra(Constants.INTENT_SERVER_IP, wifiServerIp);
+		i.putExtra(Constants.INTENT_PORT, wifiPort);
+		i.putExtra(Constants.INTENT_WIFI_NAME, wifiName);
+		i.putExtra(Constants.INTENT_WIFI_PASSWORD, wifiPassword);
+		i.putExtra(Constants.INTENT_IS_DEDICATED, wifiIsDedicated);
+		i.putExtra(Constants.INTENT_IS_SERVER, wifiIsServer);
+		i.putExtra(Constants.INTENT_BROADCAST, wifiBroadcast);
+		i.putExtra(Constants.INTENT_WIFI_DIRECT, wifiWifiDirect);
 		startActivity(i);
 		finish();
 	}
@@ -173,14 +182,26 @@ public class QRJoinerActivity extends Activity {
 			return;
 		}
 		
-	    wifi_name = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
-	    wifi_pass = uri.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
-	    wifi_server = uri.getQueryParameter(Constants.INTENT_SERVER_IP);
-	    try {
-	    	wifi_port = Integer.parseInt(uri.getQueryParameter(Constants.INTENT_PORT));
-	    } catch (Exception e) { }
-	    wifi_isDedicated = uri.getQueryParameter(Constants.INTENT_IS_DEDICATED).equals("true");
-	    Log.v("wePoker - QRJoiner", "New wifi details. ip: "+wifi_server+" port: "+wifi_port+" name:"+wifi_name+" dedicated:"+wifi_isDedicated);
+	    wifiName = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
+	    wifiServerIp = uri.getQueryParameter(Constants.INTENT_SERVER_IP);
+	    if (uri.getQueryParameter(Constants.INTENT_PORT) != null) {
+	    	try {
+	    		wifiPort = Integer.parseInt(uri.getQueryParameter(Constants.INTENT_PORT));
+	    	} catch (Exception e) {}
+	    }
+	    wifiName = uri.getQueryParameter(Constants.INTENT_WIFI_NAME);
+	    wifiPassword = uri.getQueryParameter(Constants.INTENT_WIFI_PASSWORD);
+	    if (uri.getQueryParameter(Constants.INTENT_IS_DEDICATED) != null) {
+	    	wifiIsDedicated = uri.getQueryParameter(Constants.INTENT_IS_DEDICATED).equals("true");
+	    }
+	    if (uri.getQueryParameter(Constants.INTENT_IS_SERVER) != null) {
+	    	wifiIsServer = uri.getQueryParameter(Constants.INTENT_IS_SERVER).equals("true");
+	    }
+	    wifiBroadcast = uri.getQueryParameter(Constants.INTENT_BROADCAST);
+	    if (uri.getQueryParameter(Constants.INTENT_WIFI_DIRECT) != null) {
+	    	wifiWifiDirect = uri.getQueryParameter(Constants.INTENT_WIFI_DIRECT).equals("true");
+	    }
+	    Log.v("wePoker - QRJoiner", "New wifi details. ip: "+wifiServerIp+" port: "+wifiPort+" name:"+wifiName+" dedicated:"+wifiIsDedicated);
 	}
 
 	@Override
