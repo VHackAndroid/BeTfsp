@@ -50,6 +50,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
@@ -187,6 +188,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private static final boolean audioFeedback = false;
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
+	
+	// Interactivity(Haptic)
+	private com.immersion.uhl.Launcher mImmersionLauncher;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -220,6 +224,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
+		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
 		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -272,19 +277,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 		blackchip.setOnTouchListener(gestureListener);
 
 		/*
-				ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
+			ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
 
-				final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
-				card1.setPages(mPages1);
+			final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
+			card1.setPages(mPages1);
 
-				ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
+			ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
 
-				final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
-				card2.setPages(mPages2);
+			final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
+			card2.setPages(mPages2);
 		 */
 
 		mCardView1 = (CurlView) findViewById(R.id.pCard1);
@@ -459,6 +464,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		updateBetAmount();
 		disableActions();
 	}
+	
+	private void vibrate(int buzzType) {
+		if (mImmersionLauncher == null) return;
+		try {
+			mImmersionLauncher.play(buzzType);
+		} catch (RuntimeException e) {
+			Log.v("wePoker - Client", "mImmersionLauncher failed.");
+		}
+	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -471,6 +485,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				vibrate(com.immersion.uhl.Launcher.SHORT_BUZZ_100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -705,6 +720,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					currentMoney += rwdm.chips / players.size();
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -712,7 +728,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 						}});
 
 				} else {
-					// boe
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
@@ -794,6 +810,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
+		mImmersionLauncher.stop();
 		super.onPause();
 	}
 
@@ -831,6 +848,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		switch (item.getItemId()) {
 		case R.id.speech:
 			askSpeechInput();
+			return true;
+		case R.id.qrCode:
+			showQrCode();
 			return true;
 		case R.id.allIn:
 			performAllIn();
@@ -888,6 +908,11 @@ public class ClientActivity extends Activity implements OnClickListener {
             t.show();
             outputTextToSpeech("Oops! Your device doesn't support Speech to Text");
         }
+	}
+	
+	private void showQrCode() {
+		if (isDedicated) return;
+		// TODO QRFunctions.createJoinUri(wifiGroupName, wifiPassword, ipAddress, isDedicated)
 	}
 	
 	private int txtToInteger(String msg) {
@@ -963,14 +988,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		input.setText(Settings.nickname);
 		builder.setView(input);
 		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface di, int arg1) {
 				try {
-					String nickname = input.getText().toString();
+					Settings.nickname = input.getText().toString();
 					Settings.saveSettings(ctx);
-					NicknameMessage ca = new NicknameMessage(nickname);
+					NicknameMessage ca = new NicknameMessage(Settings.nickname);
 					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 				} catch (Exception e) {	}
 			}
