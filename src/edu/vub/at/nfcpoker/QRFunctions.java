@@ -93,7 +93,7 @@ public class QRFunctions {
         builder.setCancelable(true);
         
 		try {
-			String connectionString = QRFunctions.createJoinUri(wifiName, wifiName, ipAddress, true);
+			String connectionString = QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, true);
 			Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
 			ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 			qrCodeIV.setImageBitmap(qrCode);
