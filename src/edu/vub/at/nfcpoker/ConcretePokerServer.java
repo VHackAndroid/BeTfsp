@@ -383,7 +383,6 @@ public class ConcretePokerServer extends PokerServer  {
 		public void roundTable() throws RoundEndedException {
 			
 			int minBet = 0;
-			int playersRemaining = 0;
 			boolean increasedBet = true;
 			
 			// Reset the previous action (unless folded)
@@ -416,8 +415,8 @@ public class ConcretePokerServer extends PokerServer  {
 			
 			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
-				playersRemaining = 0;
 				increasedBet = false;
+				int playersRemaining = clientsIdsInRoundOrder.size();
 				Iterator<Integer> clientsIterator2 = clientsIdsInRoundOrder.iterator();
 				while (clientsIterator2.hasNext()) {
 					Integer i = clientsIterator2.next();
@@ -461,15 +460,14 @@ public class ConcretePokerServer extends PokerServer  {
 						switch (ca.type) {
 						case Fold: 
 							broadcast(new ClientActionMessage(ca, i));
+							playersRemaining--;
 							break;
 						case Check: // And CALL (client sends diffMoney!)
-							playersRemaining++;
 							broadcast(new ClientActionMessage(ca, i));
 							addMoney(i, -ca.getExtra());
 							addChipsToPool(ca.getExtra());
 							break;
 						case AllIn: // Client sends diffMoney
-							playersRemaining++;
 							if (ca.getExtra() > minBet) {
 								minBet = ca.extra;
 								increasedBet = true; // ask for call or fold in second round
@@ -483,7 +481,6 @@ public class ConcretePokerServer extends PokerServer  {
 								actionFutures.remove(i);
 								continue; // ask for a new bet
 							}
-							playersRemaining++;
 							broadcast(new ClientActionMessage(ca, i));
 							if (ca.getExtra() > minBet) {
 								minBet = ca.extra;
@@ -499,10 +496,10 @@ public class ConcretePokerServer extends PokerServer  {
 						}
 						break;
 					}
+					if (playersRemaining <= 1)
+						throw new RoundEndedException();
 				}
 			}
-			if (playersRemaining <= 1)
-				throw new RoundEndedException();
 		}
 		
 		
