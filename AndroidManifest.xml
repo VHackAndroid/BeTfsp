@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.vub.at.nfcpoker"
-    android:versionCode="1001"
-    android:versionName="1.1-20121024" >
+    android:versionCode="1002"
+    android:versionName="1.1-20121025" >
 
     <uses-sdk
-        android:minSdkVersion="15"
+        android:minSdkVersion="7"
         android:targetSdkVersion="15" />
 
     <uses-feature
@@ -34,7 +34,6 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <!-- ADDED FOR WATCH -->
     <uses-permission android:name="com.sonyericsson.extras.liveware.aef.EXTENSION_PERMISSION"/>
 
     <application
