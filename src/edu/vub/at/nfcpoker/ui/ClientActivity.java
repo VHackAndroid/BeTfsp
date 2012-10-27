@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -24,6 +26,8 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -61,21 +65,24 @@ import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
+import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
+import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.NicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.PoolMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
-import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
-import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
-import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
-import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
-import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
+import edu.vub.at.nfcpoker.comm.Message.SmallBlindMessage;
+import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
@@ -154,8 +161,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private int currentChipSwiped = 0;
 	private boolean touchedCard = false;
 	private ReceiveHoleCardsMessage lastReceivedHoleCards;
-	
-	private static int playerIndexInGame = -1;
 
 	// Dedicated
 	private int nextToReveal = 0;
@@ -204,10 +209,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// Interactivity(Speech)
 	private static final int RESULT_SPEECH = 1;
 	
-	// Blinds
-	private static final int SMALL_BLIND = 5;
-	private static final int BIG_BLIND = 10;
-	
 	// Interactivity(Audio)
 	private static final boolean audioFeedback = false;
 	private TextToSpeech tts = null;
@@ -231,6 +232,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private UUID pendingFuture;
 	private Connection serverConnection;
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -318,7 +320,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 				return gestureDetector.onTouchEvent(arg1);
 			}
 		};
-
+		
+		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+	    if (nfcAdapter != null) {
+	    	nfcAdapter.setNdefPushMessage(getServerInfoNdefMessage(), this);
+	    }
+		
 		final ImageView whitechip = (ImageView) findViewById(R.id.whitechip);
 		whitechip.setOnClickListener(ClientActivity.this);
 		whitechip.setOnTouchListener(gestureListener);
@@ -411,6 +418,22 @@ public class ClientActivity extends Activity implements OnClickListener {
 //		
 	}
 
+	private NdefMessage getServerInfoNdefMessage() {
+		Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
+			     .buildUpon()
+			     .appendQueryParameter(Constants.INTENT_WIFI_NAME, serverWifiName)
+			     .appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, serverWifiPassword)
+			     .appendQueryParameter(Constants.INTENT_SERVER_IP, serverIpAddress)
+			     .appendQueryParameter(Constants.INTENT_IS_DEDICATED, "" + isDedicated)
+			     .build();
+		String s = uri.toString().substring(Constants.INTENT_BASE_URL.length() - 1);
+		NdefRecord r = new NdefRecord(
+    			NdefRecord.TNF_WELL_KNOWN, 
+    			NdefRecord.RTD_TEXT, 
+    			new byte[0], // No id.
+    			s.getBytes(Charset.forName("UTF-8")));
+        return new NdefMessage(new NdefRecord[]{ r });
+	}
 
 	protected void runOnNotUiThread(Runnable runnable) {
 		new Thread(runnable).start();
@@ -429,37 +452,17 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	private void putSmallBlind() {
-		Toast toast = Toast.makeText(ClientActivity.this, "Small blind!", Toast.LENGTH_SHORT);
+	private void putSmallBlind(int amount) {
+		Toast toast = Toast.makeText(ClientActivity.this, "Small blind ("+amount+" \u20AC)!", Toast.LENGTH_SHORT);
 		toast.show();
-		updateBetAmount(SMALL_BLIND);
-		currentStateBet = SMALL_BLIND;
-		currentMoney -= currentSelectedBet;
-		currentTotalBet += currentSelectedBet;
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.SmallBlind, currentSelectedBet);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
-		outputTextToSpeech("Small blind: " + currentStateBet);
+		outputTextToSpeech("Small blind " + amount);
 		disableActions();	
 	}
 	
-	private void putBigBlind() {
-		Toast toast = Toast.makeText(ClientActivity.this, "Big blind!", Toast.LENGTH_SHORT);
+	private void putBigBlind(int amount) {
+		Toast toast = Toast.makeText(ClientActivity.this, "Big blind ("+amount+" \u20AC)!", Toast.LENGTH_SHORT);
 		toast.show();
-		updateBetAmount(BIG_BLIND);
-		currentStateBet = BIG_BLIND;
-		currentMoney -= currentSelectedBet;
-		currentTotalBet += currentSelectedBet;
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.BigBlind, currentSelectedBet);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
-		outputTextToSpeech("Big blind: " + currentStateBet);
+		outputTextToSpeech("Big blind " + amount);
 		disableActions();
 	}
 
@@ -623,22 +626,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}});
 			break;
 		case PREFLOP:
-			//playerIndexInGame++;
-			runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					playerIndexInGame++;
-					if (playerIndexInGame == 0) {
-						putSmallBlind();
-					}
-					if (playerIndexInGame == 1) {
-						putBigBlind();
-					}
-				}
-			});
-			if (playerIndexInGame > 1) {
-				toastToShow = "Any preflop bet?";
-			}
+			toastToShow = "Any preflop bet?";
 			Log.v("wePoker - Client", "Game state changed to PREFLOP");
 			runOnUiThread(new Runnable() {
 				public void run() {
@@ -668,7 +656,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 			currentChipSwiped = 0;
 			nextToReveal = 0;
 			lastReceivedHoleCards = null;
-			playerIndexInGame = -1;
 			runOnUiThread(new Runnable() {
 				public void run() {
 					updateMoneyTitle();
@@ -785,6 +772,42 @@ public class ClientActivity extends Activity implements OnClickListener {
 					public void run() {
 						serverUpdatePoolMoney(pm.poolMoney);
 					}});
+			}
+
+			if (m instanceof SmallBlindMessage) {
+				final SmallBlindMessage sbm = (SmallBlindMessage) m;
+				if (sbm.clientId == myClientID) {
+					runOnUiThread(new Runnable() {
+						public void run() {
+							putSmallBlind(sbm.amount);
+						}
+					});
+				}
+				if (sbm.amount > minimumBet) {
+					runOnUiThread(new Runnable() {
+						public void run() {
+							updateMinBetAmount(sbm.amount);
+						}
+					});
+				}
+			}
+
+			if (m instanceof BigBlindMessage) {
+				final BigBlindMessage bbm = (BigBlindMessage) m;
+				if (bbm.clientId == myClientID) {
+					runOnUiThread(new Runnable() {
+						public void run() {
+							putBigBlind(bbm.amount);
+						}
+					});
+				}
+				if (bbm.amount > minimumBet) {
+					runOnUiThread(new Runnable() {
+						public void run() {
+							updateMinBetAmount(bbm.amount);
+						}
+					});
+				}
 			}
 
 			if (m instanceof SetIDMessage) {
