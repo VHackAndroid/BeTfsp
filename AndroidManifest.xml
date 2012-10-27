@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.vub.at.nfcpoker"
-    android:versionCode="1003"
-    android:versionName="1.1-20121026" >
+    android:versionCode="1004"
+    android:versionName="1.1-20121027" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -28,6 +28,15 @@
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false"/>
+     <uses-feature
+         android:name="android.hardware.touchscreen.multitouch"
+         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.screen.landscape"
+        android:required="false" />
+     <uses-feature
+         android:name="android.hardware.screen.portrait"
+         android:required="false" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
