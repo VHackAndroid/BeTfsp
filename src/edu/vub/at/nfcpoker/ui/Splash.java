@@ -4,9 +4,6 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.sonyericsson.extras.liveware.aef.control.Control;
-import com.sonyericsson.extras.liveware.aef.registration.Registration;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -19,7 +16,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,7 +26,6 @@ import android.widget.Button;
 import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.R;

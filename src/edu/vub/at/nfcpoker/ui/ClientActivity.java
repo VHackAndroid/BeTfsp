@@ -55,17 +55,14 @@ import android.widget.Toast;
 import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.sonyericsson.extras.liveware.aef.control.Control;
-import com.sonyericsson.extras.liveware.aef.registration.Registration;
 
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
-import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
