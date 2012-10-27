@@ -482,6 +482,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			public void run() {
 				disableActions();
 				updateBetAmount();
+				updateMinBetAmount(0);
 			}});
 		String toastToShow = null;
 		switch (newGameState) {
