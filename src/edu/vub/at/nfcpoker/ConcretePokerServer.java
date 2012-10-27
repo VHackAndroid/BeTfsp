@@ -544,9 +544,9 @@ public class ConcretePokerServer extends PokerServer  {
 		}
 	}
 	
-	public static ArrayList<String> names = new ArrayList<String>(Arrays.asList( "Dries", "Lode", "Elisa", "Wolf", "Tom", "Kevin", "Andoni" ));
+	public static ArrayList<String> names = new ArrayList<String>(Arrays.asList( "Dries", "Lode", "Elisa", "Wolf", "Tom", "Kevin", "Andoni", "Christophe", "Laure" ));
 
 	public static String generateName(int id) {
-		return names.get(id % names.size())+"(" + id + ")";
+		return names.get(id % names.size()); //+"(" + id + ")";
 	}
 }
