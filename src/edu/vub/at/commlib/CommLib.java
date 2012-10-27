@@ -58,7 +58,7 @@ public class CommLib {
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
 		k.register(UUID.class, new UUIDSerializer());
-		Log.d("wePoker - CommLib", "Discovering on broadcast: "+InetAddress.getByName(broadcastAddress));
+//		Log.d("wePoker - CommLib", "Discovering on broadcast: "+InetAddress.getByName(broadcastAddress));
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName(broadcastAddress));
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
@@ -82,7 +82,7 @@ public class CommLib {
 		k.writeObject(o, clci);
 		final byte[] buf = o.toBytes();
 
-		Log.d("wePoker - CommLib", "Exporting on broadcast: "+InetAddress.getByName(broadcastAddress));
+//		Log.d("wePoker - CommLib", "Exporting on broadcast: "+InetAddress.getByName(broadcastAddress));
 		DatagramSocket ds = new DatagramSocket();
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
@@ -106,7 +106,7 @@ public class CommLib {
 		@SuppressWarnings("unchecked")
 		Future<Object> f = futures.remove(futureId);
 		if (f == null) {
-			Log.w("wePoker - CommLib", "Future null!");
+//			Log.w("wePoker - CommLib", "Future null!");
 			return;
 		}
 		f.resolve(futureValue);	

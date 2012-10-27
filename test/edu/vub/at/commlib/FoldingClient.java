@@ -7,9 +7,14 @@ import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.comm.Message.ClientAction;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
+import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
+import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.ui.ClientActivity;
 
 public class FoldingClient {
 
@@ -18,9 +23,7 @@ public class FoldingClient {
 	 */
 	public static void main(String[] args) {
 		try {
-			CommLibConnectionInfo clci = CommLib.discover(PokerServer.class, args[0]);
-			System.out.println("Discovered server at " + clci.getAddress());
-			clci.connect(new Listener() {
+			CommLibConnectionInfo.connect(args[0], CommLib.SERVER_PORT, new Listener() {
 				@Override
 				public void received(Connection c, Object m) {
 					super.received(c, m);
@@ -67,6 +70,11 @@ public class FoldingClient {
 					if (m instanceof ReceiveHoleCardsMessage) {
 						ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
 						System.out.print("Received hand cards: " + newHoleCards.toString());
+					}
+					
+					if (m instanceof RequestClientActionFutureMessage) {
+						RequestClientActionFutureMessage rcafm = (RequestClientActionFutureMessage) m;
+						c.sendTCP(new FutureMessage(rcafm.futureId, new ClientAction(ClientActionType.Fold)));
 					}
 						
 				}
