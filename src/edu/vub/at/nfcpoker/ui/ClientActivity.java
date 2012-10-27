@@ -103,7 +103,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			showBarrier("Connecting to server");
 			Log.v("wePoker - Client", "Connecting to "+address+" "+port);
 		}
 
@@ -406,7 +405,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 		
 		// adding the hallo wePoker to the watch
-		clientGameState = ClientGameState.PLAYING;
+		// clientGameState = ClientGameState.PLAYING;
 		
 //		Intent intent = new Intent(Control.Intents.CONTROL_START_REQUEST_INTENT);
 //		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, this.getPackageName());

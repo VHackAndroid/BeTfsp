@@ -31,14 +31,6 @@ public class QRJoinerActivity extends Activity {
 
 	protected boolean currentlyJoining = false;
 	
-	protected static String[] status_strings = {
-		"Disabling wireless...",
-		"Wireless disabled",
-		"Enabling wireless...",
-		"Wireless enabled",
-		"Wireless state unknown"
-	};
-	
 	private BroadcastReceiver wifiChangeReceiver = new BroadcastReceiver() {
 		
 		@Override
@@ -60,7 +52,6 @@ public class QRJoinerActivity extends Activity {
 			}
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				int new_wifi_status = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
-				newStatus = status_strings[new_wifi_status];
 				
 				if (new_wifi_status == WifiManager.WIFI_STATE_DISABLED) {
 					publishProgress("Enabling Wireless...");
@@ -106,11 +97,6 @@ public class QRJoinerActivity extends Activity {
 						}
 					}
 				}
-
-			}
-			if (newStatus != null) {
-				TextView progressTxt = (TextView) findViewById(R.id.Discovering);
-				progressTxt.setText(newStatus);
 			}
 		}
 	};
