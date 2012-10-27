@@ -376,9 +376,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			return;
 		}
 		int diffMoney = 0;
-		if (currentStateBet > 0) {
-			diffMoney = minimumBet - currentStateBet; // 2nd round
-		}
+		diffMoney = minimumBet - currentStateBet; // 2nd round
 		currentSelectedBet = minimumBet;
 		currentStateBet = minimumBet;
 		currentMoney -= diffMoney;
