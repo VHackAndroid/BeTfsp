@@ -5,8 +5,17 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class QRFunctions {
 
@@ -41,5 +50,32 @@ public class QRFunctions {
     			     .build();
     	
     	return uri.toString();
+	}
+    
+
+	public static void showWifiConnectionDialog(Context ctx, String wifiName, String wifiPassword, String ipAddress, boolean isDedicated) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+		LayoutInflater inflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View dialogGuts = inflater.inflate(R.layout.wifi_connection_dialog, null);
+		
+		TextView networkNameTV = (TextView) dialogGuts.findViewById(R.id.network_name);
+		networkNameTV.setText(wifiName);
+		TextView passwordTV = (TextView) dialogGuts.findViewById(R.id.password);
+		passwordTV.setText(wifiPassword);
+		builder.setCancelable(false);
+		
+		try {
+			String connectionString = QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, isDedicated);
+			Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
+			ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
+			qrCodeIV.setImageBitmap(qrCode);
+		} catch (WriterException e) {
+			Log.e("wePoker - Server", "Could not create QR code", e);
+		}
+		
+		builder.setTitle("Connection details")
+		       .setCancelable(true)
+		       .setView(dialogGuts)
+		       .show();
 	}
 }

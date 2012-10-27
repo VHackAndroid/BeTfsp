@@ -27,8 +27,11 @@ import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
+import edu.vub.at.nfcpoker.Constants;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.settings.Settings;
+import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
 public class Splash extends Activity {
 	private static final boolean LODE = false;
@@ -93,7 +96,11 @@ public class Splash extends Activity {
 						client_startClientServerAsk = null;
 					}
 				}
-				startClient(result);
+				int port = 0;
+				try {
+					Integer.parseInt(result.getPort());
+				} catch (Exception e) { }
+				startClient(result.getAddress(), port, result.isDedicated(), false, null, null, null);
 			}
 		};
 		
@@ -192,11 +199,17 @@ public class Splash extends Activity {
 		}
 	}
 	
-	public void startClient(CommLibConnectionInfo clci) {
+	public void startClient(
+			String ip, int port, boolean isDedicated,
+			boolean isServer, String broadcast, String wifiName, String wifiPassword) {
 		Intent i = new Intent(this, ClientActivity.class);
-		i.putExtra("ip", clci.getAddress());
-		i.putExtra("port", Integer.parseInt(clci.getPort()));
-		i.putExtra("isDedicated", clci.isDedicated());
+		i.putExtra(Constants.INTENT_SERVER_IP, ip);
+		i.putExtra(Constants.INTENT_PORT, port);
+		i.putExtra(Constants.INTENT_IS_DEDICATED, isDedicated);
+		i.putExtra(Constants.INTENT_IS_SERVER, isServer);
+		i.putExtra(Constants.INTENT_BROADCAST, broadcast);
+		i.putExtra(Constants.INTENT_WIFI_NAME, wifiName);
+		i.putExtra(Constants.INTENT_WIFI_PASSWORD, wifiPassword);
 		startActivity(i);
 		finish();
 	}
@@ -234,6 +247,7 @@ public class Splash extends Activity {
 	}
 	
 	private void askStartClientServer() {
+		final Activity act = this;
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -245,11 +259,49 @@ public class Splash extends Activity {
 						new Thread() {
 							@Override
 							public void run() {
-					    		String ipAddress = CommLib.getIpAddress(Splash.this);
-					    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
-						    	ConcretePokerServer cps = new ConcretePokerServer(
-						    			new DummServerView(), false, ipAddress, broadcastAddress);
-						    	cps.start();
+								WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+								boolean isWifiEnabled = wm.isWifiEnabled();
+								boolean isConnected = wm.getConnectionInfo().getNetworkId() != -1;
+								if (!(isWifiEnabled && isConnected)) {
+						    		ServerStarter startServer = new ServerStarter() {
+						    			private String wifiGroupName;
+						    			private String wifiPassword;
+						    			private String ipAddress;
+						    			@Override
+						    			public void start(String ipAddress, String broadcastAddress) {
+						    				this.ipAddress = ipAddress;
+						    				if (discoveryTask != null) {
+						    					discoveryTask.cancel(true);
+						    					discoveryTask = null;
+						    				}
+						    				startClient(ipAddress, CommLib.SERVER_PORT, false,
+						    							true, broadcastAddress, wifiGroupName, wifiPassword);
+						    			}
+
+						    			@Override
+						    			public void setWifiDirect(String groupName, String password, final String ipAddress) {
+						    				// TODO setup NFC tag.
+						    				this.wifiGroupName = groupName;
+						    				this.wifiPassword = password;
+						    				this.ipAddress = ipAddress;
+						    				runOnUiThread(new Runnable() {
+						    					@Override
+						    					public void run() {
+						    						QRFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, false);
+						    					}
+						    				});
+						    			}
+						    		};
+						    		new WifiDirectManager.Creator(act, startServer).run();
+						    	} else {
+
+						    		String ipAddress = CommLib.getIpAddress(Splash.this);
+						    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
+				    				startClient(ipAddress, CommLib.SERVER_PORT, false,
+				    						true, broadcastAddress,
+			    							wm.getConnectionInfo().getSSID(),
+			    							"********");
+						    	}
 							}
 						}.start();
 					}

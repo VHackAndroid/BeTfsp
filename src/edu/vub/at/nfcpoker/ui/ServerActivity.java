@@ -58,6 +58,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	final boolean isDedicated = tablet_layout != null;
     	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
     	
+		final Context ctx = this;
+    	
 		ServerStarter startServer = new ServerStarter() {
 			
 			@Override
@@ -68,7 +70,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 
 			@Override
-			public void setWifiDirect(String groupName, String password, String ipAddress) {
+			public void setWifiDirect(final String groupName, final String password, final String ipAddress) {
 				// TODO setup NFC tag.
 				currentWifiGroupName = groupName;
 				currentWifiPassword  = password;
@@ -76,7 +78,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						showWifiConnectionDialog();
+						QRFunctions.showWifiConnectionDialog(ctx, groupName, password, ipAddress, true);
 					}
 				});
 			}
@@ -99,7 +101,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
     	if (item.getItemId() == R.id.show_wifi_settings) {
-    		showWifiConnectionDialog();
+    		QRFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, true);
     	}
 		return super.onOptionsItemSelected(item);
 	}
@@ -109,45 +111,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
         getMenuInflater().inflate(R.menu.activity_server, menu);
         return true;
     }
-
-    private Dialog wifiConnectionDialog;
-    
-	private void showWifiConnectionDialog() {
-		if (wifiConnectionDialog == null) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			View dialogGuts = getLayoutInflater().inflate(R.layout.wifi_connection_dialog, null);
-			
-			TextView networkNameTV = (TextView) dialogGuts.findViewById(R.id.network_name);
-			networkNameTV.setText(this.currentWifiGroupName);
-			TextView passwordTV = (TextView) dialogGuts.findViewById(R.id.password);
-			passwordTV.setText(currentWifiPassword);
-			Button dismissButton = (Button) dialogGuts.findViewById(R.id.dismiss_btn);
-			dismissButton.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					wifiConnectionDialog.dismiss();	
-				}
-			});
-			
-			try {
-				String connectionString = QRFunctions.createJoinUri(currentWifiGroupName, currentWifiPassword, currentIpAddress, true);
-				Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
-				ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
-				qrCodeIV.setImageBitmap(qrCode);
-			} catch (WriterException e) {
-				Log.e("wePoker - Server", "Could not create QR code", e);
-			}
-			
-			
-			wifiConnectionDialog = 
-				builder.setTitle("Connection details")
-				       .setCancelable(true)
-				       .setView(dialogGuts)
-				       .create();
-		}
-		
-		wifiConnectionDialog.show();
-	}
 
 	int nextToReveal = 0;
 

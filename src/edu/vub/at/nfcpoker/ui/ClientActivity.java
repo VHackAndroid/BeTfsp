@@ -48,8 +48,11 @@ import com.esotericsoftware.kryonet.Client;
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
+import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.ConcretePokerServer;
+import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
@@ -142,6 +145,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// Dedicated
 	private int nextToReveal = 0;
 	private boolean isDedicated = false;
+	
+	// Server
+	private boolean isServer = false;
+	private String serverIpAddress;
+	private int serverPort;
+	private String serverBroadcast;
+	private String serverWifiName;
+	private String serverWifiPassword;
 
 	// UI
 	private CurlView mCardView1;
@@ -205,11 +216,25 @@ public class ClientActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 
 		// Game state
-		isDedicated = getIntent().getBooleanExtra("isDedicated", false);
+		isDedicated = getIntent().getBooleanExtra(Constants.INTENT_IS_DEDICATED, false);
 		if (isDedicated) {
 			setContentView(R.layout.activity_client_is_dedicated);
 		} else {
 			setContentView(R.layout.activity_client);
+		}
+		
+		// Start server on a client
+		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
+		if (isServer) {
+			serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
+			serverPort = getIntent().getIntExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
+			serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
+			serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
+			serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
+			ConcretePokerServer cps = new ConcretePokerServer(
+					new DummServerView(), false,
+					serverIpAddress, serverBroadcast);
+			cps.start();
 		}
 
 		// Interactivity

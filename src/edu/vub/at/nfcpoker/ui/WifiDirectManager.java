@@ -107,7 +107,6 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 			//TODO: advertise password for legacy clients.
 			Log.d("wePoker - Wifi-Direct", "Created group " + groupName + " with password '" + password + "'");
 			act.runOnUiThread(new Runnable() {
-				
 				@Override
 				public void run() {
 					Toast.makeText(act, "Created group " + groupName + " with password '" + password + "'", Toast.LENGTH_LONG).show();
