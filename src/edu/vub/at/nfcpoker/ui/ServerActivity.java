@@ -12,16 +12,12 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.R;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -38,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-@TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
 
 	public interface ServerStarter {
@@ -60,7 +55,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
-    	final boolean isDedicated = tablet_layout != null;
+    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
+    	final boolean isDedicated = tablet_layout != null || isTV;
     	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
     	
 		ServerStarter startServer = new ServerStarter() {
@@ -88,8 +84,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		};
     	
 		if (isWifiDirect) {
-    		WifiDirectManager wdm = WifiDirectManager.create(this, getMainLooper(), true);
-    		wdm.createGroup(startServer);
+    		new WifiDirectManager.Creator(this, startServer).run();
     	} else {
     		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
     		currentWifiGroupName = wm.getConnectionInfo().getSSID();
@@ -114,27 +109,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
         getMenuInflater().inflate(R.menu.activity_server, menu);
         return true;
     }
-    
-    // Taken from the ZXing source code.
-    private static final int WHITE = 0xFFFFFFFF;
-    private static final int BLACK = 0xFF000000;
-    
-    private Bitmap encodeBitmap(String contents) throws WriterException {
-    	int width = 200;
-    	int height = 200;
-		BitMatrix result = new QRCodeWriter().encode(contents, BarcodeFormat.QR_CODE, width, height);
-        int[] pixels = new int[width * height];
-        for (int y = 0; y < height; y++) {
-          int offset = y * width;
-          for (int x = 0; x < width; x++) {
-            pixels[offset + x] = result.get(x, y) ? BLACK : WHITE;
-          }
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-        return bitmap;
-    }
 
     private Dialog wifiConnectionDialog;
     
@@ -156,8 +130,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			});
 			
 			try {
-				String connectionString = createJoinUri();
-				Bitmap qrCode = encodeBitmap(connectionString);
+				String connectionString = QRFunctions.createJoinUri(currentWifiGroupName, currentWifiPassword, currentIpAddress, true);
+				Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
 				ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 				qrCodeIV.setImageBitmap(qrCode);
 			} catch (WriterException e) {
@@ -174,19 +148,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		
 		wifiConnectionDialog.show();
 	}
-	
-    private String createJoinUri() {
-    	Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
-    			     .buildUpon()
-    			     .appendQueryParameter(Constants.INTENT_WIFI_NAME, currentWifiGroupName)
-    			     .appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, currentWifiPassword)
-    			     .appendQueryParameter(Constants.INTENT_WIFI_IS_DIRECT, "" + isWifiDirect)
-    			     .appendQueryParameter(Constants.INTENT_SERVER_IP, currentIpAddress)
-    			     .build();
-    	
-    	return uri.toString();
-
-	}
 
 	int nextToReveal = 0;
 
@@ -197,10 +158,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					Log.d("wePoker - Server", "Revealing card " + c);
 					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
-					ib.setImageResource(cardToResourceID(c));
-					ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
-					anim.setDuration(1000);
-					anim.start();
+					CardAnimation.setCardImage(ib, cardToResourceID(c));
 				}
 			}
 
@@ -219,22 +177,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 				for (int i = 0; i < 5; i++) {
 					final ImageButton ib = (ImageButton) ll.getChildAt(i);
-					ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
-					ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
-					animX.setDuration(500); animY.setDuration(500);
-					final AnimatorSet scalers = new AnimatorSet();
-					scalers.play(animX).with(animY);
-					scalers.addListener(new AnimatorListenerAdapter() {
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							ib.setScaleX(1.f);
-							ib.setScaleY(1.f);
-							ib.setImageResource(R.drawable.backside);
-						}
-
-					});
-					scalers.start();
+					CardAnimation.setCardImage(ib, R.drawable.backside);
 				}
 			}
 		});
@@ -305,5 +248,4 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public Context getContext() {
 		return this;
 	}
-
 }

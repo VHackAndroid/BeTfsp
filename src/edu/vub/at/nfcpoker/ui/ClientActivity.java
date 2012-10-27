@@ -8,10 +8,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -56,6 +52,7 @@ import com.sonyericsson.extras.liveware.aef.registration.Registration;
 
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
@@ -189,10 +186,17 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// Interactivity(Speech)
 	private static final int RESULT_SPEECH = 1;
 	
+	// Blinds
+	private static final int SMALL_BLIND = 5;
+	private static final int BIG_BLIND = 10;
+	
 	// Interactivity(Audio)
 	private static final boolean audioFeedback = false;
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
+	
+	// Interactivity(Haptic)
+	private com.immersion.uhl.Launcher mImmersionLauncher;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -226,6 +230,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
+		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
 		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -278,19 +283,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 		blackchip.setOnTouchListener(gestureListener);
 
 		/*
-				ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
+			ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
 
-				final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
-				card1.setPages(mPages1);
+			final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
+			card1.setPages(mPages1);
 
-				ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
+			ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
 
-				final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
-				card2.setPages(mPages2);
+			final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
+			card2.setPages(mPages2);
 		 */
 
 		mCardView1 = (CurlView) findViewById(R.id.pCard1);
@@ -366,6 +371,34 @@ public class ClientActivity extends Activity implements OnClickListener {
 			setTitle("wePoker (" +currentMoney+"\u20AC)");
 		}
 	}
+	
+	private void putSmallBlind() {
+		currentStateBet = SMALL_BLIND;
+		currentMoney -= currentSelectedBet;
+		currentTotalBet += currentSelectedBet;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		outputTextToSpeech("Small blind: " + currentStateBet);
+		disableActions();	
+	}
+	
+	private void putBigBlind() {
+		currentStateBet = BIG_BLIND;
+		currentMoney -= currentSelectedBet;
+		currentTotalBet += currentSelectedBet;
+		runOnNotUiThread(new Runnable() {
+			public void run() {
+				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+			}
+		});
+		outputTextToSpeech("Big blind: " + currentStateBet);
+		disableActions();	
+	}
 
 	private void performBet() {
 		if (!bet.isEnabled()) return;
@@ -393,9 +426,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			return;
 		}
 		int diffMoney = 0;
-		if (currentStateBet > 0) {
-			diffMoney = minimumBet - currentStateBet; // 2nd round
-		}
+		diffMoney = minimumBet - currentStateBet; // 2nd round
 		currentSelectedBet = minimumBet;
 		currentStateBet = minimumBet;
 		currentMoney -= diffMoney;
@@ -446,6 +477,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		updateBetAmount();
 		disableActions();
 	}
+	
+	private void vibrate(int buzzType) {
+		if (mImmersionLauncher == null) return;
+		try {
+			mImmersionLauncher.play(buzzType);
+		} catch (RuntimeException e) {
+			Log.v("wePoker - Client", "mImmersionLauncher failed.");
+		}
+	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -458,6 +498,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				vibrate(com.immersion.uhl.Launcher.SHORT_BUZZ_100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -499,6 +540,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			public void run() {
 				disableActions();
 				updateBetAmount();
+				updateMinBetAmount(0);
 			}});
 		String toastToShow = null;
 		switch (newGameState) {
@@ -675,6 +717,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					currentMoney += rwdm.chips / players.size();
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -682,7 +725,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 						}});
 
 				} else {
-					// boe
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
@@ -764,6 +807,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
+		mImmersionLauncher.stop();
 		super.onPause();
 	}
 
@@ -801,6 +845,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		switch (item.getItemId()) {
 		case R.id.speech:
 			askSpeechInput();
+			return true;
+		case R.id.qrCode:
+			showQrCode();
 			return true;
 		case R.id.allIn:
 			performAllIn();
@@ -858,6 +905,11 @@ public class ClientActivity extends Activity implements OnClickListener {
             t.show();
             outputTextToSpeech("Oops! Your device doesn't support Speech to Text");
         }
+	}
+	
+	private void showQrCode() {
+		if (isDedicated) return;
+		// TODO QRFunctions.createJoinUri(wifiGroupName, wifiPassword, ipAddress, isDedicated)
 	}
 	
 	private int txtToInteger(String msg) {
@@ -933,14 +985,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		final EditText input = new EditText(this);
 		input.setInputType(InputType.TYPE_CLASS_TEXT);
+		input.setText(Settings.nickname);
 		builder.setView(input);
 		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface di, int arg1) {
 				try {
-					String nickname = input.getText().toString();
+					Settings.nickname = input.getText().toString();
 					Settings.saveSettings(ctx);
-					NicknameMessage ca = new NicknameMessage(nickname);
+					NicknameMessage ca = new NicknameMessage(Settings.nickname);
 					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 				} catch (Exception e) {	}
 			}
@@ -1166,26 +1219,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 				for (int i = 0; i < 5; i++) {
 					final ImageButton ib = (ImageButton) ll.getChildAt(i);
-					ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
-					ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
-					animX.setDuration(500); animY.setDuration(500);
-					final AnimatorSet scalers = new AnimatorSet();
-					scalers.play(animX).with(animY);
-					scalers.addListener(new AnimatorListenerAdapter() {
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							ib.setScaleX(1.f);
-							ib.setScaleY(1.f);
-							ib.setImageResource(R.drawable.backside);
-						}
-
-					});
-					scalers.start();
+					CardAnimation.setCardImage(ib, R.drawable.backside);
 				}
 			}
 		});
 	}
+
 
 	@Override
 	public void onClick(View v) {
@@ -1268,10 +1307,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			Log.d("wePoker - Client-Server", "Revealing card " + c);
 			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
-			ib.setImageResource(cardToResourceID(c));
-			ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
-			anim.setDuration(1000);
-			anim.start();
+			CardAnimation.setCardImage(ib, cardToResourceID(c));
 		}
 	}
 
