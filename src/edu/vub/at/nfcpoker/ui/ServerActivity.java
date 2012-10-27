@@ -55,7 +55,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
-    	final boolean isDedicated = tablet_layout != null;
+    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
+    	final boolean isDedicated = tablet_layout != null || isTV;
     	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
     	
 		final Context ctx = this;
@@ -85,8 +86,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		};
     	
 		if (isWifiDirect) {
-    		WifiDirectManager wdm = WifiDirectManager.create(this, getMainLooper(), true);
-    		wdm.createGroup(startServer);
+    		new WifiDirectManager.Creator(this, startServer).run();
     	} else {
     		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
     		currentWifiGroupName = wm.getConnectionInfo().getSSID();
