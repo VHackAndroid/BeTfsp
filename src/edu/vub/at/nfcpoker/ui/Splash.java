@@ -4,6 +4,9 @@ import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.sonyericsson.extras.liveware.aef.control.Control;
+import com.sonyericsson.extras.liveware.aef.registration.Registration;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -129,6 +132,17 @@ public class Splash extends Activity {
 				}
 			});			
 		}
+		
+//		Log.d("wePoker - Splash", "Before sending intent to Soony");
+//		Intent intent = new Intent(Control.Intents.CONTROL_START_REQUEST_INTENT);
+//		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, "edu.vub.at.nfcpoker.smartwatch");
+//		intent.setPackage("com.sonyericsson.extras.smartwatch");
+//		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
+//		Log.d("wePoker - Splash", "After sending intent to Soony");
+		
+	//	Intent serviceIntent = new Intent(this, WePokerExtensionService.class);
+	//	serviceIntent.setAction(WePokerExtensionService.INTENT_ACTION_START);
+	//	startService(serviceIntent);
 	}
 	
 	public boolean isWifiDirectSupported() {
