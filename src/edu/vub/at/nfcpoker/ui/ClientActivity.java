@@ -11,16 +11,20 @@ import java.util.UUID;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentFilter.MalformedMimeTypeException;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -210,6 +214,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 	
 	// Interactivity(Haptic)
 	private com.immersion.uhl.Launcher mImmersionLauncher;
+	
+	// NFC
+	private NfcAdapter nfcAdapter;
+	private PendingIntent pendingIntent;
+	private IntentFilter[] intentFiltersArray;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -258,6 +267,26 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
 		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
+		
+		// NFC
+		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+    	
+    	if (nfcAdapter != null) {
+    		pendingIntent = PendingIntent.getActivity(
+    		    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+    	
+    		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+    		IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+    		try {
+    			ndef.addDataType("*/*");    /* Handles all MIME based dispatches.
+                                           You should specify only the ones that you need. */
+    		}
+    		catch (MalformedMimeTypeException e) {
+    			throw new RuntimeException("fail", e);
+    		}
+    		intentFiltersArray = new IntentFilter[] { ndef, all };
+    	}
+    	
 		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -848,6 +877,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 		mCardView1.onResume();
 		mCardView2.onResume();
+        if (nfcAdapter != null) {
+        	nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
+        }
 		super.onResume();
 	}
 
@@ -858,6 +890,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		mCardView1.onPause();
 		mCardView2.onPause();
 		mImmersionLauncher.stop();
+        if (nfcAdapter != null) {
+        	nfcAdapter.disableForegroundDispatch(this);
+        }
 		super.onPause();
 	}
 
@@ -915,6 +950,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 			return super.onOptionsItemSelected(item);
 		}
 	}
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        QRFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+    }
 	
 	TextToSpeech.OnInitListener txtToSpeechListener = new TextToSpeech.OnInitListener() {
 		@Override

@@ -60,7 +60,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	
 	private PendingIntent pendingIntent;
 	private IntentFilter[] intentFiltersArray;
-	private NfcAdapter mAdapter;
+	private NfcAdapter nfcAdapter;
 
 
     @Override
@@ -73,9 +73,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
     	
 		final Activity act = this;
-    	mAdapter = NfcAdapter.getDefaultAdapter(this);
+    	nfcAdapter = NfcAdapter.getDefaultAdapter(this);
     	
-    	if (mAdapter != null) {
+    	if (nfcAdapter != null) {
     		pendingIntent = PendingIntent.getActivity(
     		    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
     	
@@ -132,8 +132,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     @Override
     public void onResume() {
         super.onResume();
-        if (mAdapter != null) {
-        	mAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
+        if (nfcAdapter != null) {
+        	nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
         }
     }
 
@@ -141,6 +141,15 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     public void onNewIntent(Intent intent) {
         QRFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
     }
+    
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (nfcAdapter != null) {
+        	nfcAdapter.disableForegroundDispatch(this);
+        }
+    }
+    
 
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
