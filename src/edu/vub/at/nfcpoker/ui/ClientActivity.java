@@ -54,6 +54,7 @@ import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
@@ -786,6 +787,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		case R.id.speech:
 			askSpeechInput();
 			return true;
+		case R.id.qrCode:
+			showQrCode();
+			return true;
 		case R.id.allIn:
 			performAllIn();
 			return true;
@@ -842,6 +846,11 @@ public class ClientActivity extends Activity implements OnClickListener {
             t.show();
             outputTextToSpeech("Oops! Your device doesn't support Speech to Text");
         }
+	}
+	
+	private void showQrCode() {
+		if (isDedicated) return;
+		// TODO QRFunctions.createJoinUri(wifiGroupName, wifiPassword, ipAddress, isDedicated)
 	}
 	
 	private int txtToInteger(String msg) {
