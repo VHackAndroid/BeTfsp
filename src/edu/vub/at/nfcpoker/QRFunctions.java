@@ -4,7 +4,6 @@ import java.nio.charset.Charset;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -18,12 +17,8 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-import edu.vub.at.nfcpoker.ui.ServerActivity;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -34,6 +29,9 @@ public class QRFunctions {
 
 	// Last RFID Tag
 	public static Tag lastSeenNFCTag;
+	
+	// Dialog box
+	private static AlertDialog wifiDialog;
 	
 	// Taken from the ZXing source code.
 	private static final int WHITE = 0xFFFFFFFF;
@@ -88,10 +86,17 @@ public class QRFunctions {
 		});
 		NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(act);
         if (mNfcAdapter == null) {
-        	//if (!dialogGuts.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
 			nfcWriteButton.setEnabled(false);
 		}
 		
+
+		Button dismissButton = (Button) dialogGuts.findViewById(R.id.dismiss_btn);
+		dismissButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (wifiDialog != null) wifiDialog.dismiss();
+			}
+		});
         builder.setCancelable(true);
         
 		try {
@@ -103,11 +108,11 @@ public class QRFunctions {
 			Log.e("wePoker - Server", "Could not create QR code", e);
 		}
 		
-		
-		builder.setTitle("Connection details")
-			       .setCancelable(true)
-			       .setView(dialogGuts)
-			       .show();
+		wifiDialog = builder.setTitle("Connection details")
+				       .setCancelable(true)
+				       .setView(dialogGuts)
+				       .create();
+		wifiDialog.show();
 	}
 
 	private static NdefMessage stringToNdefMessage(String s) {

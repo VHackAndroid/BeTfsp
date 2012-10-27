@@ -939,7 +939,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		case R.id.speech:
 			askSpeechInput();
 			return true;
-		case R.id.qrCode:
+		case R.id.show_wifi_settings:
 			showQrCode();
 			return true;
 		case R.id.allIn:

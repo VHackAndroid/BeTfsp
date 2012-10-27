@@ -6,6 +6,9 @@
     <item android:id="@+id/allIn"
         android:title="All in"
         android:showAsAction="ifRoom" />
+    <item android:id="@+id/show_wifi_settings"
+        android:showAsAction="ifRoom|withText"
+        android:title="Connect" />
     <item android:id="@+id/itemSetName"
         android:title="Set Nickname" />
     <item android:id="@+id/itemAbout"

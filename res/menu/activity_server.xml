@@ -3,5 +3,7 @@
         android:title="@string/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
-    <item android:id="@+id/show_wifi_settings" android:showAsAction="ifRoom|withText" android:title="Wi-Fi"></item>
+    <item android:id="@+id/show_wifi_settings"
+        android:showAsAction="ifRoom|withText"
+        android:title="Connect" />
 </menu>
