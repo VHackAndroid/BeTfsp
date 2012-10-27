@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
@@ -8,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -21,6 +23,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
@@ -50,23 +55,23 @@ import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
+import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
+import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.NicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.PoolMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
-import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
-import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
-import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
-import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
-import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
+import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
@@ -202,6 +207,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private UUID pendingFuture;
 	private Connection serverConnection;
 
+	@SuppressLint("NewApi")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -255,7 +261,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 				return gestureDetector.onTouchEvent(arg1);
 			}
 		};
-
+		
+		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+	    if (nfcAdapter != null) {
+	    	nfcAdapter.setNdefPushMessage(getServerInfoNdefMessage(), this);
+	    }
+		
 		final ImageView whitechip = (ImageView) findViewById(R.id.whitechip);
 		whitechip.setOnClickListener(ClientActivity.this);
 		whitechip.setOnTouchListener(gestureListener);
@@ -339,6 +350,22 @@ public class ClientActivity extends Activity implements OnClickListener {
 		listenToGameServer();
 	}
 
+	private NdefMessage getServerInfoNdefMessage() {
+		Uri uri = Uri.parse(Constants.INTENT_BASE_URL)
+			     .buildUpon()
+			     .appendQueryParameter(Constants.INTENT_WIFI_NAME, serverWifiName)
+			     .appendQueryParameter(Constants.INTENT_WIFI_PASSWORD, serverWifiPassword)
+			     .appendQueryParameter(Constants.INTENT_SERVER_IP, serverIpAddress)
+			     .appendQueryParameter(Constants.INTENT_IS_DEDICATED, "" + isDedicated)
+			     .build();
+		String s = uri.toString().substring(Constants.INTENT_BASE_URL.length() - 1);
+		NdefRecord r = new NdefRecord(
+    			NdefRecord.TNF_WELL_KNOWN, 
+    			NdefRecord.RTD_TEXT, 
+    			new byte[0], // No id.
+    			s.getBytes(Charset.forName("UTF-8")));
+        return new NdefMessage(new NdefRecord[]{ r });
+	}
 
 	protected void runOnNotUiThread(Runnable runnable) {
 		new Thread(runnable).start();
