@@ -399,6 +399,16 @@ public class ConcretePokerServer extends PokerServer  {
 					oldFut.isResolved() &&
 					oldFut.unsafeGet().getClientActionType() == ClientActionType.AllIn) {
 					// Keep all in
+				} else if (oldFut != null &&
+						oldFut.isResolved() &&
+						oldFut.unsafeGet().getClientActionType() == ClientActionType.SmallBlind) {
+					addMoney(i, -(oldFut.unsafeGet().getExtra()));
+					addChipsToPool(oldFut.unsafeGet().getExtra());
+				} else if (oldFut != null &&
+							oldFut.isResolved() &&
+							oldFut.unsafeGet().getClientActionType() == ClientActionType.BigBlind) {
+						addMoney(i, -(oldFut.unsafeGet().getExtra()));
+						addChipsToPool(oldFut.unsafeGet().getExtra());
 				} else {
 					actionFutures.remove(i);
 				}

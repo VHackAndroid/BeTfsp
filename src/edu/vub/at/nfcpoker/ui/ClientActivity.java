@@ -358,13 +358,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void putSmallBlind() {
+		Toast toast = Toast.makeText(ClientActivity.this, "Small blind!", Toast.LENGTH_SHORT);
+		toast.show();
 		updateBetAmount(SMALL_BLIND);
 		currentStateBet = SMALL_BLIND;
 		currentMoney -= currentSelectedBet;
 		currentTotalBet += currentSelectedBet;
 		runOnNotUiThread(new Runnable() {
 			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				ClientAction ca = new ClientAction(ClientActionType.SmallBlind, currentSelectedBet);
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
@@ -373,13 +375,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void putBigBlind() {
+		Toast toast = Toast.makeText(ClientActivity.this, "Big blind!", Toast.LENGTH_SHORT);
+		toast.show();
 		updateBetAmount(BIG_BLIND);
 		currentStateBet = BIG_BLIND;
 		currentMoney -= currentSelectedBet;
 		currentTotalBet += currentSelectedBet;
 		runOnNotUiThread(new Runnable() {
 			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.Bet, currentSelectedBet);
+				ClientAction ca = new ClientAction(ClientActionType.BigBlind, currentSelectedBet);
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
@@ -547,10 +551,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}});
 			break;
 		case PREFLOP:
-			playerIndexInGame++;
+			//playerIndexInGame++;
 			runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
+					playerIndexInGame++;
 					if (playerIndexInGame == 0) {
 						putSmallBlind();
 					}
