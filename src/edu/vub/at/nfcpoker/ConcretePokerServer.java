@@ -386,6 +386,7 @@ public class ConcretePokerServer extends PokerServer  {
 			
 			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
+				playersRemaining = 0;
 				increasedBet = false;
 				for (Integer i : clientsInGame.navigableKeySet()) {
 					while (true) {
@@ -424,6 +425,7 @@ public class ConcretePokerServer extends PokerServer  {
 							ca = fut.get();
 						}
 						if (ca == null) continue;
+						
 						switch (ca.type) {
 						case Fold: 
 							broadcast(new ClientActionMessage(ca, i));
@@ -436,6 +438,10 @@ public class ConcretePokerServer extends PokerServer  {
 							break;
 						case AllIn: // Client sends diffMoney
 							playersRemaining++;
+							if (ca.getExtra() > minBet) {
+								minBet = ca.extra;
+								increasedBet = true; // ask for call or fold in second round
+							}
 							broadcast(new ClientActionMessage(ca, i));
 							addMoney(i, -ca.getExtra());
 							addChipsToPool(ca.getExtra());
@@ -447,10 +453,11 @@ public class ConcretePokerServer extends PokerServer  {
 							}
 							playersRemaining++;
 							broadcast(new ClientActionMessage(ca, i));
-							if (minBet > 0 && ca.getExtra() > minBet) {
+							if (ca.getExtra() > minBet) {
+								minBet = ca.extra;
 								increasedBet = true; // ask for call or fold in second round
 							}
-							minBet = ca.getExtra();
+							//minBet = ca.getExtra();
 							addMoney(i, -ca.getExtra());
 							addChipsToPool(ca.getExtra());
 							break;
@@ -465,6 +472,7 @@ public class ConcretePokerServer extends PokerServer  {
 			if (playersRemaining <= 1)
 				throw new RoundEndedException();
 		}
+		
 		
 		private void addChipsToPool(int extra) {
 			chipsPool += extra;

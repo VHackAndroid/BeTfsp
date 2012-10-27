@@ -17,12 +17,7 @@ import edu.vub.at.nfcpoker.R;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -39,7 +34,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-@TargetApi(11)
 public class ServerActivity extends Activity implements ServerViewInterface {
 
 	public interface ServerStarter {
@@ -164,10 +158,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					Log.d("wePoker - Server", "Revealing card " + c);
 					LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 					ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
-					ib.setImageResource(cardToResourceID(c));
-					ObjectAnimator anim = ObjectAnimator.ofFloat(ib, "alpha", 0.f, 1.f);
-					anim.setDuration(1000);
-					anim.start();
+					CardAnimation.setCardImage(ib, cardToResourceID(c));
 				}
 			}
 
@@ -186,22 +177,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 				for (int i = 0; i < 5; i++) {
 					final ImageButton ib = (ImageButton) ll.getChildAt(i);
-					ObjectAnimator animX = ObjectAnimator.ofFloat(ib, "scaleX", 1.f, 0.f);
-					ObjectAnimator animY = ObjectAnimator.ofFloat(ib, "scaleY", 1.f, 0.f);
-					animX.setDuration(500); animY.setDuration(500);
-					final AnimatorSet scalers = new AnimatorSet();
-					scalers.play(animX).with(animY);
-					scalers.addListener(new AnimatorListenerAdapter() {
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							ib.setScaleX(1.f);
-							ib.setScaleY(1.f);
-							ib.setImageResource(R.drawable.backside);
-						}
-
-					});
-					scalers.start();
+					CardAnimation.setCardImage(ib, R.drawable.backside);
 				}
 			}
 		});
@@ -272,5 +248,4 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public Context getContext() {
 		return this;
 	}
-
 }

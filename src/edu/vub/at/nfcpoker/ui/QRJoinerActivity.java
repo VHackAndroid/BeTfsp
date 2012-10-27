@@ -43,10 +43,14 @@ public class QRJoinerActivity extends Activity {
 			String action = intent.getAction();
 			Log.d("wePoker - QRJoiner", "Received intent " + intent);
 			String newStatus = null;
+			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+
 			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 				NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-				WifiInfo wifiInfo = intent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifiInfo.getSSID().equals(wifi_name)) {
+				WifiInfo wifiInfo = wm.getConnectionInfo();
+				if (netInfo == null || wifiInfo == null)
+					return;
+				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifi_name.equals(wifiInfo.getSSID())) {
 					publishProgress("Joining game!");
 					startClientActivity();
 				}
@@ -54,7 +58,6 @@ public class QRJoinerActivity extends Activity {
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
 				int new_wifi_status = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, WifiManager.WIFI_STATE_UNKNOWN);
 				newStatus = status_strings[new_wifi_status];
-				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 				
 				if (new_wifi_status == WifiManager.WIFI_STATE_DISABLED) {
 					publishProgress("Enabling Wireless...");
