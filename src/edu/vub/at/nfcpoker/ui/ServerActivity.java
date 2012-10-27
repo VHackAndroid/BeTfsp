@@ -1,38 +1,46 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
-
-import edu.vub.at.commlib.CommLib;
-import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
-import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
-import edu.vub.at.nfcpoker.R;
-import android.net.Uri;
-import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentFilter.MalformedMimeTypeException;
 import android.graphics.Bitmap;
+import android.net.wifi.WifiManager;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.zxing.WriterException;
+
+import edu.vub.at.commlib.CommLib;
+import edu.vub.at.nfcpoker.Card;
+import edu.vub.at.nfcpoker.ConcretePokerServer;
+import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.QRFunctions;
+import edu.vub.at.nfcpoker.R;
 
 public class ServerActivity extends Activity implements ServerViewInterface {
 
@@ -49,6 +57,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	protected String currentIpAddress;
 
 	private boolean isWifiDirect;
+	
+	private Tag lastSeenNFCTag;
+	private PendingIntent pendingIntent;
+	private IntentFilter[] intentFiltersArray;
+	private NfcAdapter mAdapter;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +71,24 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	final boolean isDedicated = tablet_layout != null;
     	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
+    	
+    	mAdapter = NfcAdapter.getDefaultAdapter(this);
+    	
+    	if (mAdapter != null) {
+    		pendingIntent = PendingIntent.getActivity(
+    		    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+    	
+    		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+    		IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+    		try {
+    			ndef.addDataType("*/*");    /* Handles all MIME based dispatches.
+                                           You should specify only the ones that you need. */
+    		}
+    		catch (MalformedMimeTypeException e) {
+    			throw new RuntimeException("fail", e);
+    		}
+    		intentFiltersArray = new IntentFilter[] { ndef, all };
+    	}
     	
 		ServerStarter startServer = new ServerStarter() {
 			
@@ -94,6 +126,19 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     		String broadcastAddress = CommLib.getBroadcastAddress(this);
     		startServer.start(ipAddress, broadcastAddress);
     	}
+		
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdapter != null) {
+        	mAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
+        }
+    }
+    
+    public void onNewIntent(Intent intent) {
+        lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
     }
 
     @Override
@@ -121,6 +166,20 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			networkNameTV.setText(this.currentWifiGroupName);
 			TextView passwordTV = (TextView) dialogGuts.findViewById(R.id.password);
 			passwordTV.setText(currentWifiPassword);
+			
+			Button nfcWriteButton = (Button) dialogGuts.findViewById(R.id.nfcwrite_btn);
+			nfcWriteButton.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					QRFunctions.writeJoinInfoOnNFCTag(lastSeenNFCTag, QRFunctions.createJoinUri(currentWifiGroupName, currentWifiPassword, currentIpAddress, true));
+				}
+			});
+			NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+	        if (mNfcAdapter == null) {
+			//if (!dialogGuts.getContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC)) {
+				nfcWriteButton.setEnabled(false);
+			}
+			
 			Button dismissButton = (Button) dialogGuts.findViewById(R.id.dismiss_btn);
 			dismissButton.setOnClickListener(new OnClickListener() {
 				@Override

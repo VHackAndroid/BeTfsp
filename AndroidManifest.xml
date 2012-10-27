@@ -49,14 +49,7 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:mimeType="x-thing/edu.vub.at.nfcpoker.TableThing" />
-                <data android:mimeType="x-thing/edu.vub.nfc.TableThing" />
-            </intent-filter>
+            
         </activity>
         <activity
             android:name=".ui.ClientActivity"
@@ -84,6 +77,14 @@
                     android:host="code.google.com"
                     android:pathPrefix="/p/ambienttalk/wiki/WePoker/play/"
                     android:scheme="https" />
+            </intent-filter>
+            
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
     </application>

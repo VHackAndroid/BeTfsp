@@ -1,12 +1,21 @@
 package edu.vub.at.nfcpoker;
 
+import java.nio.charset.Charset;
+
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.nfc.FormatException;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
+import android.util.Log;
+
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
-
-import android.graphics.Bitmap;
-import android.net.Uri;
 
 public class QRFunctions {
 
@@ -42,4 +51,74 @@ public class QRFunctions {
     	
     	return uri.toString();
 	}
+    
+    private static NdefMessage stringToNdefMessage(String s) {
+    	NdefRecord r = new NdefRecord(
+    			NdefRecord.TNF_WELL_KNOWN, 
+    			NdefRecord.RTD_TEXT, 
+    			new byte[0], // No id.
+    			s.getBytes(Charset.forName("UTF-8")));
+        return new NdefMessage(new NdefRecord[]{ r });
+   }
+    
+    
+   public static Uri readUriFromNFCTag(Tag tag) {
+	   try {
+			Ndef ndef = Ndef.get(tag);
+			ndef.connect();
+			NdefMessage message = ndef.getNdefMessage();
+			ndef.close();
+			String s = new String((message.getRecords()[0]).getPayload());
+			return Uri.parse(Constants.INTENT_BASE_URL + s);
+		} catch(Exception e) {
+			try {
+				Ndef ndef = Ndef.get(tag);
+				if (ndef != null) { 
+					ndef.close();
+				}
+			} catch(Exception exc) {
+				Log.wtf("wePoker - NFC", "Nothing to see here, move along.");
+			}
+		}
+	   return null;
+   }
+   
+    
+    public static boolean writeJoinInfoOnNFCTag(Tag tag, String info) {
+    	String s = info.substring(Constants.INTENT_BASE_URL.length() - 1);
+    	try {
+			// First, try if the tag is an NDEF tag.
+			Ndef ndef = Ndef.get(tag);
+			NdefMessage msg = stringToNdefMessage(s);
+			if (ndef == null) {
+				NdefFormatable ndefFormatable = NdefFormatable.get(tag);
+				ndefFormatable.connect();
+				ndefFormatable.format(msg);
+				ndefFormatable.close();
+			} else {
+				if (ndef.getMaxSize() < msg.toByteArray().length) {
+					Log.e("wePoker - NFC", "NFC tag memory too small for: " + s);
+					return false;
+				} else {
+					ndef.connect();
+					ndef.writeNdefMessage(msg);
+					ndef.close();
+				}
+			}
+    	} catch(Exception e) {
+    		Log.v("wePoker - NFC", "Could not write NFC tag ", e);
+    		try {
+				Ndef ndef = Ndef.get(tag);
+				if (ndef != null) { 
+					ndef.close();
+					return false;
+				}
+			} catch(Exception exc) {
+				Log.wtf("wePoker - NFC", "Nothing to see here, move along.", exc);
+				return false;
+			}
+    	}
+    	return true;
+    }
+
 }
