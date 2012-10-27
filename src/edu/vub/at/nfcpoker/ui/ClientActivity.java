@@ -330,6 +330,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 		lastReceivedHoleCards = null;
 
 		listenToGameServer();
+		
+		// adding the hallo wePoker to the watch
+		
 	}
 
 
