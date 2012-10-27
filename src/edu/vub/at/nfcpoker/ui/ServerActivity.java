@@ -45,6 +45,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	
 	private final int MIN_AVATAR_ID = 1;
 	private final int MAX_AVATAR_ID = 15;
+	private final int MAX_NUMBER_AVATARS_SIDE = 4;
+	
+	private Random random = new Random();
 	
 	@SuppressLint("UseSparseArrays")
 	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
@@ -197,7 +200,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	public String getNewAvatar(){
-		Random random = new Random();
 		int rndNumberInRange = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
 		Log.d("wePoker - Server", "Avatar for player " + rndNumberInRange);
 		return "avatar_" + rndNumberInRange;
@@ -207,7 +209,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				Log.d("wePoker - Server", "Adding player name " + clientName);
-				LinearLayout users = (LinearLayout) findViewById(R.id.users_bottom);
+				LinearLayout users;
+				 // todo make this variable.. now hardcoded 4 and 4 on each side.
+				if (playerBadges.size() < MAX_NUMBER_AVATARS_SIDE) {
+				 users = (LinearLayout) findViewById(R.id.users_bottom);
+				} else{
+					users = (LinearLayout) findViewById(R.id.users_top);
+				}
 				View badge = getLayoutInflater().inflate(R.layout.user, null);
 				
 				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
