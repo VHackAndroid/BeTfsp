@@ -351,10 +351,18 @@ public class Splash extends Activity {
 		boolean enabled = wm.isWifiEnabled();
 		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
 		
-		Intent i = new Intent(this, ServerActivity.class);
-		i.putExtra("wifiDirect", isWifiDirectSupported() && !(enabled && connected));
-		startActivity(i);
-		finish();
+		if (isWifiDirectSupported()) {
+			Intent i = new Intent(this, ServerActivity.class);
+			i.putExtra(Constants.INTENT_WIFI_DIRECT, isWifiDirectSupported() && !(enabled && connected));
+			startActivity(i);
+			finish();
+		} else if (!connected) {
+			Toast.makeText(this, "Wifi-Direct is not supported on this devices. Please connect to the nearest hotspot!", Toast.LENGTH_SHORT).show();
+		} else {
+			Intent i = new Intent(this, ServerActivity.class);
+			startActivity(i);
+			finish();
+		}
 	}
 
 }

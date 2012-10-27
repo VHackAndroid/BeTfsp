@@ -39,6 +39,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRFunctions;
 import edu.vub.at.nfcpoker.R;
 
@@ -70,7 +71,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
     	final boolean isDedicated = tablet_layout != null || isTV;
-    	isWifiDirect = getIntent().getBooleanExtra("wifiDirect", false);
+    	isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
     	
 		final Activity act = this;
     	nfcAdapter = NfcAdapter.getDefaultAdapter(this);

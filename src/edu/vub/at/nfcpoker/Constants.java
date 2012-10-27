@@ -10,4 +10,5 @@ public class Constants {
 	public static final String INTENT_IS_DEDICATED   = "d";
 	public static final String INTENT_IS_SERVER      = "s";
 	public static final String INTENT_BROADCAST      = "b";
+	public static final String INTENT_WIFI_DIRECT    = "w";
 }
