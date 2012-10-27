@@ -182,6 +182,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private static final boolean audioFeedback = false;
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
+	
+	// Interactivity(Haptic)
+	private com.immersion.uhl.Launcher mImmersionLauncher;
 
 	// Help
 	private boolean firstSwipe = true;
@@ -215,6 +218,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
+		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
 		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
@@ -267,19 +271,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 		blackchip.setOnTouchListener(gestureListener);
 
 		/*
-				ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-		mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
+			ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
 
-				final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
-				card1.setPages(mPages1);
+			final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
+			card1.setPages(mPages1);
 
-				ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-				mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
+			ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
+			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
 
-				final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
-				card2.setPages(mPages2);
+			final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
+			card2.setPages(mPages2);
 		 */
 
 		mCardView1 = (CurlView) findViewById(R.id.pCard1);
@@ -424,6 +428,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 		updateBetAmount();
 		disableActions();
 	}
+	
+	private void vibrate(int buzzType) {
+		if (mImmersionLauncher == null) return;
+		try {
+			mImmersionLauncher.play(buzzType);
+		} catch (RuntimeException e) {
+			Log.v("wePoker - Client", "mImmersionLauncher failed.");
+		}
+	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -436,6 +449,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				vibrate(com.immersion.uhl.Launcher.SHORT_BUZZ_100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -654,6 +668,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					currentMoney += rwdm.chips / players.size();
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -661,7 +676,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 						}});
 
 				} else {
-					// boe
+					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
@@ -743,6 +758,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
+		mImmersionLauncher.stop();
 		super.onPause();
 	}
 
