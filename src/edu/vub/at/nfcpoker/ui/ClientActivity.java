@@ -25,6 +25,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
@@ -204,7 +205,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private static final int RESULT_SPEECH = 1;
 	
 	// Interactivity(Audio)
-	private static final boolean audioFeedback = false;
+	private static boolean audioFeedback = false;
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
 	
@@ -266,6 +267,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
 		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
+		checkHeadset();
 		
 		// NFC
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -490,7 +492,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// TODO: force all in if not enough money for blind / bet / ...
 	private void performAllIn() {
 		if (!fold.isEnabled()) return;
-		int diffMoney = 0;
+		int diffMoney = currentMoney;
 		if (currentStateBet > 0) {
 			diffMoney = Math.max(0, currentMoney - currentStateBet); // All-in (after previous bet)
 		}
@@ -507,7 +509,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 		});
 		quickOutputMessage(this, "All in for "+currentStateBet);
 		updateBetAmount();
+		updateMoneyTitle();
 		disableActions();
+	}
+	
+	private void checkHeadset() {
+		AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
+		Log.i("wePoker - Client", "Wifi headset: " + am.isWiredHeadsetOn());
+		audioFeedback = am.isWiredHeadsetOn();
 	}
 	
 	private void vibrate(int buzzType) {
@@ -573,6 +582,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				disableActions();
 				updateBetAmount();
 				updateMinBetAmount(0);
+				checkHeadset();
 			}});
 		String toastToShow = null;
 		switch (newGameState) {
@@ -710,7 +720,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
 				final ClientAction action = newClientActionMessage.getClientAction();
 				Log.v("wePoker - Client", "Received client action message" + newClientActionMessage.toString());
-				if (action.getClientActionType() == Message.ClientActionType.Bet) {
+				if (action.getClientActionType() == Message.ClientActionType.Bet ||
+					action.getClientActionType() == Message.ClientActionType.AllIn) {
 					final int amount = action.getExtra();
 					if (amount > minimumBet) {
 						runOnUiThread(new Runnable() {
