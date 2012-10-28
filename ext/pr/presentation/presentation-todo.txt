@@ -1,0 +1,29 @@
+- check, bet, raise, call, fold and all-in
+- extra interaction (per layer)
+- Reduced all heavy poker equipment to a small, portable Android apk!
+	(unless you are bringing a TV of course)
+
+
+
+Key achievements:
+	- Playable ad-hoc wePoker NOW! Available at the Play store!
+		- Ways to join:
+			- Connect to AndroidV (android5) network -> Automated discovery
+			- Scan the GoogleTV Tag
+			- Beam your information from one phone (or tablet) to another (propagating invites)
+			- Scan the QRCode
+			- Spectate on the Google TV
+	- Free ad-hoc network connectivity!
+	- Backport to Android 2.3
+	- Supports Intel chipsets as well
+	- Tons of _optional_ features in terms of I/O. Only one single requirement: a wifi-chip
+		-> Supporting ... Devices
+	
+
+Next steps:
+	- Testing on many different devices
+	- Making noise in the wild, bars should offer this poker service and deploy Google TV's!
+		- Integrate prices (i.e. win beers instead of money)
+	- Integrate real money?
+	- Playing during the trip home in the eurostar tunnel, for free, yay!:)
+	
