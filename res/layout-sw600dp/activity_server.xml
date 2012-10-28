@@ -82,6 +82,16 @@
                 android:src="@drawable/backside" />
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/current_phase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/users_top"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="false"
+            android:text="Waiting for players ..."
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
         <LinearLayout
             android:id="@+id/users_bottom"
             android:layout_width="match_parent"
