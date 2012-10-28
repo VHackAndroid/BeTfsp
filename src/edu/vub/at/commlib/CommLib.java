@@ -32,7 +32,7 @@ public class CommLib {
 	
 	private static Map<String,String> wifiConnections = new HashMap<String, String>();
 	static {
-		wifiConnections.put("androidVHack", "android5");
+		wifiConnections.put("androidVHack", "android55");
 	}
 
 	private static String putAddress(int addr) {
