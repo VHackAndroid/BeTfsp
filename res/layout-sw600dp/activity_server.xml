@@ -3,7 +3,7 @@
     android:id="@+id/server_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/table"
+    android:background="#000000"
     android:gravity="center" >
 
         <LinearLayout
@@ -22,7 +22,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:minHeight="300dp" >
+            android:background="@drawable/table"
+            android:minHeight="100dp" 
+         	android:maxHeight="200dp" >
 
             <ImageButton
                 android:id="@+id/imageButton1"
