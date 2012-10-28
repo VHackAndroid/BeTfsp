@@ -1,4 +1,4 @@
-- check, bet, raise, call, fold and all-in
+- check, bet, raise, call, fold and all-in, split-pot, flush, straight, full-house, blinds all supported!
 - extra interaction (per layer)
 - Reduced all heavy poker equipment to a small, portable Android apk!
 	(unless you are bringing a TV of course)
