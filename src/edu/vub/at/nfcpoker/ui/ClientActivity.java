@@ -24,6 +24,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
@@ -203,7 +204,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private static final int RESULT_SPEECH = 1;
 	
 	// Interactivity(Audio)
-	private static final boolean audioFeedback = false;
+	private static boolean audioFeedback = false;
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
 	
@@ -265,6 +266,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
 		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
+		checkHeadset();
 		
 		// NFC
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -509,6 +511,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		disableActions();
 	}
 	
+	private void checkHeadset() {
+		AudioManager am = (AudioManager)getSystemService(AUDIO_SERVICE);
+		Log.i("wePoker - Client", "Wifi headset: " + am.isWiredHeadsetOn());
+		audioFeedback = am.isWiredHeadsetOn();
+	}
+	
 	private void vibrate(int buzzType) {
 		if (mImmersionLauncher == null) return;
 		try {
@@ -572,6 +580,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				disableActions();
 				updateBetAmount();
 				updateMinBetAmount(0);
+				checkHeadset();
 			}});
 		String toastToShow = null;
 		switch (newGameState) {
