@@ -491,7 +491,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	// TODO: force all in if not enough money for blind / bet / ...
 	private void performAllIn() {
 		if (!fold.isEnabled()) return;
-		int diffMoney = 0;
+		int diffMoney = currentMoney;
 		if (currentStateBet > 0) {
 			diffMoney = Math.max(0, currentMoney - currentStateBet); // All-in (after previous bet)
 		}
@@ -508,6 +508,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		});
 		quickOutputMessage(this, "All in for "+currentStateBet);
 		updateBetAmount();
+		updateMoneyTitle();
 		disableActions();
 	}
 	
@@ -718,7 +719,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
 				final ClientAction action = newClientActionMessage.getClientAction();
 				Log.v("wePoker - Client", "Received client action message" + newClientActionMessage.toString());
-				if (action.getClientActionType() == Message.ClientActionType.Bet) {
+				if (action.getClientActionType() == Message.ClientActionType.Bet ||
+					action.getClientActionType() == Message.ClientActionType.AllIn) {
 					final int amount = action.getExtra();
 					if (amount > minimumBet) {
 						runOnUiThread(new Runnable() {
