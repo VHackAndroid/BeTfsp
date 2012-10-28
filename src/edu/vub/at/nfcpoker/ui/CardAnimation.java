@@ -1,6 +1,5 @@
 package edu.vub.at.nfcpoker.ui;
 
-import edu.vub.at.nfcpoker.R;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -34,7 +33,6 @@ public class CardAnimation {
 		@Override
 		public void setCardImage(ImageButton ib, int drawable) {
 			ib.setImageResource(drawable);
-			
 		}
 
 	}

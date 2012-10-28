@@ -296,9 +296,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			public boolean onTouch(View arg0, MotionEvent arg1) {
 				if (firstSwipe) {
 					firstSwipe = false;
-					Toast t = Toast.makeText(ClientActivity.this, "Swipe up or down to add or remove money", Toast.LENGTH_SHORT);
-					t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-					t.show();
+					quickOutputMessage(ClientActivity.this, "Swipe up or down to add or remove money");
 				}
 				int viewSwiped = arg0.getId();
 				switch(viewSwiped) {
@@ -414,24 +412,23 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	private void putSmallBlind(int amount) {
-		Toast toast = Toast.makeText(ClientActivity.this, "Small blind ("+amount+" \u20AC)!", Toast.LENGTH_SHORT);
-		toast.show();
-		outputTextToSpeech("Small blind " + amount);
+	private void toastSmallBlind(int amount) {
+		quickOutputMessage(this, "Small blind for " + amount + " \u20AC");
 		disableActions();	
 	}
 	
-	private void putBigBlind(int amount) {
-		Toast toast = Toast.makeText(ClientActivity.this, "Big blind ("+amount+" \u20AC)!", Toast.LENGTH_SHORT);
-		toast.show();
-		outputTextToSpeech("Big blind " + amount);
+	private void toastBigBlind(int amount) {
+		quickOutputMessage(this, "Big blind for "+amount+" \u20AC");
 		disableActions();
 	}
 
 	private void performBet() {
-		if (!bet.isEnabled()) return;
+		if (!bet.isEnabled()) {
+			quickOutputMessage(this, "Cannot bet or raise currently");
+			return;
+		}
 		if (currentSelectedBet < minimumBet) {
-			Toast.makeText(this, "At least bet "+minimumBet, Toast.LENGTH_SHORT).show();
+			quickOutputMessage(this, "At least bet "+minimumBet);
 			return;
 		}
 		currentStateBet = currentSelectedBet;
@@ -443,12 +440,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
-		outputTextToSpeech("Bet "+currentStateBet);
+		quickOutputMessage(this, "Bet "+currentStateBet);
 		disableActions();	
 	}
 
 	private void performCheck() {
-		if (!check.isEnabled()) return;
+		if (!check.isEnabled()) {
+			quickOutputMessage(this, "Cannot check or call currently");
+			return;
+		}
 		if (minimumBet >= currentStateBet + currentMoney) { // All in
 			performAllIn();
 			return;
@@ -466,19 +466,22 @@ public class ClientActivity extends Activity implements OnClickListener {
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
-		outputTextToSpeech("Following for "+currentStateBet);
+		quickOutputMessage(this, "Following for "+currentStateBet);
 		disableActions();
 	}
 
 	private void performFold() {
-		if (!fold.isEnabled()) return;
+		if (!fold.isEnabled()) {
+			quickOutputMessage(this, "Cannot fold currently");
+			return;
+		}
 		runOnNotUiThread(new Runnable() {
 			public void run() {
 				ClientAction ca = new ClientAction(ClientActionType.Fold);
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
-		outputTextToSpeech("Fold");
+		quickOutputMessage(this, "Fold");
 		updateBetAmount();
 		disableActions();
 	}
@@ -501,7 +504,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
 			}
 		});
-		outputTextToSpeech("All in for "+currentStateBet);
+		quickOutputMessage(this, "All in for "+currentStateBet);
 		updateBetAmount();
 		disableActions();
 	}
@@ -631,8 +634,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			final String toastToShowFinal = toastToShow;
 			runOnUiThread(new Runnable() {
 				public void run() {
-					Toast toast = Toast.makeText(ClientActivity.this, toastToShowFinal, Toast.LENGTH_SHORT);
-					toast.show();
+					quickOutputMessage(ClientActivity.this, toastToShowFinal);
 				}
 			});
 		}
@@ -662,11 +664,13 @@ public class ClientActivity extends Activity implements OnClickListener {
 					// Server view
 					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
 					final StateChangeMessage sm = (StateChangeMessage) m;
-					runOnUiThread(new Runnable() {
-						@Override
-						public void run() {
-							serverStateChange(sm.newState);
-						}});
+					if (sm.newState == GameState.PREFLOP) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								serverHideCards();
+							}});
+					}
 				}
 			}
 
@@ -741,7 +745,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				if (sbm.clientId == myClientID) {
 					runOnUiThread(new Runnable() {
 						public void run() {
-							putSmallBlind(sbm.amount);
+							toastSmallBlind(sbm.amount);
 						}
 					});
 				}
@@ -759,7 +763,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				if (bbm.clientId == myClientID) {
 					runOnUiThread(new Runnable() {
 						public void run() {
-							putBigBlind(bbm.amount);
+							toastBigBlind(bbm.amount);
 						}
 					});
 				}
@@ -786,14 +790,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
-							Toast.makeText(ClientActivity.this, "You won!!", Toast.LENGTH_LONG).show();
+							quickOutputMessage(ClientActivity.this, "Congratulations, you won!!");
 						}});
 
 				} else {
 					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
-							Toast.makeText(ClientActivity.this, "You lost...", Toast.LENGTH_LONG).show();
+							quickOutputMessage(ClientActivity.this, "You lost...");
 						}});
 				}
 			}
@@ -805,10 +809,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
 		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
+		mCardView1.setContentDescription(cards.card1.toString().replace("_", " "));
 
 		int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card2.toString(), null, null);
 		int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
 		mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
+		mCardView2.setContentDescription(cards.card2.toString().replace("_", " "));
 
 		updateMoneyTitle();
 	}
@@ -932,7 +938,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 
     @Override
     public void onNewIntent(Intent intent) {
-        QRFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        QRNFCFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
     }
 	
 	TextToSpeech.OnInitListener txtToSpeechListener = new TextToSpeech.OnInitListener() {
@@ -954,11 +960,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	};
 	
-	private void outputTextToSpeech(String msg) {
-		if (!audioFeedback) return;
-		if (tts == null) return;
-		if (!ttsInitialised) return;
-        tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
+	private static void quickOutputMessage(ClientActivity ca, String msg) {
+		Toast t = Toast.makeText(ca, msg, Toast.LENGTH_SHORT);
+		t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+		t.show();
+		if (!ClientActivity.audioFeedback) return;
+		if (ca.tts == null) return;
+		if (!ca.ttsInitialised) return;
+		ca.tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null);
 	}
 	
 	private void askSpeechInput() {
@@ -968,16 +977,12 @@ public class ClientActivity extends Activity implements OnClickListener {
         try {
             startActivityForResult(intent, RESULT_SPEECH);
         } catch (ActivityNotFoundException a) {
-            Toast t = Toast.makeText(this,
-                    "Oops! Your device doesn't support Speech to Text",
-                    Toast.LENGTH_SHORT);
-            t.show();
-            outputTextToSpeech("Oops! Your device doesn't support Speech to Text");
+        	quickOutputMessage(this, "Oops! Your device doesn't support Speech to Text");
         }
 	}
 	
 	private void showQrCode() {
-    	QRFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, serverPort, true);
+    	QRNFCFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, serverPort, true);
 	}
 	
 	private int txtToInteger(String msg) {
@@ -1038,7 +1043,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 						break;
 					default:
 						Log.d("wePoker - Text2Speech", "No action found");
-						outputTextToSpeech("No command recognised.");
+						quickOutputMessage(this, "No command recognised.");
 						break;
 					}
 				}
@@ -1123,20 +1128,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 			toast = ToastBetAmount.MinimumBet;
 		}
 
-		Toast t;
 		switch (toast) {
 		case Positive:
 		case Negative:
 			break;
 		case OutOfMoney:
-			t = Toast.makeText(ClientActivity.this, "Out of money !!", Toast.LENGTH_SHORT);
-			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-			t.show();
+			quickOutputMessage(ClientActivity.this, "Out of money !!");
 			break;
 		case MinimumBet:
-			t = Toast.makeText(ClientActivity.this, "Minimum bet required", Toast.LENGTH_SHORT);
-			t.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
-			t.show();
+			quickOutputMessage(ClientActivity.this, "Minimum bet required");
 			break;
 		}
 
@@ -1331,34 +1331,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	public void serverStateChange(GameState newState) {
-		if (isDedicated) return;
-		final ImageView card1 = (ImageView) findViewById(R.id.card1);
-		final ImageView card2 = (ImageView) findViewById(R.id.card2);
-		final ImageView card3 = (ImageView) findViewById(R.id.card3);
-		final ImageView card4 = (ImageView) findViewById(R.id.card4);
-		final ImageView card5 = (ImageView) findViewById(R.id.card5);
-		switch (newState) {
-		case WAITING_FOR_PLAYERS:
-		case END_OF_ROUND:
-		case STOPPED:
-			card1.setImageResource(R.drawable.backside);
-			card2.setImageResource(R.drawable.backside);
-			card3.setImageResource(R.drawable.backside);
-			card4.setImageResource(R.drawable.backside);
-			card5.setImageResource(R.drawable.backside);
-			break;
-		case PREFLOP:
-		case FLOP:
-		case TURN:
-		case RIVER:
-			break;
-		default:
-			Log.v("wePoker - Client-Server", "Invalid state for showStateChange");
-			break;
-		}
-	}
-
 	private void serverUpdatePoolMoney(int poolMoney) {
 		if (isDedicated) return;
 		final TextView textPool = (TextView) findViewById(R.id.pool);
@@ -1370,12 +1342,33 @@ public class ClientActivity extends Activity implements OnClickListener {
 		return getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
 	}
 
+	public void serverHideCards() {
+		if (isDedicated) return;
+		final ImageView card1 = (ImageView) findViewById(R.id.card1);
+		card1.setImageResource(R.drawable.backside);
+		card1.setContentDescription("No card yet");
+		final ImageView card2 = (ImageView) findViewById(R.id.card2);
+		card2.setImageResource(R.drawable.backside);
+		card2.setContentDescription("No card yet");
+		final ImageView card3 = (ImageView) findViewById(R.id.card3);
+		card3.setImageResource(R.drawable.backside);
+		card3.setContentDescription("No card yet");
+		final ImageView card4 = (ImageView) findViewById(R.id.card4);
+		card4.setImageResource(R.drawable.backside);
+		card4.setContentDescription("No card yet");
+		final ImageView card5 = (ImageView) findViewById(R.id.card5);
+		card5.setImageResource(R.drawable.backside);
+		card5.setContentDescription("No card yet");
+	}
+
 	public void serverRevealCards(final Card[] cards) {
 		for (Card c : cards) {
 			Log.d("wePoker - Client-Server", "Revealing card " + c);
 			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 			CardAnimation.setCardImage(ib, cardToResourceID(c));
+			ib.setContentDescription(c.toString().replace("_", " "));
+			quickOutputMessage(this, c.toString().replace("_", " "));
 		}
 	}
 

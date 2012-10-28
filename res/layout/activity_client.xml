@@ -84,6 +84,7 @@
 		    android:layout_width="wrap_content"
 		    android:layout_height="160dip"
 		    android:layout_weight="1"
+		    android:contentDescription="Card 1"
 		    android:baselineAligned="false"
 		    android:scaleType="fitXY" />
 		
@@ -92,6 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="160dip"
             android:layout_weight="1"
+		    android:contentDescription="Card 2"
     		android:baselineAligned="false"
             android:scaleType="fitXY" />
 
