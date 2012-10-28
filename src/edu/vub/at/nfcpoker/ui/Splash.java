@@ -27,13 +27,12 @@ import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
+import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
 public class Splash extends Activity {
-	private static final boolean LODE = false;
 
 	// Shared globals
 	public static final String WEPOKER_WEBSITE = "http://wepoker.info";
@@ -144,16 +143,15 @@ public class Splash extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-//		registerWifiWatcher();
-//		mWifiDirectManager.registerReceiver();
+		registerWifiWatcher();
+		// TODO mWifiDirectManager.registerReceiver();
 	}
 	
 	@Override
 	public void onPause() {
 		super.onPause();
-//		unregisterReceiver(wifiWatcher); wifiWatcher = null;
-//		mWifiDirectManager.unregisterReceiver();
-		// TODO pause discovery 
+		unregisterReceiver(wifiWatcher); wifiWatcher = null;
+		// TODO mWifiDirectManager.unregisterReceiver();
 	}
 	
 	@Override
@@ -274,10 +272,9 @@ public class Splash extends Activity {
 						    		ServerStarter startServer = new ServerStarter() {
 						    			private String wifiGroupName;
 						    			private String wifiPassword;
-						    			private String ipAddress;
+						    			
 						    			@Override
 						    			public void start(String ipAddress, String broadcastAddress) {
-						    				this.ipAddress = ipAddress;
 						    				if (discoveryTask != null) {
 						    					discoveryTask.cancel(true);
 						    					discoveryTask = null;
@@ -288,14 +285,12 @@ public class Splash extends Activity {
 
 						    			@Override
 						    			public void setWifiDirect(String groupName, String password, final String ipAddress, final int port) {
-						    				// TODO setup NFC tag.
 						    				this.wifiGroupName = groupName;
 						    				this.wifiPassword = password;
-						    				this.ipAddress = ipAddress;
 						    				runOnUiThread(new Runnable() {
 						    					@Override
 						    					public void run() {
-						    						QRFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, port, false);
+						    						QRNFCFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, port, false);
 						    					}
 						    				});
 						    			}
