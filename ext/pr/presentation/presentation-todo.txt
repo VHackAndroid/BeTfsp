@@ -2,6 +2,7 @@
 - extra interaction (per layer)
 - Reduced all heavy poker equipment to a small, portable Android apk!
 	(unless you are bringing a TV of course)
+- Very few buttons for the Google TV
 
 
 Key achievements:
@@ -25,4 +26,23 @@ Next steps:
 		- Integrate prices (i.e. win beers instead of money)
 	- Integrate real money?
 	- Playing during the trip home in the eurostar tunnel, for free, yay!:)
-	
+
+
+API's:
+	- Kryo
+		-> Fixed bug in the Kryo trunk version (when using GoogleTV), patch will be submitted to the project
+	- NFC: RFID and Beam
+	- Immersion's SDK
+	- Wifi-Direct and Wifi
+	- TTS
+	- Sony SmartExtensions API
+	- Speech To Command (Google Speech) and customized Levenshtein distance for Poker commands
+	- Gesture API
+	- Proximity sensor
+	- Light sensor
+	- Gravity sensor
+	- Accelerometer sensor
+	- Touch
+	- OpenGL ES
+	- Animation API
+	-> All (but wifi) optional API's, only used when supported on the phone
