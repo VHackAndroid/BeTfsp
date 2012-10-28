@@ -16,7 +16,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
@@ -24,7 +23,7 @@ import android.view.Menu;
 import android.widget.TextView;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
+import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 
 public class QRJoinerActivity extends Activity {
@@ -39,7 +38,6 @@ public class QRJoinerActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			Log.d("wePoker - QRJoiner", "Received intent " + intent);
-			String newStatus = null;
 			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 
 			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
@@ -172,7 +170,7 @@ public class QRJoinerActivity extends Activity {
 				Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 		        // only one message sent during the beam
 		        NdefMessage msg = (NdefMessage) rawMsgs[0];
-		        uri = QRFunctions.getUriFromNdefMessage(msg);
+		        uri = QRNFCFunctions.getUriFromNdefMessage(msg);
 		} else {
 			uri = getIntent().getData();
 		}

@@ -25,7 +25,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class QRFunctions {
+public class QRNFCFunctions {
 
 	// Last RFID Tag
 	public static Tag lastSeenNFCTag;
@@ -80,8 +80,8 @@ public class QRFunctions {
 		nfcWriteButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				QRFunctions.writeJoinInfoOnNFCTag(act, lastSeenNFCTag,
-						QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true));
+				QRNFCFunctions.writeJoinInfoOnNFCTag(act, lastSeenNFCTag,
+						QRNFCFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true));
 			}
 		});
 		NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(act);
@@ -100,8 +100,8 @@ public class QRFunctions {
         builder.setCancelable(true);
         
 		try {
-			String connectionString = QRFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true);
-			Bitmap qrCode = QRFunctions.encodeBitmap(connectionString);
+			String connectionString = QRNFCFunctions.createJoinUri(wifiName, wifiPassword, ipAddress, port, true);
+			Bitmap qrCode = QRNFCFunctions.encodeBitmap(connectionString);
 			ImageView qrCodeIV = (ImageView) dialogGuts.findViewById(R.id.qr_code);
 			qrCodeIV.setImageBitmap(qrCode);
 		} catch (WriterException e) {
@@ -122,6 +122,18 @@ public class QRFunctions {
 				new byte[0], // No id.
 				s.getBytes(Charset.forName("UTF-8")));
 		return new NdefMessage(new NdefRecord[]{ r });
+	}
+
+	public static NdefMessage getServerInfoNdefMessage(String wifiGroupName, String wifiPassword, String ipAddress, int port, boolean isDedicated) {
+		String uri = QRNFCFunctions.createJoinUri(wifiGroupName, wifiPassword, ipAddress, port, isDedicated);
+		String s = uri.substring(Constants.INTENT_BASE_URL.length() - 1);
+		NdefRecord r = new NdefRecord(
+    			NdefRecord.TNF_WELL_KNOWN, 
+    			NdefRecord.RTD_TEXT, 
+    			new byte[0], // No id.
+    			s.getBytes(Charset.forName("UTF-8")));
+		Log.v("wePoker - NFC", "Beaming Uri: " + s);
+        return new NdefMessage(new NdefRecord[]{ r });
 	}
 
 	public static Uri getUriFromNdefMessage(NdefMessage message) {

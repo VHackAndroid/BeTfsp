@@ -1,46 +1,31 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
-import android.graphics.Bitmap;
 import android.net.wifi.WifiManager;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.nfc.tech.Ndef;
-import android.nfc.tech.NdefFormatable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.google.zxing.WriterException;
 
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
+import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 
 public class ServerActivity extends Activity implements ServerViewInterface {
@@ -110,7 +95,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						QRFunctions.showWifiConnectionDialog(act, groupName, password, ipAddress, port, true);
+						QRNFCFunctions.showWifiConnectionDialog(act, groupName, password, ipAddress, port, true);
 					}
 				});
 			}
@@ -140,7 +125,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
     @Override
     public void onNewIntent(Intent intent) {
-        QRFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        QRNFCFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
     }
     
     @Override
@@ -155,7 +140,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     @Override
 	public boolean onOptionsItemSelected(MenuItem item) {
     	if (item.getItemId() == R.id.show_wifi_settings) {
-    		QRFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
+    		QRNFCFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
     		return true;
     	}
 		return super.onOptionsItemSelected(item);
@@ -166,8 +151,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
         getMenuInflater().inflate(R.menu.activity_server, menu);
         return true;
     }
-
-    private Dialog wifiConnectionDialog;
     
 	int nextToReveal = 0;
 

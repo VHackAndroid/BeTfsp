@@ -284,7 +284,12 @@ public class ClientActivity extends Activity implements OnClickListener {
     			throw new RuntimeException("fail", e);
     		}
     		intentFiltersArray = new IntentFilter[] { ndef, all };
-    	}
+    		// Broadcast NFC Beam
+	    	nfcAdapter.setNdefPushMessage(
+	    			QRNFCFunctions.getServerInfoNdefMessage(
+	    					serverWifiName, serverWifiPassword,
+	    					serverIpAddress, serverPort, isDedicated), this);
+	    }
     	
 		
 		// Gesture detection
@@ -391,25 +396,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 //		intent.setPackage("com.sonyericsson.extras.smartwatch");
 //		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
 		
-		NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-	    if (nfcAdapter != null) {
-	    	nfcAdapter.setNdefPushMessage(getServerInfoNdefMessage(), this);
-	    }
 //		
 	}
-
-	private NdefMessage getServerInfoNdefMessage() {
-		String uri = QRFunctions.createJoinUri(serverWifiName, serverWifiPassword, serverIpAddress, serverPort, isDedicated);
-		String s = uri.substring(Constants.INTENT_BASE_URL.length() - 1);
-		NdefRecord r = new NdefRecord(
-    			NdefRecord.TNF_WELL_KNOWN, 
-    			NdefRecord.RTD_TEXT, 
-    			new byte[0], // No id.
-    			s.getBytes(Charset.forName("UTF-8")));
-		Log.v("wePoker - NFC", "Beaming Uri: " + s);
-        return new NdefMessage(new NdefRecord[]{ r });
-	}
-
+	
 	protected void runOnNotUiThread(Runnable runnable) {
 		new Thread(runnable).start();
 	}
