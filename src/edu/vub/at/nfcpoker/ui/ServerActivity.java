@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -17,7 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
 import edu.vub.at.commlib.CommLib;
@@ -41,6 +44,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	protected String currentIpAddress;
 	protected int currentPort;
 	private boolean isWifiDirect;
+	
+	// UI
+	private final int MIN_AVATAR_ID = 1;
+	private final int MAX_AVATAR_ID = 15;
+	private final int MAX_NUMBER_AVATARS_SIDE = 4;
+	private Random random = new Random();
 	
 	// NFC
 	private PendingIntent pendingIntent;
@@ -188,19 +197,39 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public void showStateChange(final GameState newState) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				TextView phase = (TextView)findViewById(R.id.current_phase);
-				phase.setText(newState.toString());
+				String prefix = getResources().getString(R.string.title_activity_server);
+				setTitle(prefix + " \u2014 " + newState.toString());
 			}
 		});
 	}
 
+	public String getNewAvatar(){
+		int rndNumberInRange = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
+		Log.d("wePoker - Server", "Avatar for player " + rndNumberInRange);
+		return "avatar_" + rndNumberInRange;
+	}
 	@Override
 	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				Log.d("wePoker - Server", "Adding player name " + clientName);
-				LinearLayout users = (LinearLayout) findViewById(R.id.users);
-				View badge = getLayoutInflater().inflate(R.layout.user, null);
+				LinearLayout users;
+				 // todo make this variable.. now hardcoded 4 and 4 on each side.
+				if (playerBadges.size() < MAX_NUMBER_AVATARS_SIDE) {
+					users = (LinearLayout) findViewById(R.id.users_bottom);
+				} else{
+					users = (LinearLayout) findViewById(R.id.users_top);
+				}
+				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
+				
+				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
+				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar();
+				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
+				int id = getResources().getIdentifier(avatarField, null, null);
+				avatar.setImageDrawable(getResources().getDrawable(id));
+				avatar.setAdjustViewBounds(true);
+				avatar.setMaxHeight(users.getHeight());
+				avatar.setMaxWidth(users.getHeight());
 				
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
 				name.setText(clientName);
@@ -208,7 +237,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				money.setText("\u20AC" + initialMoney);
 
 				playerBadges.put(clientID, badge);
-				users.addView(badge);
+				
+				LinearLayout.LayoutParams params = (LayoutParams) badge.getLayoutParams();
+				params.setMargins(24, 0, 24, 0);
+				users.addView(badge, params);
 			}
 		});
 	}
@@ -238,8 +270,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				View badge = playerBadges.get(player);
 				if (badge != null) {
-					LinearLayout users = (LinearLayout) findViewById(R.id.users);
-					users.removeView(badge);
+					LinearLayout users_bottom = (LinearLayout) findViewById(R.id.users_bottom);
+					users_bottom.removeView(badge);
+					LinearLayout users_top = (LinearLayout) findViewById(R.id.users_top);
+					users_top.removeView(badge);
 					playerBadges.remove(player);
 				}
 			}
