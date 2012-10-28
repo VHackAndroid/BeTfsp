@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.comm;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
@@ -178,13 +179,15 @@ public interface Message {
 	 public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
 			
 			public Set<Integer> bestPlayers;
+			public Set<String> bestPlayerNames;
 			public Hand bestHand;
 			public int chips;
 
-			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Hand bestHand, int amountOfChips) {
+			public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Set<String> bestNames, Hand bestHand, int amountOfChips) {
 				this.bestPlayers = bestPlayers;
 				this.bestHand = bestHand;
 				this.chips = amountOfChips;
+				this.bestPlayerNames = bestNames;
 			}
 
 			// kryo
@@ -193,6 +196,16 @@ public interface Message {
 			@Override
 			public String toString() {
 				return super.toString() + ": Round winners" + this.bestPlayers.toString();
+			}
+			
+			public String winMessageString() {
+				String s = "Winner(s) - ";
+				Iterator<String> playersIt = bestPlayerNames.iterator();
+				while (playersIt.hasNext()) {
+					s = s + " - " + playersIt.next();
+				}
+				s = s + " chips won: " + chips;
+				return s;
 			}
 	}
 

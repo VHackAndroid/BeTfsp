@@ -2,6 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
@@ -798,6 +799,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
+							showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
 						}});
 				}
 			}
@@ -1272,6 +1274,22 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private void showCards() {
 		mCardView1.setCurrentIndex(1);
 		mCardView2.setCurrentIndex(1);
+	}
+	
+	private void showWinningCards(Card[] cards, String winMessage) {
+		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[0].toString(), null, null);
+		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
+		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
+		mCardView1.setContentDescription(cards[0].toString().replace("_", " "));
+
+		int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[1].toString(), null, null);
+		int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
+		mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
+		mCardView2.setContentDescription(cards[1].toString().replace("_", " "));
+		
+		showCards();
+		
+		quickOutputMessage(this, winMessage);
 	}
 
 	private void hideCards() {

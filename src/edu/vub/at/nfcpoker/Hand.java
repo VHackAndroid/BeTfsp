@@ -9,7 +9,7 @@ import java.util.Vector;
 // From http://www.dreamincode.net/forums/topic/116864-how-to-make-a-poker-game-in-java/
 
 public class Hand implements Comparable<Hand> {
-	private Card[] cards;
+	public Card[] cards;
 	private int[] value;
 	
 	
