@@ -34,21 +34,24 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		public void start(String ipAddress, String broadcastAddress);
 		public void setWifiDirect(String groupName, String password, String ipAddress, int port);
 	}
-
-	@SuppressLint("UseSparseArrays")
-	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
+	
+	// Connectivity
 	protected String currentWifiGroupName;
 	protected String currentWifiPassword; 
 	protected String currentIpAddress;
 	protected int currentPort;
-
 	private boolean isWifiDirect;
 	
+	// NFC
 	private PendingIntent pendingIntent;
 	private IntentFilter[] intentFiltersArray;
 	private NfcAdapter nfcAdapter;
 
-
+	// UI
+	int nextToReveal = 0;
+	@SuppressLint("UseSparseArrays")
+	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
@@ -87,7 +90,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 			@Override
 			public void setWifiDirect(final String groupName, final String password, final String ipAddress, final int port) {
-				// TODO setup NFC tag.
 				currentWifiGroupName = groupName;
 				currentWifiPassword  = password;
 				currentIpAddress = ipAddress;
@@ -150,8 +152,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
         getMenuInflater().inflate(R.menu.activity_server, menu);
         return true;
     }
-    
-	int nextToReveal = 0;
 
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
