@@ -66,8 +66,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	super.onCreate(savedInstanceState);
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
+    	View server_layout = findViewById(R.id.server_layout);
     	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
-    	final boolean isDedicated = tablet_layout != null || isTV;
+    	final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
     	isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
     	
 		final Activity act = this;

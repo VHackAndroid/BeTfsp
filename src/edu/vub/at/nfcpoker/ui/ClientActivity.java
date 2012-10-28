@@ -235,7 +235,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		// Connectivity
 		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
 		serverPort = getIntent().getIntExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
-		isDedicated = getIntent().getBooleanExtra(Constants.INTENT_IS_DEDICATED, false);
+		isDedicated = getIntent().getBooleanExtra(Constants.INTENT_IS_DEDICATED, true);
 		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
 		serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
 		serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);

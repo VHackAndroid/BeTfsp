@@ -49,7 +49,7 @@ public class ConcretePokerServer extends PokerServer  {
 	
 	int nextClientID = 0;
 	private ServerViewInterface gui;
-	private boolean isDedicated = false;
+	private boolean isDedicated = true;
 
 	// Blinds
 	private static final int SMALL_BLIND = 5;
@@ -61,7 +61,7 @@ public class ConcretePokerServer extends PokerServer  {
 			while (true) {
 				String port = "" + CommLib.SERVER_PORT;
 				String dedicated = "" + isDedicated;
-				Log.d("wePoker - Server", "Starting export thread, advertising " + broadcastAddress + ":" + port);
+				Log.d("wePoker - Server", "Starting export thread, advertising " + broadcastAddress + ":" + port + " D:"+isDedicated);
 				CommLibConnectionInfo clci = new CommLibConnectionInfo(
 						PokerServer.class.getCanonicalName(),
 						new String[] {serverAddress, port, dedicated});
