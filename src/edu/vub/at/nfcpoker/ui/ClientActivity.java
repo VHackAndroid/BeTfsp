@@ -1,7 +1,6 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
@@ -26,8 +25,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.nfc.NdefMessage;
-import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -62,7 +59,7 @@ import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.QRFunctions;
+import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
@@ -237,17 +234,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
 		serverPort = getIntent().getIntExtra(Constants.INTENT_PORT, CommLib.SERVER_PORT);
 		isDedicated = getIntent().getBooleanExtra(Constants.INTENT_IS_DEDICATED, false);
-		if (isDedicated) {
+		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
+		serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
+		serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
+		serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
+		
+		// Configure the Client Interface
+		if (isDedicated && !audioFeedback) {
 			setContentView(R.layout.activity_client_is_dedicated);
 		} else {
 			setContentView(R.layout.activity_client);
 		}
 		
-		// Start server on a client
-		isServer = getIntent().getBooleanExtra(Constants.INTENT_IS_SERVER, false);
-		serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
-		serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
-		serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
+		// Start server on a client if required
 		if (isServer) {
 			ConcretePokerServer cps = new ConcretePokerServer(
 					new DummServerView(), false,
@@ -269,7 +268,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		
 		// NFC
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-    	
     	if (nfcAdapter != null) {
     		pendingIntent = PendingIntent.getActivity(
     		    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
@@ -291,7 +289,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	    					serverIpAddress, serverPort, isDedicated), this);
 	    }
     	
-		
 		// Gesture detection
 		gestureDetector = new GestureDetector(this, new MyGestureDetector());
 		gestureListener = new View.OnTouchListener() {
@@ -386,6 +383,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		nextToReveal = 0;
 		lastReceivedHoleCards = null;
 
+		// Connect to the server
 		new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 		
 		// adding the hallo wePoker to the watch
