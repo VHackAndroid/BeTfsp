@@ -810,7 +810,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
-							showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
+							if (rwdm.bestHand == null) {
+								showWinningCards(null, rwdm.winMessageString());
+							} else {
+								showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
+							}
 						}});
 				}
 			}
@@ -1288,6 +1292,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void showWinningCards(Card[] cards, String winMessage) {
+		
+		if (cards != null) {
+		
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[0].toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
 		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
@@ -1299,6 +1306,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		mCardView2.setContentDescription(cards[1].toString().replace("_", " "));
 		
 		showCards();
+		}
 		
 		quickOutputMessage(this, winMessage);
 	}
