@@ -261,6 +261,14 @@ public class ConcretePokerServer extends PokerServer  {
 						c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 					}
 					newState(GameState.PREFLOP);
+					// Small and big blind
+					addMoney(clientsIdsInRoundOrder.get(0), -SMALL_BLIND);
+					addChipsToPool(SMALL_BLIND);
+					broadcast(new Message.SmallBlindMessage(clientsIdsInRoundOrder.get(0), SMALL_BLIND));
+					addMoney(clientsIdsInRoundOrder.get(1), -BIG_BLIND);
+					addChipsToPool(BIG_BLIND);
+					broadcast(new Message.BigBlindMessage(clientsIdsInRoundOrder.get(1), BIG_BLIND));
+					// Do a round
 					roundTable();
 					
 					
@@ -406,25 +414,20 @@ public class ConcretePokerServer extends PokerServer  {
 					actionFutures.remove(i);
 				}
 			}
-			
+
 			if (clientsIdsInRoundOrder.size() < 2) {
 				throw new RoundEndedException();
 			}
-			
-			// Small and big blind
-			addMoney(clientsIdsInRoundOrder.get(0), -SMALL_BLIND);
-			addChipsToPool(SMALL_BLIND);
-			broadcast(new Message.SmallBlindMessage(clientsIdsInRoundOrder.get(0), SMALL_BLIND));
-			addMoney(clientsIdsInRoundOrder.get(1), -BIG_BLIND);
-			addChipsToPool(BIG_BLIND);
-			broadcast(new Message.BigBlindMessage(clientsIdsInRoundOrder.get(1), BIG_BLIND));
 
-			// Skip the blind players
+			@SuppressWarnings("unchecked")
 			Vector<Integer> clientsIdsInRoundOrderAfterBlinds = (Vector<Integer>) clientsIdsInRoundOrder.clone();
-			clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
-			clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
-			clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
-			clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
+			if (gameState == GameState.PREFLOP) {
+				// Move the players that have a small or big blind (only for preflop)
+				clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
+				clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
+				clientsIdsInRoundOrderAfterBlinds.add(clientsIdsInRoundOrderAfterBlinds.elementAt(0));
+				clientsIdsInRoundOrderAfterBlinds.removeElementAt(0);
+			}
 			
 			// Two table rounds if needed
 			for (int r = 0; r < 2 && increasedBet; r++) {
