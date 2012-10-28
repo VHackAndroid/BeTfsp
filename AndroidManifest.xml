@@ -6,7 +6,7 @@
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="15" />
-
+    
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
@@ -23,23 +23,23 @@
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
     <uses-feature
-        android:name="android.hardware.wifi"
-        android:required="true" />
-    <uses-feature
         android:name="android.hardware.touchscreen"
-        android:required="false"/>
-     <uses-feature
-         android:name="android.hardware.touchscreen.multitouch"
-         android:required="false" />
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen.multitouch"
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.screen.landscape"
         android:required="false" />
-     <uses-feature
-         android:name="android.hardware.screen.portrait"
-         android:required="false" />
-     <uses-feature
-         android:name="com.google.android.tv"
-         android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.screen.portrait"
+        android:required="false" />
+    <uses-feature
+        android:name="com.google.android.tv"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="true" />
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" />
