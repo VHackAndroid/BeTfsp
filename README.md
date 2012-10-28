@@ -8,6 +8,7 @@ On newer devices, wePoker will even use Wifi-Direct and NFC!
 wePoker won the 'best app' award at the V Hack Android Belgium Hackathon in October 2012.
 You can see a demo at http://bit.ly/wePokerDemo or download the application at http://bit.ly/wePokerapp.
 
+
 Features
 ========
 - Nomadic and Spontaneous Poker games!
@@ -47,6 +48,13 @@ Features
 	- Set content description for all UI fields to improve talkback
 	- Enforced UI view where all cards are accessible (even if there is a dedicated poker table)
 	- Allows visually impaired users to compete with sighted people without game-specific advantages for any side.
+
+- Extra
+	- Cheat mode: players can add money on the server view. All players get informed via visual and audio feedback about this sneaky interaction. This allows to customize the money rules.
+	- Customize nicknames and avatars
+	- Free gaming (no internet required)
+	- Open source!
+	
 
 About the authors
 =================
