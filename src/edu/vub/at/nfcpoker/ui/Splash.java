@@ -300,10 +300,11 @@ public class Splash extends Activity {
 
 						    		String ipAddress = CommLib.getIpAddress(Splash.this);
 						    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
+						    		String password = CommLib.getWifiPassword(wm.getConnectionInfo().getSSID());
 				    				startClient(ipAddress, CommLib.SERVER_PORT, false,
 				    						true, broadcastAddress,
 			    							wm.getConnectionInfo().getSSID(),
-			    							"********");
+			    							password);
 						    	}
 							}
 						}.start();

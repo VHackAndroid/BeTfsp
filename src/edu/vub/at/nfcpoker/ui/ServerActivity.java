@@ -106,8 +106,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	} else {
     		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
     		currentWifiGroupName = wm.getConnectionInfo().getSSID();
-    		currentWifiPassword = "********";
-    		
+    		currentWifiPassword = CommLib.getWifiPassword(currentWifiGroupName);
     		String ipAddress = CommLib.getIpAddress(this);
     		String broadcastAddress = CommLib.getBroadcastAddress(this);
     		startServer.start(ipAddress, broadcastAddress);

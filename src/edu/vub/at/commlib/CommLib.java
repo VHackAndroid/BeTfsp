@@ -29,6 +29,11 @@ public class CommLib {
 	
 	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
+	
+	private static Map<String,String> wifiConnections = new HashMap<String, String>();
+	static {
+		wifiConnections.put("androidVHack", "android5");
+	}
 
 	private static String putAddress(int addr) {
 		StringBuffer buf = new StringBuffer();
@@ -50,6 +55,14 @@ public class CommLib {
 		if (dhcp == null) return "localhost";
 		int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
 		return putAddress(broadcast);
+	}
+
+	public static String getWifiPassword(String ssid) {
+		if (wifiConnections.containsKey(ssid)) {
+			return wifiConnections.get(ssid);
+		} else {
+			return "********";
+		}
 	}
 	
 	public static CommLibConnectionInfo discover(Class<?> klass, String broadcastAddress) throws IOException {
