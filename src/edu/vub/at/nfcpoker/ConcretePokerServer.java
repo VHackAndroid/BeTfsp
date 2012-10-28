@@ -3,6 +3,7 @@ package edu.vub.at.nfcpoker;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -317,7 +318,11 @@ public class ConcretePokerServer extends PokerServer  {
 				if (endedPrematurely) {
 					if (remainingPlayers.size() == 1) {
 						addMoney(remainingPlayers.iterator().next(), chipsPool);
-						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, null, chipsPool));
+
+						HashSet<String> winnerNames = new HashSet<String>();
+						winnerNames.add(playerNames.get(remainingPlayers.iterator().next()));
+						
+						broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, winnerNames, null, chipsPool));
 					}
 				} else {
 					TreeMap<Integer, Hand> hands = new TreeMap<Integer, Hand>();
@@ -345,9 +350,14 @@ public class ConcretePokerServer extends PokerServer  {
 							}
 						}
 						
-						for (Integer player: bestPlayers)
+						HashSet<String> winnerNames = new HashSet<String>();
+						for (Integer player: bestPlayers) {
 							addMoney(player, chipsPool / bestPlayers.size());
-						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, bestHand, chipsPool));
+							winnerNames.add(playerNames.get(player));
+						}
+					
+						
+						broadcast(new RoundWinnersDeclarationMessage(bestPlayers, winnerNames, bestHand, chipsPool));
 					}
 				}
 				
