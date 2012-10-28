@@ -1,40 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:background="#000000"
     android:gravity="center"
-    android:orientation="vertical" >
-    
-    <TextView
-        android:id="@+id/playerName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="0"
-        android:text="Player Name"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#CFB52B" />
+    android:orientation="horizontal"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp" >
 
     <ImageView
         android:id="@+id/avatar_user"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="1"
-        android:src="@drawable/avatar_1" />
-        
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:scaleType="fitCenter"/>
+
+    <TextView
+        android:id="@+id/playerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/avatar_user"
+        android:text="Player Name"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#CFB52B" />
+    
     <TextView
         android:id="@+id/playerMoney"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        android:layout_weight="0"
+        android:layout_toRightOf="@+id/avatar_user"
+        android:layout_below="@+id/playerName"
         android:text="Player Money"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#CFB52B" />
+        android:textColor="#CFB52B" >
 
-</LinearLayout>
+    </TextView>
+
+
+</RelativeLayout>
