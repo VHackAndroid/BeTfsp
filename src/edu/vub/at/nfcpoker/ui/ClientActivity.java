@@ -1378,6 +1378,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 			CardAnimation.setCardImage(ib, cardToResourceID(c));
+			if (!ClientActivity.audioFeedback) return;
 			ib.setContentDescription(c.toString().replace("_", " "));
 			quickOutputMessage(this, c.toString().replace("_", " "));
 		}
