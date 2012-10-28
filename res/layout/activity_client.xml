@@ -78,34 +78,6 @@
         android:orientation="horizontal"
         android:layout_weight="1"
     	android:baselineAligned="false" >
-        
-		<!-- 
-		<edu.vub.at.nfcpoker.ui.tools.PageCurlView
-            android:id="@+id/Card1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/backside"
-            android:src="@drawable/backside"
-            android:paddingLeft="2dip"
-            android:paddingRight="4dip"
-            android:paddingTop="4dip"
-            android:scaleType="fitXY">
-		</edu.vub.at.nfcpoker.ui.tools.PageCurlView>
-		
-		<edu.vub.at.nfcpoker.ui.tools.PageCurlView
-            android:id="@+id/Card2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/backside"
-            android:src="@drawable/backside"
-            android:paddingLeft="4dip"
-            android:paddingRight="2dip"
-            android:paddingTop="4dip"
-            android:scaleType="fitXY">
-		</edu.vub.at.nfcpoker.ui.tools.PageCurlView>
-		-->
 		
 		<fi.harism.curl.CurlView
 		    android:id="@+id/pCard1"

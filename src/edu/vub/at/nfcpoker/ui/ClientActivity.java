@@ -337,22 +337,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		blackchip.setOnClickListener(ClientActivity.this);
 		blackchip.setOnTouchListener(gestureListener);
 
-		/*
-			ArrayList<Bitmap> mPages1 = new ArrayList<Bitmap>();
-			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-			mPages1.add(BitmapFactory.decodeResource(getResources(), R.drawable.clubs_10c));
-
-			final PageCurlView card1 = (PageCurlView) findViewById(R.id.Card1);
-			card1.setPages(mPages1);
-
-			ArrayList<Bitmap> mPages2 = new ArrayList<Bitmap>();
-			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.backside));
-			mPages2.add(BitmapFactory.decodeResource(getResources(), R.drawable.diamonds_10d));
-
-			final PageCurlView card2 = (PageCurlView) findViewById(R.id.Card2);
-			card2.setPages(mPages2);
-		 */
-
 		mCardView1 = (CurlView) findViewById(R.id.pCard1);
 		mCardView1.setPageProvider(new PageProvider(this, DEFAULT_CARDS));
 		mCardView1.setCurrentIndex(0);
