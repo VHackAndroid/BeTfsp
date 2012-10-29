@@ -200,6 +200,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				String prefix = getResources().getString(R.string.title_activity_server);
 				setTitle(prefix + " \u2014 " + newState.toString());
+				
+				TextView tv = (TextView) findViewById(R.id.current_phase);
+				tv.setText(newState.toString());
 			}
 		});
 	}
