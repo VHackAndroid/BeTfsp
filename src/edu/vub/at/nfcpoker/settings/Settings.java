@@ -15,8 +15,8 @@ import android.provider.Settings.Secure;
 
 public class Settings {
 	public static volatile String UUID;
-	public static volatile String NETWORK_GROUP;
 	public static volatile String nickname;
+	public static volatile int avatar;
 	public static volatile int gamesPlayed;
 	
 	private static final int nicknameTxtLength = 10000;
@@ -24,7 +24,6 @@ public class Settings {
 	public static void loadSettings(Context ctx) {
 		SharedPreferences settings = ctx.getSharedPreferences("settings", Activity.MODE_PRIVATE);
 		UUID = Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
-		NETWORK_GROUP = "TODO-FROM-NFC";
 		nickname = settings.getString("nickname", getRandomNickName(ctx));
 		gamesPlayed = settings.getInt("gamesPlayed", 0);
 	}
