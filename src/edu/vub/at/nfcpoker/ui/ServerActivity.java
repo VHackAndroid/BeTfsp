@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import android.annotation.SuppressLint;
@@ -59,7 +60,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	// UI
 	int nextToReveal = 0;
 	@SuppressLint("UseSparseArrays")
-	HashMap<Integer, View> playerBadges = new HashMap<Integer, View>();
+	Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -200,8 +201,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				String prefix = getResources().getString(R.string.title_activity_server);
 				setTitle(prefix + " \u2014 " + newState.toString());
-				
 				TextView tv = (TextView) findViewById(R.id.current_phase);
+				if (tv == null) return;
 				tv.setText(newState.toString());
 			}
 		});
@@ -219,7 +220,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				Log.d("wePoker - Server", "Adding player name " + clientName);
 				LinearLayout users;
 				 // todo make this variable.. now hardcoded 4 and 4 on each side.
-				if (playerBadges.size() < MAX_NUMBER_AVATARS_SIDE) {
+				if (playerAvatars.size() < MAX_NUMBER_AVATARS_SIDE) {
 					users = (LinearLayout) findViewById(R.id.users_bottom);
 				} else{
 					users = (LinearLayout) findViewById(R.id.users_top);
@@ -240,7 +241,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
 				money.setText("\u20AC" + initialMoney);
 
-				playerBadges.put(clientID, badge);
+				playerAvatars.put(clientID, badge);
 				
 				LinearLayout.LayoutParams params = (LayoutParams) badge.getLayoutParams();
 				params.setMargins(24, 0, 24, 0);
@@ -253,7 +254,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public void setPlayerMoney(final Integer player, final int current) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				View badge = playerBadges.get(player);
+				View badge = playerAvatars.get(player);
 				if (badge != null) {
 					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
 					money.setText("\u20AC" + current);
@@ -272,13 +273,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	public void removePlayer(final Integer player) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				View badge = playerBadges.get(player);
+				View badge = playerAvatars.get(player);
 				if (badge != null) {
 					LinearLayout users_bottom = (LinearLayout) findViewById(R.id.users_bottom);
 					users_bottom.removeView(badge);
 					LinearLayout users_top = (LinearLayout) findViewById(R.id.users_top);
 					users_top.removeView(badge);
-					playerBadges.remove(player);
+					playerAvatars.remove(player);
 				}
 			}
 		});
