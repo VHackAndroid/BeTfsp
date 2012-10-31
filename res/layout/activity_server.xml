@@ -35,6 +35,7 @@
                 android:paddingRight="4dip"
                 android:paddingTop="4dip"
                 android:scaleType="fitCenter"
+                android:contentDescription="Public card 1"
                 android:src="@drawable/backside" />
 
             <ImageButton
@@ -46,6 +47,7 @@
                 android:paddingRight="2dip"
                 android:paddingTop="4dip"
                 android:scaleType="fitCenter"
+                android:contentDescription="Public card 2"
                 android:src="@drawable/backside" />
 
             <ImageButton
@@ -57,6 +59,7 @@
                 android:paddingRight="2dip"
                 android:paddingTop="4dip"
                 android:scaleType="fitCenter"
+                android:contentDescription="Public card 3"
                 android:src="@drawable/backside" />
 
             <ImageButton
@@ -68,6 +71,7 @@
                 android:paddingRight="2dip"
                 android:paddingTop="4dip"
                 android:scaleType="fitCenter"
+                android:contentDescription="Public card 4"
                 android:src="@drawable/backside" />
 
             <ImageButton
@@ -79,9 +83,20 @@
                 android:paddingRight="2dip"
                 android:paddingTop="4dip"
                 android:scaleType="fitCenter"
+                android:contentDescription="Public card 5"
                 android:src="@drawable/backside" />
         </LinearLayout>
-
+        
+		<TextView
+            android:id="@+id/current_phase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/users_top"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="false"
+            android:text="Waiting for players ..."
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+ 
         <LinearLayout
             android:id="@+id/users_bottom"
             android:layout_width="match_parent"

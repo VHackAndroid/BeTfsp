@@ -24,6 +24,7 @@
             android:paddingRight="4dip"
             android:paddingTop="4dip"
             android:scaleType="fitXY"
+            android:contentDescription="Public card 1"
             android:src="@drawable/backside" />
 
         <ImageButton
@@ -35,6 +36,7 @@
             android:paddingRight="2dip"
             android:paddingTop="4dip"
             android:scaleType="fitXY"
+            android:contentDescription="Public card 2"
             android:src="@drawable/backside" />
 
         <ImageButton
@@ -46,6 +48,7 @@
             android:paddingRight="2dip"
             android:paddingTop="4dip"
             android:scaleType="fitXY"
+            android:contentDescription="Public card 3"
             android:src="@drawable/backside" />
 
         <ImageButton
@@ -57,6 +60,7 @@
             android:paddingRight="2dip"
             android:paddingTop="4dip"
             android:scaleType="fitXY"
+            android:contentDescription="Public card 4"
             android:src="@drawable/backside" />
 
         <ImageButton
@@ -68,6 +72,7 @@
             android:paddingRight="2dip"
             android:paddingTop="4dip"
             android:scaleType="fitXY"
+            android:contentDescription="Public card 5"
             android:src="@drawable/backside" />
     </LinearLayout>
 
@@ -111,10 +116,11 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:layout_weight="1"
-    	android:baselineAligned="false"
+    	 android:baselineAligned="false"
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
+         android:contentDescription="Add 5 chips"
          android:src="@drawable/chips_white" />
         
      <ImageView
@@ -126,6 +132,7 @@
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
+         android:contentDescription="Add 10 chips"
          android:src="@drawable/chips_red" />
             
      <ImageView
@@ -137,6 +144,7 @@
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
+         android:contentDescription="Add 20 chips"
          android:src="@drawable/chips_green" />
             
      <ImageView
@@ -148,6 +156,7 @@
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
+         android:contentDescription="Add 50 chips"
          android:src="@drawable/chips_blue" />
      
      <ImageView
@@ -159,6 +168,7 @@
          android:paddingLeft="2dip"
          android:paddingRight="2dip"
          android:scaleType="fitCenter"
+         android:contentDescription="Add 100 chips"
          android:src="@drawable/chips_black" />
      
     </LinearLayout>

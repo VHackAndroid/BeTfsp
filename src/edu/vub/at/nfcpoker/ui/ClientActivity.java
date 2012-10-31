@@ -826,12 +826,16 @@ public class ClientActivity extends Activity implements OnClickListener {
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card1.toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
 		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
-		mCardView1.setContentDescription(cards.card1.toString().replace("_", " "));
+		String vMsg1 = cards.card1.toString().replace("_", " ");
+		mCardView1.setContentDescription(vMsg1);
+		speakMessage(this, vMsg1);
 
 		int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards.card2.toString(), null, null);
 		int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
 		mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
-		mCardView2.setContentDescription(cards.card2.toString().replace("_", " "));
+		String vMsg2 = cards.card2.toString().replace("_", " ");
+		mCardView2.setContentDescription(vMsg2);
+		speakMessage(this, vMsg2);
 
 		updateMoneyTitle();
 	}
@@ -1399,14 +1403,19 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 
 	public void serverRevealCards(final Card[] cards) {
+		if (cards.length > 1) {
+			speakMessage(this, "Revealing card");
+		} else {
+			speakMessage(this, "Revealing cards");
+		}
 		for (Card c : cards) {
 			Log.d("wePoker - Client-Server", "Revealing card " + c);
 			LinearLayout ll = (LinearLayout) findViewById(R.id.cards);
 			ImageButton ib = (ImageButton) ll.getChildAt(nextToReveal++);
 			CardAnimation.setCardImage(ib, cardToResourceID(c));
-			if (!ClientActivity.audioFeedback) return;
-			ib.setContentDescription(c.toString().replace("_", " "));
-			quickOutputMessage(this, c.toString().replace("_", " "));
+			String vMsg = c.toString().replace("_", " ");
+			ib.setContentDescription(vMsg);
+			speakMessage(this, vMsg);
 		}
 	}
 
