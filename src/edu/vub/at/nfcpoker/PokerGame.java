@@ -95,14 +95,6 @@ public class PokerGame implements Runnable {
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
 				newState(PokerGameState.PREFLOP);
-				// Small and big blind
-				PlayerState smallBlind = playerState.get(clientsIdsInRoundOrder.get(0));
-				addBet(smallBlind, SMALL_BLIND);
-				broadcast(new Message.SmallBlindMessage(smallBlind.clientId, SMALL_BLIND));
-				PlayerState bigBlind = playerState.get(clientsIdsInRoundOrder.get(1));
-				addBet(bigBlind, BIG_BLIND);
-				broadcast(new Message.BigBlindMessage(bigBlind.clientId, BIG_BLIND));
-				// Do a round
 				roundTable();
 				
 				
@@ -224,20 +216,6 @@ public class PokerGame implements Runnable {
 		clientsIdsInRoundOrder.removeElementAt(0);
 	}
 	
-	private Vector<Integer> getClientsRoundOrder() {
-		@SuppressWarnings("unchecked")
-		Vector<Integer> v = (Vector<Integer>) clientsIdsInRoundOrder.clone();
-		if (v.size() < 2) return v;
-		if (gameState == PokerGameState.PREFLOP) {
-			// Move the players that have a small or big blind (only for preflop)
-			v.add(v.elementAt(0));
-			v.removeElementAt(0);
-			v.add(v.elementAt(0));
-			v.removeElementAt(0);
-		}
-		return v;
-	}
-	
 	private void askClientActions(int clientId, int round) {
 		PlayerState player = playerState.get(clientId);
 		if ((player.roundActionType == ClientActionType.Fold) ||
@@ -356,35 +334,59 @@ public class PokerGame implements Runnable {
 		gui.updatePlayerStatus(player);
 	}
 	
+	// Idea:
+	//   Ask all players in parallel to bet
+	//   Handle cases where player 2 checks before player 1 bets
+	//     -> player2 should perform the action again
+	//   Handle cases where player 1 bets (100) and player 2 raises (200)
+	//     -> Should be handled by the second tableRound (1) && increasedBet
+	//   Stop early if not enough players
 	private void roundTable() throws RoundEndedException {
 		int minBet = 0;
 		boolean increasedBet = true;
 
-		Vector<Integer> clientOrderAfterBlinds = getClientsRoundOrder();
+		@SuppressWarnings("unchecked")
+		Vector<Integer> clientOrder = (Vector<Integer>) clientsIdsInRoundOrder.clone();
 
+		if (clientOrder.size() < 2) {
+			throw new RoundEndedException();
+		}
+		
 		// Reset player actions
 		for (PlayerState player : playerState.values()) {
 			player.roundActionType = ClientActionType.Unknown;
 			player.roundMoney = 0;
 			actionFutures.remove(player.clientId);
 		}
-
-		if (clientOrderAfterBlinds.size() < 2) {
-			throw new RoundEndedException();
+		
+		// Add blinds
+		if (gameState == PokerGameState.PREFLOP) {
+			// Small and big blind
+			PlayerState smallBlind = playerState.get(clientOrder.get(0));
+			addBet(smallBlind, SMALL_BLIND);
+			broadcast(new Message.SmallBlindMessage(smallBlind.clientId, SMALL_BLIND));
+			PlayerState bigBlind = playerState.get(clientOrder.get(1));
+			addBet(bigBlind, BIG_BLIND);
+			broadcast(new Message.BigBlindMessage(bigBlind.clientId, BIG_BLIND));
+			// Cycle the players that have a small or big blind
+			clientOrder.add(clientOrder.elementAt(0));
+			clientOrder.removeElementAt(0);
+			clientOrder.add(clientOrder.elementAt(0));
+			clientOrder.removeElementAt(0);
 		}
 		
 		// Two table rounds if needed
 		for (int tableRound = 0; tableRound < 2 && increasedBet; tableRound++) {
-			int playersRemaining = clientOrderAfterBlinds.size();
+			int playersRemaining = clientOrder.size();
 			increasedBet = false;
 			
 			// Ask the client actions (in parallel)
-			for (int clientId : clientOrderAfterBlinds) {
+			for (int clientId : clientOrder) {
 				askClientActions(clientId, tableRound);
 			}
 			
 			// Process the client action (one-by-one, in round order)
-			for (int clientId : clientOrderAfterBlinds) {
+			for (int clientId : clientOrder) {
 				// Keep asking for valid input
 				while (!verifyClientActions(clientId, tableRound, minBet)) {
 					askClientActions(clientId, tableRound);

@@ -15,7 +15,7 @@ public class PlayerState {
 	public volatile int gameMoney;
 	public volatile Card[] gameHoleCards;
 	
-	// Round-specific
+	// Round-specific (roundTable)
 	public volatile ClientActionType roundActionType;
 	public volatile int roundMoney;
 	
