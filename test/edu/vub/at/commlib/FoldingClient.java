@@ -6,15 +6,13 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.GameState;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
-import edu.vub.at.nfcpoker.comm.PokerServer;
-import edu.vub.at.nfcpoker.ui.ClientActivity;
 
 public class FoldingClient {
 

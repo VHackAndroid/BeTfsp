@@ -9,12 +9,13 @@ import com.esotericsoftware.minlog.Log;
 
 import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
-	enum ClientActionType { Bet, Fold, Check, AllIn };
+	enum ClientActionType { Bet, Fold, Check, AllIn, Unknown };
 
 	public static final class ClientAction {
 		public ClientActionType actionType;
@@ -176,16 +177,18 @@ public interface Message {
 
 	public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
 
-		public Set<Integer> bestPlayers;
+		public Set<PlayerState> bestPlayers;
 		public Set<String> bestPlayerNames;
+		public boolean showCards;
 		public Hand bestHand;
 		public int chips;
 
-		public RoundWinnersDeclarationMessage(Set<Integer> bestPlayers, Set<String> bestNames, Hand bestHand, int amountOfChips) {
+		public RoundWinnersDeclarationMessage(Set<PlayerState> bestPlayers, Set<String> bestNames, boolean showCards, Hand bestHand, int amountOfChips) {
 			this.bestPlayers = bestPlayers;
+			this.bestPlayerNames = bestNames;
+			this.showCards = showCards;
 			this.bestHand = bestHand;
 			this.chips = amountOfChips;
-			this.bestPlayerNames = bestNames;
 		}
 
 		// kryo

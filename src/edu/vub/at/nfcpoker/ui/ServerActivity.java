@@ -1,6 +1,8 @@
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -27,11 +29,13 @@ import android.widget.TextView;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
+import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 
+@SuppressLint("UseSparseArrays")
 public class ServerActivity extends Activity implements ServerViewInterface {
 
 	public interface ServerStarter {
@@ -59,7 +63,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 	// UI
 	int nextToReveal = 0;
-	@SuppressLint("UseSparseArrays")
+	List<PlayerState> playerState = new ArrayList<PlayerState>();
 	Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
 	
     @Override
@@ -164,6 +168,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
         return true;
     }
 
+	@Override
+	public Context getContext() {
+		return this;
+	}
+	
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -174,7 +183,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					CardAnimation.setCardImage(ib, cardToResourceID(c));
 				}
 			}
-
 			public int cardToResourceID(Card c) {
 				return getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + c.toString(), null, null);
 			}
@@ -207,19 +215,19 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 		});
 	}
-
-	public String getNewAvatar(){
-		int rndNumberInRange = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
-		Log.d("wePoker - Server", "Avatar for player " + rndNumberInRange);
-		return "avatar_" + rndNumberInRange;
-	}
+	
 	@Override
-	public void addPlayer(final int clientID, final String clientName, final int initialMoney) {
-		runOnUiThread(new Runnable() {
+	public void updatePoolMoney(int chipsPool) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void addPlayer(final PlayerState player) {
+		playerState.add(player);runOnUiThread(new Runnable() {
 			public void run() {
-				Log.d("wePoker - Server", "Adding player name " + clientName);
+				Log.d("wePoker - Server", "Adding player name " + player.name);
 				LinearLayout users;
-				 // todo make this variable.. now hardcoded 4 and 4 on each side.
+				// todo make this variable.. now hardcoded 4 and 4 on each side.
 				if (playerAvatars.size() < MAX_NUMBER_AVATARS_SIDE) {
 					users = (LinearLayout) findViewById(R.id.users_bottom);
 				} else{
@@ -228,7 +236,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
 				
 				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
-				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar();
+				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);
 				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
 				int id = getResources().getIdentifier(avatarField, null, null);
 				avatar.setImageDrawable(getResources().getDrawable(id));
@@ -237,11 +245,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				avatar.setMaxWidth(users.getHeight());
 				
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
-				name.setText(clientName);
+				name.setText(player.name);
 				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
-				money.setText("\u20AC" + initialMoney);
+				money.setText("\u20AC" + player.money);
 
-				playerAvatars.put(clientID, badge);
+				playerAvatars.put(player.clientId, badge);
 				
 				LinearLayout.LayoutParams params = (LayoutParams) badge.getLayoutParams();
 				params.setMargins(24, 0, 24, 0);
@@ -250,23 +258,31 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-	@Override
-	public void setPlayerMoney(final Integer player, final int current) {
-		runOnUiThread(new Runnable() {
-			public void run() {
-				View badge = playerAvatars.get(player);
-				if (badge != null) {
-					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
-					money.setText("\u20AC" + current);
-				}
-			}
-		});
+	public String getNewAvatar(int avatarId) {
+		if (avatarId < MIN_AVATAR_ID || avatarId > MAX_AVATAR_ID) {
+			avatarId = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
+		}
+		Log.d("wePoker - Server", "Avatar for player " + avatarId);
+		return "avatar_" + avatarId;
 	}
 
 	@Override
-	public void updatePoolMoney(int chipsPool) {
-		// TODO Auto-generated method stub
-		
+	public void updatePlayerStatus(final PlayerState player) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				View badge = playerAvatars.get(player.clientId);
+				if (badge != null) {
+					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
+					money.setText("\u20AC" + player.gameMoney);
+					TextView name = (TextView) badge.findViewById(R.id.playerName);
+					name.setText(player.name);
+					ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
+					String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);	
+					int id = getResources().getIdentifier(avatarField, null, null);
+					avatar.setImageDrawable(getResources().getDrawable(id));
+				}
+			}
+		});
 	}
 
 	@Override
@@ -283,10 +299,5 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				}
 			}
 		});
-	}
-
-	@Override
-	public Context getContext() {
-		return this;
 	}
 }

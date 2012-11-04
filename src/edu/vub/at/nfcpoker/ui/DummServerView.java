@@ -2,7 +2,8 @@ package edu.vub.at.nfcpoker.ui;
 
 import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
+import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PlayerState;
 
 public class DummServerView implements ServerViewInterface {
 
@@ -13,14 +14,8 @@ public class DummServerView implements ServerViewInterface {
 	public void resetCards() { }
 
 	@Override
-	public void addPlayer(int clientID, String clientName, int initialMoney) { }
-
-	@Override
 	public void showStateChange(GameState newState) { }
-
-	@Override
-	public void setPlayerMoney(Integer player, int current) { }
-
+	
 	@Override
 	public void updatePoolMoney(int chipsPool) { }
 
@@ -31,5 +26,11 @@ public class DummServerView implements ServerViewInterface {
 	public Context getContext() {
 		return null;
 	}
+
+	@Override
+	public void addPlayer(PlayerState player) { }
+
+	@Override
+	public void updatePlayerStatus(PlayerState player) { }
 
 }

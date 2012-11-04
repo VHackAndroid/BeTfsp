@@ -58,8 +58,9 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.ConcretePokerServer;
-import edu.vub.at.nfcpoker.ConcretePokerServer.GameState;
 import edu.vub.at.nfcpoker.Constants;
+import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.Message;
@@ -790,8 +791,15 @@ public class ClientActivity extends Activity implements OnClickListener {
 			
 			if (m instanceof RoundWinnersDeclarationMessage) {
 				final RoundWinnersDeclarationMessage rwdm = (RoundWinnersDeclarationMessage) m;
-				final Set<Integer> players = rwdm.bestPlayers;
-				if (players.contains(myClientID)) {
+				final Set<PlayerState> players = rwdm.bestPlayers;
+				boolean iWon = false;
+				for (PlayerState player : players) {
+					if (player.clientId == myClientID) {
+						iWon = true;
+						break;
+					}
+				}
+				if (iWon) {
 					money += rwdm.chips / players.size();
 					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
@@ -799,18 +807,22 @@ public class ClientActivity extends Activity implements OnClickListener {
 							updateMoneyTitle();
 							quickOutputMessage(ClientActivity.this, "Congratulations, you won!!");
 						}});
-
 				} else {
 					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
-							if (rwdm.bestHand == null) {
-								showWinningCards(null, rwdm.winMessageString());
-							} else {
-								showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
+							quickOutputMessage(ClientActivity.this, rwdm.winMessageString());
+							if (rwdm.showCards) {
+								if (rwdm.bestPlayers.size() == 1) {
+									// Show the winning cards of the player
+									showWinningCards(rwdm.bestPlayers.iterator().next().gameHoleCards, rwdm.winMessageString());
+								} else {
+									// Show the best hand
+									showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
+								}
 							}
-						}});
+					}});
 				}
 			}
 		}
@@ -1295,8 +1307,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	}
 	
 	private void showWinningCards(Card[] cards, String winMessage) {
-		
-		if (cards != null) {
+		if (cards == null) return;
 		
 		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[0].toString(), null, null);
 		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
@@ -1309,9 +1320,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		mCardView2.setContentDescription(cards[1].toString().replace("_", " "));
 		
 		showCards();
-		}
-		
-		quickOutputMessage(this, winMessage);
 	}
 
 	private void hideCards() {

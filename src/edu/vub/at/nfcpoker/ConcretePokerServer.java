@@ -17,14 +17,10 @@ import edu.vub.at.commlib.UUIDSerializer;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
-import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
 public class ConcretePokerServer extends PokerServer  {
-	
-	@SuppressWarnings("serial")
-	public class RoundEndedException extends Exception {}
 
 	int nextClientID = 0;
 	private boolean isDedicated = true;
@@ -118,7 +114,6 @@ public class ConcretePokerServer extends PokerServer  {
 	public void addClient(Connection c) {
 		Log.d("wePoker - Server", "Adding client " + c.getRemoteAddressTCP());
 		connections.put(nextClientID, c);
-		c.sendTCP(new StateChangeMessage(gameLoop.gameState));
 		c.sendTCP(new SetIDMessage(nextClientID));
 		nextClientID++;
 	}
@@ -142,31 +137,5 @@ public class ConcretePokerServer extends PokerServer  {
 			}
 		}
 	}
-	
-	public enum GameState {
-		STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
-		
-		@Override
-		public String toString() {
-			switch (this) {
-			case STOPPED:
-				return "STOPPED";
-			case WAITING_FOR_PLAYERS:
-				return "Waiting for other players";
-			case PREFLOP:
-				return "Pre-flop";
-			case FLOP:
-				return "Flop";
-			case TURN:
-				return "Turn";
-			case RIVER:
-				return "River";
-			case END_OF_ROUND:
-				return "Round ended";
-			default:
-				return "";
-			}
-		}
-	};
 }
 
