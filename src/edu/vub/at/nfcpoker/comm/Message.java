@@ -197,12 +197,11 @@ public interface Message {
 		}
 
 		public String winMessageString() {
-			String s = "Winner(s) - ";
+			String s = "" + chips + "chips won by ";
 			Iterator<String> playersIt = bestPlayerNames.iterator();
 			while (playersIt.hasNext()) {
 				s = s + " - " + playersIt.next();
 			}
-			s = s + " chips won: " + chips;
 			return s;
 		}
 	}
