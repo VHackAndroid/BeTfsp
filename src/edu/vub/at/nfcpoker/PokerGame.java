@@ -68,11 +68,11 @@ public class PokerGame implements Runnable {
 				}
 				if (clientsInGame.size() < 2) {
 					try {
-						Log.d("wePoker - Server", "# of clients < 2, changing state to stopped");
+						Log.d("wePoker - PokerGame", "# of clients < 2, changing state to stopped");
 						newState(PokerGameState.WAITING_FOR_PLAYERS);
 						this.wait();
 					} catch (InterruptedException e) {
-						Log.wtf("wePoker - Server", "Thread was interrupted");
+						Log.wtf("wePoker - PokerGame", "Thread was interrupted");
 					}
 				}
 			}
@@ -131,7 +131,7 @@ public class PokerGame implements Runnable {
 				roundTable();					
 			} catch (RoundEndedException e1) {
 				/* ignore */
-				Log.d("wePoker - Server", "Everybody folded at round " + gameState);
+				Log.d("wePoker - PokerGame", "Everybody folded at round " + gameState);
 			}
 			
 			// results
@@ -156,7 +156,7 @@ public class PokerGame implements Runnable {
 					
 					broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, winnerNames, false, null, chipsPool));
 				} else {
-					Log.wtf("wePoker - Server", "Ended prematurely with more than one player?");
+					Log.wtf("wePoker - PokerGame", "Ended prematurely with more than one player?");
 				}
 			} else {
 				// Calculate who has the best cards
@@ -200,7 +200,7 @@ public class PokerGame implements Runnable {
 			try {
 				Thread.sleep(10000);
 			} catch (InterruptedException e) {
-				Log.wtf("wePoker - Server", "Thread.sleep was interrupted", e);
+				Log.wtf("wePoker - PokerGame", "Thread.sleep was interrupted", e);
 			}
 		}
 	}
@@ -247,7 +247,7 @@ public class PokerGame implements Runnable {
 		
 		Future<ClientAction> fut = CommLib.createFuture();
 		actionFutures.put(clientId, fut);
-		Log.d("wePoker - Server", "Creating & Sending new future " + fut.getFutureId() + " to " + clientId);
+		Log.d("wePoker - PokerGame", "Creating & Sending new future " + fut.getFutureId() + " to " + clientId);
 		Connection c = clientsInGame.get(clientId);
 		if (c == null) {
 			// If client disconnected -> Fold
@@ -292,7 +292,7 @@ public class PokerGame implements Runnable {
 				return true;
 			}
 		default:
-			Log.d("wePoker - Server", "Unknown client action message (processClientActions)");
+			Log.d("wePoker - PokerGame", "Unknown client action message (processClientActions)");
 			return false;
 		}
 	}
@@ -334,12 +334,12 @@ public class PokerGame implements Runnable {
 			// Client sends diffMoney
 			addBet(player, ca.extraMoney);
 			if (player.roundMoney < minBet) {
-				Log.wtf("wePoker - Server", "Invalid extra money");
+				Log.wtf("wePoker - PokerGame", "Invalid extra money");
 				return minBet;
 			}
 			return player.roundMoney;
 		default:
-			Log.d("wePoker - Server", "Unknown client action message");
+			Log.d("wePoker - PokerGame", "Unknown client action message");
 			return minBet;
 		}
 	}
@@ -392,6 +392,9 @@ public class PokerGame implements Runnable {
 				int newMinBet = processClientActions(clientId, tableRound, minBet);
 				if (newMinBet > minBet) {
 					increasedBet = true;
+					if (tableRound > 1) {
+						Log.wtf("wePoker - PokerGame", "Increased bet in second round?");
+					}
 					minBet = newMinBet;
 				}
 				PlayerState player = playerState.get(clientId);
