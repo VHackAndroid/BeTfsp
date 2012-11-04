@@ -9,7 +9,7 @@ import com.esotericsoftware.minlog.Log;
 
 import edu.vub.at.commlib.Future;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.Hand;
 
@@ -62,9 +62,9 @@ public interface Message {
 	}
 
 	public static final class StateChangeMessage extends TimestampedMessage {
-		public GameState newState;
+		public PokerGameState newState;
 
-		public StateChangeMessage(GameState newState_) {
+		public StateChangeMessage(PokerGameState newState_) {
 			newState = newState_;
 		}
 

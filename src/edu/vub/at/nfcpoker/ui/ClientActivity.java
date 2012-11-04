@@ -57,12 +57,12 @@ import com.esotericsoftware.kryonet.Listener;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.comm.GameServer;
 import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
@@ -218,7 +218,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		
 		// Start server on a client if required
 		if (isServer) {
-			ConcretePokerServer cps = new ConcretePokerServer(
+			GameServer cps = new GameServer(
 					new DummServerView(), false,
 					serverIpAddress, serverBroadcast);
 			cps.start();
@@ -569,7 +569,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 
 	public void processStateChangeMessage(Connection c, Object m) {
 		StateChangeMessage scm = (StateChangeMessage) m;
-		GameState newGameState = scm.newState;
+		PokerGameState newGameState = scm.newState;
 		currentSelectedBet = 0;
 		currentProcessedBet = 0;
 		currentChipSwiped = 0;
@@ -671,7 +671,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 					// Server view
 					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
 					final StateChangeMessage sm = (StateChangeMessage) m;
-					if (sm.newState == GameState.PREFLOP) {
+					if (sm.newState == PokerGameState.PREFLOP) {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {

@@ -28,12 +28,12 @@ import android.widget.TextView;
 
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.ConcretePokerServer;
 import edu.vub.at.nfcpoker.Constants;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.comm.GameServer;
 
 @SuppressLint("UseSparseArrays")
 public class ServerActivity extends Activity implements ServerViewInterface {
@@ -98,7 +98,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
-				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
+				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
 				currentIpAddress = ipAddress; 
 				cps.start();				
 			}
@@ -204,7 +204,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-	public void showStateChange(final GameState newState) {
+	public void showStateChange(final PokerGameState newState) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				String prefix = getResources().getString(R.string.title_activity_server);

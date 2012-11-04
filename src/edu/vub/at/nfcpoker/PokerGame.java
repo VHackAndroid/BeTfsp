@@ -25,7 +25,7 @@ import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
-public class GameLoop implements Runnable {
+public class PokerGame implements Runnable {
 	
 	@SuppressWarnings("serial")
 	public class RoundEndedException extends Exception {}
@@ -42,7 +42,7 @@ public class GameLoop implements Runnable {
 	private ConcurrentSkipListMap<Integer, Connection> clientsInGame = new ConcurrentSkipListMap<Integer, Connection>();
 	
 	// Rounds
-	public volatile GameState gameState;
+	public volatile PokerGameState gameState;
 	private Vector<Integer> clientsIdsInRoundOrder = new Vector<Integer>();
 	private ConcurrentSkipListMap<Integer, PlayerState> playerState  = new ConcurrentSkipListMap<Integer, PlayerState>();
 	private int chipsPool = 0;
@@ -50,8 +50,8 @@ public class GameLoop implements Runnable {
 	// GUI
 	private ServerViewInterface gui;
 	
-	public GameLoop(ServerViewInterface gui) {
-		this.gameState = GameState.STOPPED;
+	public PokerGame(ServerViewInterface gui) {
+		this.gameState = PokerGameState.STOPPED;
 		this.gui = gui;
 	}
 	
@@ -69,7 +69,7 @@ public class GameLoop implements Runnable {
 				if (clientsInGame.size() < 2) {
 					try {
 						Log.d("wePoker - Server", "# of clients < 2, changing state to stopped");
-						newState(GameState.WAITING_FOR_PLAYERS);
+						newState(PokerGameState.WAITING_FOR_PLAYERS);
 						this.wait();
 					} catch (InterruptedException e) {
 						Log.wtf("wePoker - Server", "Thread was interrupted");
@@ -94,7 +94,7 @@ public class GameLoop implements Runnable {
 					Connection c = clientsInGame.get(clientNum);
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
-				newState(GameState.PREFLOP);
+				newState(PokerGameState.PREFLOP);
 				// Small and big blind
 				PlayerState smallBlind = playerState.get(clientsIdsInRoundOrder.get(0));
 				addBet(smallBlind, SMALL_BLIND);
@@ -111,7 +111,7 @@ public class GameLoop implements Runnable {
 				cardPool.addAll(Arrays.asList(flop));
 				gui.revealCards(flop);
 				broadcast(new ReceivePublicCards(flop));
-				newState(GameState.FLOP);
+				newState(PokerGameState.FLOP);
 				roundTable();
 
 				// turn cards
@@ -119,7 +119,7 @@ public class GameLoop implements Runnable {
 				cardPool.add(turn[0]);
 				gui.revealCards(turn);
 				broadcast(new ReceivePublicCards(turn));
-				newState(GameState.TURN);
+				newState(PokerGameState.TURN);
 				roundTable();
 				
 				// river cards
@@ -127,7 +127,7 @@ public class GameLoop implements Runnable {
 				cardPool.add(river[0]);
 				gui.revealCards(river);
 				broadcast(new ReceivePublicCards(river));
-				newState(GameState.RIVER);
+				newState(PokerGameState.RIVER);
 				roundTable();					
 			} catch (RoundEndedException e1) {
 				/* ignore */
@@ -135,8 +135,8 @@ public class GameLoop implements Runnable {
 			}
 			
 			// results
-			boolean endedPrematurely = gameState != GameState.RIVER;
-			newState(GameState.END_OF_ROUND);
+			boolean endedPrematurely = gameState != PokerGameState.RIVER;
+			newState(PokerGameState.END_OF_ROUND);
 			
 			Set<PlayerState> remainingPlayers = new HashSet<PlayerState>();
 			for (PlayerState player : playerState.values()) {
@@ -228,7 +228,7 @@ public class GameLoop implements Runnable {
 		@SuppressWarnings("unchecked")
 		Vector<Integer> v = (Vector<Integer>) clientsIdsInRoundOrder.clone();
 		if (v.size() < 2) return v;
-		if (gameState == GameState.PREFLOP) {
+		if (gameState == PokerGameState.PREFLOP) {
 			// Move the players that have a small or big blind (only for preflop)
 			v.add(v.elementAt(0));
 			v.removeElementAt(0);
@@ -416,7 +416,7 @@ public class GameLoop implements Runnable {
 		gui.updatePoolMoney(chipsPool);
 	}
 
-	private void newState(GameState newState) {
+	private void newState(PokerGameState newState) {
 		gameState = newState;
 		broadcast(new StateChangeMessage(newState));
 		gui.showStateChange(newState);

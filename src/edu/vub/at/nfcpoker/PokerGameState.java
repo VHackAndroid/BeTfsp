@@ -1,6 +1,6 @@
 package edu.vub.at.nfcpoker;
 
-public enum GameState {
+public enum PokerGameState {
 	STOPPED, WAITING_FOR_PLAYERS, PREFLOP, FLOP, TURN, RIVER, END_OF_ROUND;
 	
 	@Override

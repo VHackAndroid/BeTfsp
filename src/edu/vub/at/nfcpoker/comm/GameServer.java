@@ -1,4 +1,4 @@
-package edu.vub.at.nfcpoker;
+package edu.vub.at.nfcpoker.comm;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -14,23 +14,23 @@ import com.esotericsoftware.kryonet.Server;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.commlib.UUIDSerializer;
+import edu.vub.at.nfcpoker.PokerGame;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
-import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
-import edu.vub.at.nfcpoker.comm.PokerServer;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
-public class ConcretePokerServer extends PokerServer  {
+public class GameServer extends PokerServer  {
 
 	int nextClientID = 0;
 	private boolean isDedicated = true;
-	private GameLoop gameLoop;
+	private PokerGame gameLoop;
 	private String broadcastAddress;
 	private String serverAddress;
 	private ConcurrentSkipListMap<Integer, Connection> connections = new ConcurrentSkipListMap<Integer, Connection>();
 
-	public ConcretePokerServer(ServerViewInterface gui, boolean isDedicated, String serverAddress, String broadcastAddress) {
-		this.gameLoop = new GameLoop(gui);
+	public GameServer(ServerViewInterface gui, boolean isDedicated, String serverAddress, String broadcastAddress) {
+		this.gameLoop = new PokerGame(gui);
 		this.isDedicated = isDedicated;
     	this.serverAddress = serverAddress;
     	this.broadcastAddress = broadcastAddress;

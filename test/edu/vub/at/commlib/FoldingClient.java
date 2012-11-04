@@ -6,7 +6,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
@@ -28,8 +28,8 @@ public class FoldingClient {
 					
 					System.out.println("Received message " + m.toString());
 					
-					if (m instanceof GameState) {
-						GameState newGameState = (GameState) m;
+					if (m instanceof PokerGameState) {
+						PokerGameState newGameState = (PokerGameState) m;
 						switch (newGameState) {
 			            	case STOPPED:
 			            		System.out.println("Game state changed to STOPPED");

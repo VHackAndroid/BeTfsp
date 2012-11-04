@@ -2,7 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 
 public class DummServerView implements ServerViewInterface {
@@ -14,7 +14,7 @@ public class DummServerView implements ServerViewInterface {
 	public void resetCards() { }
 
 	@Override
-	public void showStateChange(GameState newState) { }
+	public void showStateChange(PokerGameState newState) { }
 	
 	@Override
 	public void updatePoolMoney(int chipsPool) { }

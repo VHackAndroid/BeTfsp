@@ -2,7 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
-import edu.vub.at.nfcpoker.GameState;
+import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 
 public interface ServerViewInterface {
@@ -13,7 +13,7 @@ public interface ServerViewInterface {
 
 	public void resetCards();
 	
-	public void showStateChange(GameState newState);
+	public void showStateChange(PokerGameState newState);
 
 	public void updatePoolMoney(int chipsPool);
 	
