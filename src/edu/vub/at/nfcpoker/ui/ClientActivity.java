@@ -840,6 +840,10 @@ public class ClientActivity extends Activity implements OnClickListener {
 		updateMoneyTitle();
 	}
 
+	private void speakMessage(ClientActivity clientActivity, String vMsg1) {
+		// TODO Auto-generated method stub
+	}
+
 	@Override
 	protected void onResume() {
 		if (useIncognitoMode) {
