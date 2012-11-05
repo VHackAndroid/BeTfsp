@@ -121,17 +121,17 @@ public class GameServer extends PokerServer  {
 	public void registerClient(Connection c, String nickname, int avatar, int money) {
 		for (Integer i : connections.keySet()) {
 			if (connections.get(i) == c) {
-				gameLoop.addPlayerInformation(c, i, nickname, avatar, money);
+				gameLoop.addPlayer(c, i, nickname, avatar, money);
 				return;
 			}
 		}
 	}
 	
 	public void removeClient(Connection c) {
-		Log.d("wePoker - Server", "Client removed: " + c);
+		//Log.d("wePoker - Server", "Client removed: " + c);
 		for (Integer i : connections.keySet()) {
 			if (connections.get(i) == c) {
-				gameLoop.removeClientInGame(i);
+				gameLoop.removePlayer(i);
 				connections.remove(i);
 				return;
 			}

@@ -98,9 +98,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
-				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
 				currentIpAddress = ipAddress; 
-				cps.start();				
+				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
+				cps.start();
 			}
 
 			@Override
@@ -286,10 +286,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	@Override
-	public void removePlayer(final Integer player) {
+	public void removePlayer(final PlayerState player) {
 		runOnUiThread(new Runnable() {
 			public void run() {
-				View badge = playerAvatars.get(player);
+				View badge = playerAvatars.get(player.clientId);
 				if (badge != null) {
 					LinearLayout users_bottom = (LinearLayout) findViewById(R.id.users_bottom);
 					users_bottom.removeView(badge);

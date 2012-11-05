@@ -23,7 +23,7 @@ public interface ServerViewInterface {
 
 	public void updatePlayerStatus(PlayerState player);
 	
-	public void removePlayer(Integer i);
+	public void removePlayer(PlayerState player);
 
 	// Other
 	

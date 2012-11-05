@@ -1,8 +1,10 @@
 package edu.vub.at.nfcpoker;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -39,11 +41,11 @@ public class PokerGame implements Runnable {
 	private ConcurrentSkipListMap<Integer, Future<ClientAction>> actionFutures = new ConcurrentSkipListMap<Integer, Future<ClientAction>>();  
 
 	// Connections
-	private ConcurrentSkipListMap<Integer, Connection> clientsInGame = new ConcurrentSkipListMap<Integer, Connection>();
+	// private ConcurrentSkipListMap<Integer, Connection> clientsInGame = new ConcurrentSkipListMap<Integer, Connection>();
 	
 	// Rounds
 	public volatile PokerGameState gameState;
-	private Vector<Integer> clientsIdsInRoundOrder = new Vector<Integer>();
+	private Vector<PlayerState> clientsIdsInRoundOrder = new Vector<PlayerState>();
 	private ConcurrentSkipListMap<Integer, PlayerState> playerState  = new ConcurrentSkipListMap<Integer, PlayerState>();
 	private int chipsPool = 0;
 	
@@ -60,38 +62,42 @@ public class PokerGame implements Runnable {
 			chipsPool = 0;
 			gui.resetCards();
 			updatePoolMoney();
-			synchronized(this) {
-				actionFutures.clear();
-				for (Integer i : clientsInGame.keySet()) {
-					if (clientsInGame.get(i) == null)
-						removeClientInGame(i);
-				}
-				if (clientsInGame.size() < 2) {
-					try {
-						Log.d("wePoker - PokerGame", "# of clients < 2, changing state to stopped");
-						newState(PokerGameState.WAITING_FOR_PLAYERS);
-						this.wait();
-					} catch (InterruptedException e) {
-						Log.wtf("wePoker - PokerGame", "Thread was interrupted");
-					}
+			actionFutures.clear();
+			if (clientsIdsInRoundOrder.size() < 2) {
+				try {
+					Log.d("wePoker - PokerGame", "# of clients < 2, changing state to stopped");
+					newState(PokerGameState.WAITING_FOR_PLAYERS);
+					this.wait();
+				} catch (InterruptedException e) {
+					Log.wtf("wePoker - PokerGame", "Thread was interrupted");
 				}
 			}
-			
+
+			List<PlayerState> currentPlayers = new ArrayList<PlayerState>();
 			Set<Card> cardPool = new HashSet<Card>();
+
+			for (PlayerState player : clientsIdsInRoundOrder) {
+				currentPlayers.add(player);
+			}
+			
 			try {
 				Deck deck = new Deck();
 				
 				// Reset player actions
-				for (PlayerState player : playerState.values()) {
+				for (PlayerState player : currentPlayers) {
 					player.gameMoney = 0;
 					player.gameHoleCards = null;
 				}
 				
 				// hole cards
-				for (Integer clientNum : clientsInGame.navigableKeySet()) {
+				for (PlayerState player : currentPlayers) {
 					Card preflop[] = deck.drawCards(2);
-					playerState.get(clientNum).gameHoleCards = preflop;
-					Connection c = clientsInGame.get(clientNum);
+					player.gameHoleCards = preflop;
+					Connection c = player.connection;
+					if (c == null) {
+						player.roundActionType = ClientActionType.Fold;
+						continue;
+					}
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
 				newState(PokerGameState.PREFLOP);
@@ -131,7 +137,7 @@ public class PokerGame implements Runnable {
 			newState(PokerGameState.END_OF_ROUND);
 			
 			Set<PlayerState> remainingPlayers = new HashSet<PlayerState>();
-			for (PlayerState player : playerState.values()) {
+			for (PlayerState player : currentPlayers) {
 				if (player.roundActionType != ClientActionType.Fold &&
 					player.roundActionType != ClientActionType.Unknown) {
 					remainingPlayers.add(player);
@@ -197,40 +203,26 @@ public class PokerGame implements Runnable {
 		}
 	}
 	
-	public synchronized void removeClientInGame(Integer clientId) {
-		clientsInGame.remove(clientId);
-		PlayerState player = playerState.get(clientId);
-		if (player != null) {
-			player.roundActionType = ClientActionType.Fold;
-		}
-		Future<ClientAction> fut = actionFutures.get(clientId);
-		if (fut != null && ! fut.isResolved()) {
-			fut.resolve(new ClientAction(Message.ClientActionType.Fold, 0, 0));
-		}
-		gui.removePlayer(clientId);
-	}
-	
 	private void cycleClientsInGame() {
 		if (clientsIdsInRoundOrder.size() <= 1) return;
 		clientsIdsInRoundOrder.add(clientsIdsInRoundOrder.elementAt(0));
 		clientsIdsInRoundOrder.removeElementAt(0);
 	}
 	
-	private void askClientActions(int clientId, int round) {
-		PlayerState player = playerState.get(clientId);
+	private void askClientActions(PlayerState player, int round) {
 		if ((player.roundActionType == ClientActionType.Fold) ||
 			(player.roundActionType == ClientActionType.AllIn)) {
 			return;
 		}
 		
 		Future<ClientAction> fut = CommLib.createFuture();
-		actionFutures.put(clientId, fut);
-		Log.d("wePoker - PokerGame", "Creating & Sending new future " + fut.getFutureId() + " to " + clientId);
-		Connection c = clientsInGame.get(clientId);
+		actionFutures.put(player.clientId, fut);
+		Log.d("wePoker - PokerGame", "Creating & Sending new future " + fut.getFutureId() + " to " + player.clientId);
+		Connection c = player.connection;
 		if (c == null) {
 			// If client disconnected -> Fold
 			player.roundActionType = ClientActionType.Fold;
-			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold), clientId));
+			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold), player.clientId));
 			return;
 		}
 		c.sendTCP(new RequestClientActionFutureMessage(fut, round));
@@ -239,14 +231,13 @@ public class PokerGame implements Runnable {
 		}
 	}
 	
-	private boolean verifyClientActions(int clientId, int round, int minBet) {
-		PlayerState player = playerState.get(clientId);
+	private boolean verifyClientActions(PlayerState player, int round, int minBet) {
 		if ((player.roundActionType == ClientActionType.Fold) ||
 			(player.roundActionType == ClientActionType.AllIn)) {
 			return true;
 		}
 		
-		Future<ClientAction> fut = actionFutures.get(clientId);
+		Future<ClientAction> fut = actionFutures.get(player.clientId);
 		if (fut == null) return true;
 		ClientAction ca = fut.get();
 		if (ca == null) return true;
@@ -279,27 +270,26 @@ public class PokerGame implements Runnable {
 	// - Updates money
 	// - Broadcasts actions
 	// Returns minimum bet
-	private int processClientActions(int clientId, int round, int minBet) {
-		PlayerState player = playerState.get(clientId);
+	private int processClientActions(PlayerState player, int round, int minBet) {
 		if (player.roundActionType == ClientActionType.Fold ||
 			player.roundActionType == ClientActionType.AllIn) {
 			return minBet;
 		}
 		
-		Future<ClientAction> fut = actionFutures.get(clientId);
+		Future<ClientAction> fut = actionFutures.get(player.clientId);
 		if (fut == null) {
-			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold, player.roundMoney, 0), clientId));
+			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold, player.roundMoney, 0), player.clientId));
 			player.roundActionType = ClientActionType.Fold;
 			return minBet;
 		}
 		ClientAction ca = fut.get();
 		if (ca == null) {
-			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold, player.roundMoney, 0), clientId));
+			broadcast(new ClientActionMessage(new ClientAction(ClientActionType.Fold, player.roundMoney, 0), player.clientId));
 			player.roundActionType = ClientActionType.Fold;
 			return minBet;
 		}
 
-		broadcast(new ClientActionMessage(ca, clientId));
+		broadcast(new ClientActionMessage(ca, player.clientId));
 		player.roundActionType = ca.actionType;
 		
 		switch (player.roundActionType) {
@@ -346,7 +336,7 @@ public class PokerGame implements Runnable {
 		boolean increasedBet = true;
 
 		@SuppressWarnings("unchecked")
-		Vector<Integer> clientOrder = (Vector<Integer>) clientsIdsInRoundOrder.clone();
+		Vector<PlayerState> clientOrder = (Vector<PlayerState>) clientsIdsInRoundOrder.clone();
 
 		if (clientOrder.size() < 2) {
 			throw new RoundEndedException();
@@ -381,17 +371,17 @@ public class PokerGame implements Runnable {
 			increasedBet = false;
 			
 			// Ask the client actions (in parallel)
-			for (int clientId : clientOrder) {
-				askClientActions(clientId, tableRound);
+			for (PlayerState player : clientOrder) {
+				askClientActions(player, tableRound);
 			}
 			
 			// Process the client action (one-by-one, in round order)
-			for (int clientId : clientOrder) {
+			for (PlayerState player : clientOrder) {
 				// Keep asking for valid input
-				while (!verifyClientActions(clientId, tableRound, minBet)) {
-					askClientActions(clientId, tableRound);
+				while (!verifyClientActions(player, tableRound, minBet)) {
+					askClientActions(player, tableRound);
 				}
-				int newMinBet = processClientActions(clientId, tableRound, minBet);
+				int newMinBet = processClientActions(player, tableRound, minBet);
 				if (newMinBet > minBet) {
 					increasedBet = true;
 					if (tableRound > 1) {
@@ -399,7 +389,6 @@ public class PokerGame implements Runnable {
 					}
 					minBet = newMinBet;
 				}
-				PlayerState player = playerState.get(clientId);
 				if (player.roundActionType == ClientActionType.Fold) {
 					playersRemaining--;
 				}
@@ -427,23 +416,34 @@ public class PokerGame implements Runnable {
 		gui.showStateChange(newState);
 	}
 
-	public synchronized void addPlayerInformation(Connection c, int clientId, String nickname, int avatar, int money) {
-		clientsInGame.put(clientId, c);
-		clientsIdsInRoundOrder.add(clientId);
-		PlayerState player = new PlayerState(clientId, money, nickname, avatar);
+	public synchronized void addPlayer(Connection c, int clientId, String nickname, int avatar, int money) {
+		PlayerState player = new PlayerState(c, clientId, money, nickname, avatar);
 		playerState.put(clientId, player);
+		clientsIdsInRoundOrder.add(player);
 		gui.addPlayer(player);
 		c.sendTCP(new StateChangeMessage(gameState));
 	}
 	
-	public synchronized void removePlayerInformation(int clientId) {
-		clientsInGame.remove(clientId);
-		gui.removePlayer(clientId);
+	public synchronized void removePlayer(int clientId) {
+		PlayerState player = playerState.get(clientId);
+		if (player != null) {
+			player.connection = null;
+			player.roundActionType = ClientActionType.Fold;
+			gui.removePlayer(player);
+			clientsIdsInRoundOrder.remove(player);
+			playerState.remove(player);
+		}
+		Future<ClientAction> fut = actionFutures.get(clientId);
+		if (fut != null && ! fut.isResolved()) {
+			fut.resolve(new ClientAction(Message.ClientActionType.Fold, 0, 0));
+		}
 	}
 	
 	public synchronized void broadcast(Message m) {
-		for (Connection c : clientsInGame.values())
+		for (PlayerState p : playerState.values()) {
+			Connection c = p.connection;
 			if (c != null)
 				c.sendTCP(m);
+		}
 	}
 }
