@@ -209,9 +209,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
 	
-	// Interactivity(Haptic)
-	private com.immersion.uhl.Launcher mImmersionLauncher;
-	
 	// NFC
 	private NfcAdapter nfcAdapter;
 	private PendingIntent pendingIntent;
@@ -266,7 +263,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
-		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
 		checkHeadset();
 		
 		// NFC
@@ -518,15 +514,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		Log.i("wePoker - Client", "Wifi headset: " + am.isWiredHeadsetOn());
 		audioFeedback = am.isWiredHeadsetOn();
 	}
-	
-	private void vibrate(int buzzType) {
-		if (mImmersionLauncher == null) return;
-		try {
-			mImmersionLauncher.play(buzzType);
-		} catch (RuntimeException e) {
-			Log.v("wePoker - Client", "mImmersionLauncher failed.");
-		}
-	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -539,7 +526,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
-				vibrate(com.immersion.uhl.Launcher.SHORT_BUZZ_100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -798,7 +784,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final Set<Integer> players = rwdm.bestPlayers;
 				if (players.contains(myClientID)) {
 					currentMoney += rwdm.chips / players.size();
-					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
@@ -806,7 +791,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 						}});
 
 				} else {
-					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
@@ -899,7 +883,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
-		mImmersionLauncher.stop();
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
         }
