@@ -787,6 +787,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 			if (m instanceof SetIDMessage) {
 				final SetIDMessage sidm = (SetIDMessage) m;
 				myClientID = sidm.id;
+				SetClientParameterMessage pm = new SetClientParameterMessage(Settings.nickname, Settings.avatar, money);
+				serverConnection.sendTCP(pm);
 			}
 			
 			if (m instanceof RoundWinnersDeclarationMessage) {
