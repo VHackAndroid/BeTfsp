@@ -422,6 +422,7 @@ public class PokerGame implements Runnable {
 		clientsIdsInRoundOrder.add(player);
 		gui.addPlayer(player);
 		c.sendTCP(new StateChangeMessage(gameState));
+		this.notify();
 	}
 	
 	public synchronized void removePlayer(int clientId) {
