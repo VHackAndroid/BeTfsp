@@ -139,7 +139,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private static int myClientID;
 
 	// UI
-	private static final int POKER_GREEN = 0xFF2C672E;
+	public static final int POKER_GREEN = 0xFF2C672E;
 	private static int nextToReveal = 0;
 	private static ReceiveHoleCardsMessage lastReceivedHoleCards;
 	private CurlView mCardView1;

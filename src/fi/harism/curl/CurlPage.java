@@ -19,7 +19,6 @@ package fi.harism.curl;
 import edu.vub.at.nfcpoker.ui.ClientActivity;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.RectF;
 
 /**
@@ -153,12 +152,6 @@ public class CurlPage {
 	 * Resets this CurlPage into its initial state.
 	 */
 	public void reset() {
-		mColorBack = Color.TRANSPARENT;
-		mColorFront = Color.TRANSPARENT;
-		mColorBack = ClientActivity.POKER_GREEN;
-		mColorFront = ClientActivity.POKER_GREEN;
-		mColorBack = Color.WHITE;
-		mColorFront = Color.WHITE;
 		mColorBack = ClientActivity.POKER_GREEN;
 		mColorFront = ClientActivity.POKER_GREEN;
 		recycle();
