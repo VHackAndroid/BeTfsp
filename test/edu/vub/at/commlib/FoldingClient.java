@@ -2,6 +2,8 @@ package edu.vub.at.commlib;
 
 import java.io.IOException;
 
+import android.util.Log;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
@@ -13,20 +15,38 @@ import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
+import edu.vub.at.nfcpoker.settings.Settings;
 
 public class FoldingClient {
 
-	/**
-	 * @param args
-	 */
+	public static Connection serverConnection;
+	public static int clientId;
+	
 	public static void main(String[] args) {
 		try {
-			CommLibConnectionInfo.connect(args[0], CommLib.SERVER_PORT, new Listener() {
+			String ipAddress = "127.0.0.1";
+			if (args.length > 0) ipAddress = args[0];
+			CommLibConnectionInfo.connect(ipAddress, CommLib.SERVER_PORT, new Listener() {
+				@Override
+				public void connected(Connection c) {
+					super.connected(c);
+					serverConnection = c;
+				}
+				
 				@Override
 				public void received(Connection c, Object m) {
 					super.received(c, m);
 					
 					System.out.println("Received message " + m.toString());
+
+					if (m instanceof SetIDMessage) {
+						final SetIDMessage sidm = (SetIDMessage) m;
+						clientId = sidm.id;
+						SetClientParameterMessage pm = new SetClientParameterMessage(Settings.nickname, Settings.avatar, 2000);
+						serverConnection.sendTCP(pm);
+					}
 					
 					if (m instanceof PokerGameState) {
 						PokerGameState newGameState = (PokerGameState) m;
@@ -84,11 +104,7 @@ public class FoldingClient {
 			System.err.println("Could not discover server: ");
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
 	}
-
-	
-
 }
