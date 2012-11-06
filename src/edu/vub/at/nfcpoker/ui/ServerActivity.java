@@ -94,7 +94,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
 				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
-				currentIpAddress = ipAddress; 
+				currentIpAddress = ipAddress;
+				currentPort = CommLib.SERVER_PORT;
 				cps.start();				
 			}
 
