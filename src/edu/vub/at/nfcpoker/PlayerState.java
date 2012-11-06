@@ -4,7 +4,7 @@ import com.esotericsoftware.kryonet.Connection;
 
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 
-public class PlayerState {
+public class PlayerState implements Comparable<PlayerState> {
 	// Connection
 	public volatile Connection connection;
 	public volatile int clientId;
@@ -41,5 +41,11 @@ public class PlayerState {
 		return "Player ("+clientId+"): "+name+" - "+money+" - "+avatar+" - "+
 				gameMoney+" - "+gameHoleCards+" - "+
 				roundActionType+" - "+roundMoney;
+	}
+
+	@Override
+	public int compareTo(PlayerState another) {
+		PlayerState p2 = (PlayerState) another;
+		return Integer.valueOf(p2.clientId).compareTo(clientId);
 	}
 }
