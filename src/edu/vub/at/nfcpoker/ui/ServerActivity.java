@@ -44,20 +44,20 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		public void start(String ipAddress, String broadcastAddress);
 		public void setWifiDirect(String groupName, String password, String ipAddress, int port);
 	}
-	
+
 	// Connectivity
 	protected String currentWifiGroupName;
 	protected String currentWifiPassword; 
 	protected String currentIpAddress;
 	protected int currentPort;
 	private boolean isWifiDirect;
-	
+
 	// UI
 	private final int MIN_AVATAR_ID = 1;
 	private final int MAX_AVATAR_ID = 15;
 	private final int MAX_NUMBER_AVATARS_SIDE = 4;
 	private Random random = new Random();
-	
+
 	// NFC
 	private PendingIntent pendingIntent;
 	private IntentFilter[] intentFiltersArray;
@@ -67,53 +67,53 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	int nextToReveal = 0;
 	List<PlayerState> playerState = new ArrayList<PlayerState>();
 	Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
-	
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-    	super.onCreate(savedInstanceState);
-    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
-    	if (isTV) {
-    		requestWindowFeature(Window.FEATURE_NO_TITLE);
-    		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-    	}
-    	
-    	setContentView(R.layout.activity_server);
-    	View tablet_layout = findViewById(R.id.tablet_layout);
-    	View server_layout = findViewById(R.id.server_layout);
-    	final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
-    	isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
-    	
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
+		if (isTV) {
+			requestWindowFeature(Window.FEATURE_NO_TITLE);
+			getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+
+		setContentView(R.layout.activity_server);
+		View tablet_layout = findViewById(R.id.tablet_layout);
+		View server_layout = findViewById(R.id.server_layout);
+		final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
+		isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
+
 		final Activity act = this;
-    	nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-    	
-    	if (nfcAdapter != null) {
-    		pendingIntent = PendingIntent.getActivity(
-    		    this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
-    	
-    		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
-    		IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
-    		try {
-    			ndef.addDataType("*/*");    /* Handles all MIME based dispatches.
+		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+		if (nfcAdapter != null) {
+			pendingIntent = PendingIntent.getActivity(
+					this, 0, new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+			IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
+			IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
+			try {
+				ndef.addDataType("*/*");    /* Handles all MIME based dispatches.
                                            You should specify only the ones that you need. */
-    		}
-    		catch (MalformedMimeTypeException e) {
-    			throw new RuntimeException("fail", e);
-    		}
-    		intentFiltersArray = new IntentFilter[] { ndef, all };
-    	}
-    	
-    	ImageButton wifi_btn = (ImageButton) findViewById(R.id.wifi_btn);
-    	if (isTV) {
-    		wifi_btn.setOnClickListener(new OnClickListener() {
+			}
+			catch (MalformedMimeTypeException e) {
+				throw new RuntimeException("fail", e);
+			}
+			intentFiltersArray = new IntentFilter[] { ndef, all };
+		}
+
+		ImageButton wifi_btn = (ImageButton) findViewById(R.id.wifi_btn);
+		if (isTV) {
+			wifi_btn.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					QRNFCFunctions.showWifiConnectionDialog(ServerActivity.this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
 				}
 			});
-    	} else {
-    		wifi_btn.setVisibility(View.GONE);
-    	}
-    	
+		} else {
+			wifi_btn.setVisibility(View.GONE);
+		}
+
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
@@ -135,64 +135,64 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				});
 			}
 		};
-    	
+
 		if (isWifiDirect) {
-    		new WifiDirectManager.Creator(this, startServer).run();
-    	} else {
-    		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-    		String ipAddress = CommLib.getIpAddress(this);
-    		String broadcastAddress = CommLib.getBroadcastAddress(this);
-    		currentWifiGroupName = wm.getConnectionInfo().getSSID();
+			new WifiDirectManager.Creator(this, startServer).run();
+		} else {
+			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+			String ipAddress = CommLib.getIpAddress(this);
+			String broadcastAddress = CommLib.getBroadcastAddress(this);
+			currentWifiGroupName = wm.getConnectionInfo().getSSID();
 			currentWifiPassword = CommLib.getWifiPassword(currentWifiGroupName);
 			currentIpAddress = ipAddress;
 			currentPort = CommLib.SERVER_PORT;
-    		startServer.start(ipAddress, broadcastAddress);
-    	}
-		
-    }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (nfcAdapter != null) {
-        	nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
-        }
-    }
+			startServer.start(ipAddress, broadcastAddress);
+		}
 
-    @Override
-    public void onNewIntent(Intent intent) {
-        QRNFCFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-    }
-    
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (nfcAdapter != null) {
-        	nfcAdapter.disableForegroundDispatch(this);
-        }
-    }
-    
+	}
 
-    @Override
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (nfcAdapter != null) {
+			nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
+		}
+	}
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		QRNFCFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (nfcAdapter != null) {
+			nfcAdapter.disableForegroundDispatch(this);
+		}
+	}
+
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-    	if (item.getItemId() == R.id.show_wifi_settings) {
-    		QRNFCFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
-    		return true;
-    	}
+		if (item.getItemId() == R.id.show_wifi_settings) {
+			QRNFCFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
+			return true;
+		}
 		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_server, menu);
-        return true;
-    }
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_server, menu);
+		return true;
+	}
 
 	@Override
 	public Context getContext() {
 		return this;
 	}
-	
+
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -208,7 +208,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 		});
 	}
-	
+
 
 	public void resetCards() {
 		Log.d("wePoker - Server", "Hiding cards again");
@@ -235,7 +235,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 		});
 	}
-	
+
 	@Override
 	public void updatePoolMoney(int chipsPool) {
 		// TODO Auto-generated method stub
@@ -254,7 +254,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					users = (LinearLayout) findViewById(R.id.users_top);
 				}
 				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
-				
+
 				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
 				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);
 				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
@@ -263,14 +263,14 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				avatar.setAdjustViewBounds(true);
 				avatar.setMaxHeight(users.getHeight());
 				avatar.setMaxWidth(users.getHeight());
-				
+
 				TextView name = (TextView) badge.findViewById(R.id.playerName);
 				name.setText(player.name);
 				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
 				money.setText("\u20AC" + player.money);
 
 				playerAvatars.put(player.clientId, badge);
-				
+
 				LinearLayout.LayoutParams params = (LayoutParams) badge.getLayoutParams();
 				params.setMargins(24, 0, 24, 0);
 				users.addView(badge, params);
