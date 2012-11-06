@@ -63,7 +63,7 @@ public class PokerGame implements Runnable {
 			gui.resetCards();
 			updatePoolMoney();
 			actionFutures.clear();
-			if (clientsIdsInRoundOrder.size() < 2) {
+			while (clientsIdsInRoundOrder.size() < 2) {
 				try {
 					Log.d("wePoker - PokerGame", "# of clients < 2, changing state to stopped");
 					newState(PokerGameState.WAITING_FOR_PLAYERS);
