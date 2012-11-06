@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.vub.at.nfcpoker"
-    android:versionCode="1009"
-    android:versionName="1.1-20121105-iminds" >
+    android:versionCode="1010"
+    android:versionName="1.1-20121106-iminds" >
 
     <uses-sdk
         android:minSdkVersion="10"
