@@ -97,6 +97,14 @@
             android:text="Waiting for players ..."
             android:textAppearance="?android:attr/textAppearanceLarge" />
  
+		<ImageButton
+            android:id="@+id/wifi_btn"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:src="@android:drawable/ic_menu_compass" />
+		
         <LinearLayout
             android:id="@+id/users_bottom"
             android:layout_width="match_parent"

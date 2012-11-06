@@ -75,7 +75,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	View server_layout = findViewById(R.id.server_layout);
-    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
     	final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
     	isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
     	
@@ -96,6 +95,18 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     			throw new RuntimeException("fail", e);
     		}
     		intentFiltersArray = new IntentFilter[] { ndef, all };
+    	}
+    	
+    	ImageButton wifi_btn = (ImageButton) findViewById(R.id.wifi_btn);
+    	if (isTV) {
+    		wifi_btn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					QRNFCFunctions.showWifiConnectionDialog(ServerActivity.this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
+				}
+			});
+    	} else {
+    		wifi_btn.setVisibility(View.GONE);
     	}
     	
 		ServerStarter startServer = new ServerStarter() {
