@@ -46,6 +46,7 @@ public class Splash extends Activity {
 	private volatile Dialog client_startClientServerAsk;
 	
 	// UI
+	public static Activity activity;
 	public static Handler messageHandler;
 	private boolean isTablet = false;
 	private boolean isTV = false;
@@ -56,6 +57,7 @@ public class Splash extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
+		activity = this;
 
 		// Settings
 		Settings.loadSettings(this);
@@ -144,6 +146,7 @@ public class Splash extends Activity {
 	public void onResume() {
 		super.onResume();
 		registerWifiWatcher();
+		activity = this;
 		// TODO mWifiDirectManager.registerReceiver();
 	}
 	
@@ -151,6 +154,7 @@ public class Splash extends Activity {
 	public void onPause() {
 		super.onPause();
 		unregisterReceiver(wifiWatcher); wifiWatcher = null;
+		activity = null;
 		// TODO mWifiDirectManager.unregisterReceiver();
 	}
 	
@@ -253,7 +257,10 @@ public class Splash extends Activity {
 	}
 	
 	private void askStartClientServer() {
-		final Activity act = this;
+		if (activity == null) {
+			scheduleAskStartClientServer(startClientServerTimerTimeout2);
+			return;
+		}
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
@@ -290,12 +297,12 @@ public class Splash extends Activity {
 						    				runOnUiThread(new Runnable() {
 						    					@Override
 						    					public void run() {
-						    						QRNFCFunctions.showWifiConnectionDialog(act, wifiGroupName, wifiPassword, ipAddress, port, false);
+						    						QRNFCFunctions.showWifiConnectionDialog(activity, wifiGroupName, wifiPassword, ipAddress, port, false);
 						    					}
 						    				});
 						    			}
 						    		};
-						    		new WifiDirectManager.Creator(act, startServer).run();
+						    		new WifiDirectManager.Creator(activity, startServer).run();
 						    	} else {
 
 						    		String ipAddress = CommLib.getIpAddress(Splash.this);
