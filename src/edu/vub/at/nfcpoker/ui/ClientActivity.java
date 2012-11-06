@@ -363,6 +363,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		// Connect to the server
 		new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 		
+		showBarrier("Registering to server...");
 		// adding the hallo wePoker to the watch
 		// clientGameState = ClientGameState.PLAYING;
 		
@@ -583,7 +584,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			Log.v("wePoker - Client", "Game state changed to STOPPED");
 			runOnUiThread(new Runnable() {
 				public void run() {
-					showBarrier("Waiting for players");
+					showBarrier("Waiting for server");
 				}});
 			break;
 		case WAITING_FOR_PLAYERS:
