@@ -432,7 +432,7 @@ public class PokerGame implements Runnable {
 			player.roundActionType = ClientActionType.Fold;
 			gui.removePlayer(player);
 			clientsIdsInRoundOrder.remove(player);
-			playerState.remove(player);
+			playerState.remove(player.clientId);
 		}
 		Future<ClientAction> fut = actionFutures.get(clientId);
 		if (fut != null && ! fut.isResolved()) {
