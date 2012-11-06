@@ -413,12 +413,14 @@ public class PokerGame implements Runnable {
 	}
 
 	private void newState(PokerGameState newState) {
+		Log.v("wePoker - PokerGame", "Updating poker game state"+newState.toString());
 		gameState = newState;
 		broadcast(new StateChangeMessage(newState));
 		gui.showStateChange(newState);
 	}
 
 	public synchronized void addPlayer(Connection c, int clientId, String nickname, int avatar, int money) {
+		Log.v("wePoker - PokerGame", "Adding player "+clientId);
 		PlayerState player = new PlayerState(c, clientId, money, nickname, avatar);
 		playerState.put(clientId, player);
 		clientsIdsInRoundOrder.add(player);
@@ -428,6 +430,7 @@ public class PokerGame implements Runnable {
 	}
 	
 	public synchronized void removePlayer(int clientId) {
+		Log.v("wePoker - PokerGame", "Removing player "+clientId);
 		PlayerState player = playerState.get(clientId);
 		if (player != null) {
 			player.connection = null;
