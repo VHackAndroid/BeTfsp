@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.vub.at.nfcpoker"
-    android:versionCode="1008"
-    android:versionName="1.1-20121031" >
+    android:versionCode="1010"
+    android:versionName="1.1-20121106-iminds" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -69,7 +69,7 @@
         <activity
             android:name=".ui.ClientActivity"
             android:label="@string/title_activity_client"
-            android:screenOrientation="portrait" >
+            android:configChanges="keyboard|keyboardHidden|orientation" >
         </activity>
         <activity
             android:name=".ui.ServerActivity"

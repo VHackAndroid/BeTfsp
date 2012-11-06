@@ -20,12 +20,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
-
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.Constants;
@@ -69,10 +71,15 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	super.onCreate(savedInstanceState);
+    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
+    	if (isTV) {
+    		requestWindowFeature(Window.FEATURE_NO_TITLE);
+    		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    	}
+    	
     	setContentView(R.layout.activity_server);
     	View tablet_layout = findViewById(R.id.tablet_layout);
     	View server_layout = findViewById(R.id.server_layout);
-    	boolean isTV = getPackageManager().hasSystemFeature("com.google.android.tv");
     	final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
     	isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
     	
@@ -95,10 +102,23 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     		intentFiltersArray = new IntentFilter[] { ndef, all };
     	}
     	
+    	ImageButton wifi_btn = (ImageButton) findViewById(R.id.wifi_btn);
+    	if (isTV) {
+    		wifi_btn.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					QRNFCFunctions.showWifiConnectionDialog(ServerActivity.this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
+				}
+			});
+    	} else {
+    		wifi_btn.setVisibility(View.GONE);
+    	}
+    	
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
 				currentIpAddress = ipAddress; 
+				currentPort = CommLib.SERVER_PORT;
 				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
 				cps.start();
 			}

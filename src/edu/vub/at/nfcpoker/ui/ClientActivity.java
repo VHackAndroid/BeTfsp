@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
+import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -180,9 +181,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private TextToSpeech tts = null;
 	private boolean ttsInitialised = false;
 	
-	// Interactivity(Haptic)
-	private com.immersion.uhl.Launcher mImmersionLauncher;
-	
 	// NFC
 	private NfcAdapter nfcAdapter;
 	private PendingIntent pendingIntent;
@@ -199,6 +197,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		// Force portrait mode. Do this in code because Google TV does not like it in the manifest.
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
 
 		// Connectivity
 		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);
@@ -234,7 +235,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		foldDelay = null;
 		sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		tts = new TextToSpeech(this, txtToSpeechListener);
-		mImmersionLauncher = new com.immersion.uhl.Launcher(this);
 		checkHeadset();
 		
 		// NFC
@@ -514,15 +514,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		Log.i("wePoker - Client", "Wifi headset: " + am.isWiredHeadsetOn());
 		audioFeedback = am.isWiredHeadsetOn();
 	}
-	
-	private void vibrate(int buzzType) {
-		if (mImmersionLauncher == null) return;
-		try {
-			mImmersionLauncher.play(buzzType);
-		} catch (RuntimeException e) {
-			Log.v("wePoker - Client", "mImmersionLauncher failed.");
-		}
-	}
 
 	private void enableActions(final int round) {
 		runOnUiThread(new Runnable() {
@@ -535,7 +526,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
-				vibrate(com.immersion.uhl.Launcher.SHORT_BUZZ_100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -803,14 +793,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				if (iWon) {
 					money += rwdm.chips / players.size();
-					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_UP_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							updateMoneyTitle();
 							quickOutputMessage(ClientActivity.this, "Congratulations, you won!!");
 						}});
 				} else {
-					vibrate(com.immersion.uhl.Launcher.LONG_TRANSITION_RAMP_DOWN_100);
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
@@ -904,7 +892,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		sensorManager.unregisterListener(foldGravitySensorEventListener);
 		mCardView1.onPause();
 		mCardView2.onPause();
-		mImmersionLauncher.stop();
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
         }
