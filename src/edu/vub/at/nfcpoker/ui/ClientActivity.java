@@ -532,6 +532,9 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
+				// Reset Interactivity(Fold&Gravity)
+				foldProximity = 0;
+				foldGravity = 0;
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
