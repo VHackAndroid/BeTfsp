@@ -1,6 +1,7 @@
 package edu.vub.at.nfcpoker.ui;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Set;
@@ -27,6 +28,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -246,18 +248,23 @@ public class ClientActivity extends Activity implements OnClickListener {
     		IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
     		IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
     		try {
-    			ndef.addDataType("*/*");    /* Handles all MIME based dispatches.
-                                           You should specify only the ones that you need. */
+    			// Handles all MIME based dispatches. You should specify only the ones that you need.
+    			ndef.addDataType("*/*");
     		}
     		catch (MalformedMimeTypeException e) {
     			throw new RuntimeException("fail", e);
     		}
     		intentFiltersArray = new IntentFilter[] { ndef, all };
     		// Broadcast NFC Beam
-	    	nfcAdapter.setNdefPushMessage(
-	    			QRNFCFunctions.getServerInfoNdefMessage(
-	    					serverWifiName, serverWifiPassword,
-	    					serverIpAddress, serverPort, isDedicated), this);
+    		try {
+    			// SDK API 14
+    			Method setNdefPushMessage = nfcAdapter.getClass().getMethod("setNdefPushMessage", new Class[] { NdefMessage.class, Activity.class, Activity[].class });
+    			setNdefPushMessage.invoke(nfcAdapter, QRNFCFunctions.getServerInfoNdefMessage(
+    					serverWifiName, serverWifiPassword,
+    					serverIpAddress, serverPort, isDedicated), this);
+    		} catch (Exception e) {
+    		    e.printStackTrace();
+			}
 	    }
     	
 		// Gesture detection
@@ -1414,5 +1421,4 @@ public class ClientActivity extends Activity implements OnClickListener {
 			speakMessage(this, vMsg);
 		}
 	}
-
 }
