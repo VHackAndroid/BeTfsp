@@ -112,15 +112,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
-<<<<<<< HEAD
 				ConcretePokerServer cps = new ConcretePokerServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
 				currentIpAddress = ipAddress;
-				currentPort = CommLib.SERVER_PORT;
 				cps.start();				
-=======
-				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
-				cps.start();
->>>>>>> ba59971... Correctly fixes aa70dd5fb4ff749318472a237489e30b65e49ace: setting up ports for the normal wifi case
 			}
 
 			@Override
@@ -145,9 +139,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
     		String ipAddress = CommLib.getIpAddress(this);
     		String broadcastAddress = CommLib.getBroadcastAddress(this);
     		currentWifiGroupName = wm.getConnectionInfo().getSSID();
-			currentWifiPassword = CommLib.getWifiPassword(currentWifiGroupName);
-			currentIpAddress = ipAddress;
-			currentPort = CommLib.SERVER_PORT;
+				currentWifiPassword = CommLib.getWifiPassword(currentWifiGroupName);
+				currentIpAddress = ipAddress;
+				currentPort = CommLib.SERVER_PORT;
     		startServer.start(ipAddress, broadcastAddress);
     	}
 		
