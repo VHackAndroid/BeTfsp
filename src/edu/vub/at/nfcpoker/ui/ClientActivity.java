@@ -548,6 +548,8 @@ public class ClientActivity extends Activity implements OnClickListener {
 		if (minimumBet > 0) {
 			if (minimumBet >= currentProcessedBet + money) {
 				check.setText("All in");
+			} else if (minimumBet == currentProcessedBet) {
+				check.setText("Check");
 			} else {
 				check.setText("Call");
 			}
