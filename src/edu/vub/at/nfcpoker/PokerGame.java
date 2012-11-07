@@ -418,7 +418,7 @@ public class PokerGame implements Runnable {
 		Log.v("wePoker - PokerGame", "Updating poker game state"+newState.toString());
 		gameState = newState;
 		broadcast(new StateChangeMessage(newState));
-		gui.showStateChange(newState);
+		gui.updateGameState(newState);
 	}
 
 	public synchronized void addPlayer(Connection c, int clientId, String nickname, int avatar, int money) {

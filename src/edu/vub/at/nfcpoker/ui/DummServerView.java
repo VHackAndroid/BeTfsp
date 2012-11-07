@@ -19,7 +19,7 @@ public class DummServerView implements ServerViewInterface {
 	public void resetCards() { }
 
 	@Override
-	public void showStateChange(PokerGameState newState) { }
+	public void updateGameState(PokerGameState newState) { }
 	
 	@Override
 	public void updatePoolMoney(int chipsPool) { }

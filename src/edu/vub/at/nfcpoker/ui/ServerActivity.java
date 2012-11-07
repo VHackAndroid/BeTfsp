@@ -193,6 +193,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		return this;
 	}
 
+	@Override
 	public void revealCards(final Card[] cards) {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -210,6 +211,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 
+	@Override
 	public void resetCards() {
 		Log.d("wePoker - Server", "Hiding cards again");
 		nextToReveal = 0;
@@ -224,7 +226,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-	public void showStateChange(final PokerGameState newState) {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				String prefix = getResources().getString(R.string.title_activity_server);
@@ -234,6 +235,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				tv.setText(newState.toString());
 			}
 		});
+	@Override
+	public void updateGameState(final PokerGameState newState) {
 	}
 
 	@Override

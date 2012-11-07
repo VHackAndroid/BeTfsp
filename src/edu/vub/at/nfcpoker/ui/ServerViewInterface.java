@@ -13,7 +13,7 @@ public interface ServerViewInterface {
 
 	public void resetCards();
 	
-	public void showStateChange(PokerGameState newState);
+	public void updateGameState(PokerGameState newState);
 
 	public void updatePoolMoney(int chipsPool);
 	
