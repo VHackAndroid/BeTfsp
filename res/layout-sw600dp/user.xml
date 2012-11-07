@@ -38,9 +38,16 @@
         android:layout_below="@+id/playerName"
         android:text="Player Money"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#CFB52B" >
-
-    </TextView>
-
+        android:textColor="#CFB52B" />
+    
+    <TextView
+        android:id="@+id/playerGameMoney"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/avatar_user"
+        android:layout_below="@+id/playerMoney"
+        android:text="Player Game Money"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#CFB52B" />
 
 </RelativeLayout>
