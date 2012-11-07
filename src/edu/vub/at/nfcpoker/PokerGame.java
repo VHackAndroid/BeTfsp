@@ -354,10 +354,10 @@ public class PokerGame implements Runnable {
 		// Add blinds
 		if (gameState == PokerGameState.PREFLOP) {
 			// Small and big blind
-			PlayerState smallBlind = playerState.get(clientOrder.get(0));
+			PlayerState smallBlind = clientOrder.get(0);
 			addBet(smallBlind, SMALL_BLIND);
 			broadcast(new Message.SmallBlindMessage(smallBlind.clientId, SMALL_BLIND));
-			PlayerState bigBlind = playerState.get(clientOrder.get(1));
+			PlayerState bigBlind = clientOrder.get(1);
 			addBet(bigBlind, BIG_BLIND);
 			broadcast(new Message.BigBlindMessage(bigBlind.clientId, BIG_BLIND));
 			// Cycle the players that have a small or big blind
