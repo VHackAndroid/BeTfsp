@@ -32,7 +32,6 @@ public class PokerGame implements Runnable {
 	@SuppressWarnings("serial")
 	public class RoundEndedException extends Exception {}
 
-
 	// Blinds
 	private static final int SMALL_BLIND = 5;
 	private static final int BIG_BLIND = 10;
@@ -300,7 +299,6 @@ public class PokerGame implements Runnable {
 			return minBet;
 		case Check: // Or CALL
 		case Bet:
-		case AllIn:
 			// Client sends diffMoney
 			addBet(player, ca.extraMoney);
 			if (player.roundMoney < minBet) {
@@ -308,6 +306,10 @@ public class PokerGame implements Runnable {
 				return minBet;
 			}
 			return player.roundMoney;
+		case AllIn:
+			// Client sends diffMoney
+			addBet(player, ca.extraMoney);
+			return minBet;
 		default:
 			Log.d("wePoker - PokerGame", "Unknown client action message");
 			return minBet;
