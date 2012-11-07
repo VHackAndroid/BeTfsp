@@ -1020,7 +1020,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 		if (v == null) return;
-		v.vibrate(pattern, 0);
+		v.vibrate(pattern, -1);
 	}
 	
 	private static void quickOutputMessage(ClientActivity ca, String msg) {
