@@ -31,6 +31,7 @@ import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.text.InputType;
@@ -532,9 +533,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
-				// Reset Interactivity(Fold&Gravity)
+				// Interactivity(Fold&Gravity) - Reset
 				foldProximity = 0;
 				foldGravity = 0;
+				// Interactivity(Vibrate)
+				vibrate(100);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -806,12 +809,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 						public void run() {
 							updateMoneyTitle();
 							quickOutputMessage(ClientActivity.this, "Congratulations, you won!!");
+							vibrate(100);
 						}});
 				} else {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
 							quickOutputMessage(ClientActivity.this, rwdm.winMessageString());
+							vibrate(40);
 							if (rwdm.showCards) {
 								if (rwdm.bestPlayers.size() == 1) {
 									// Show the winning cards of the player
@@ -985,6 +990,11 @@ public class ClientActivity extends Activity implements OnClickListener {
 
 		}
 	};
+
+	private void vibrate(int period) {
+		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+		v.vibrate(period);
+	}
 	
 	private static void quickOutputMessage(ClientActivity ca, String msg) {
 		Toast t = Toast.makeText(ca, msg, Toast.LENGTH_SHORT);
