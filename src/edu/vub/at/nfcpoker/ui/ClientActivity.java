@@ -193,6 +193,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	private Button bet;
 	private Button check;
 	private Button fold;
+	private boolean allInEnabled;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -493,7 +494,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 	
 	// TODO: force all in if not enough money for blind / bet / ...
 	private void performAllIn() {
-		if (!fold.isEnabled()) {
+		if (!allInEnabled) {
 			quickOutputMessage(this, "Cannot perform all in");
 			return;
 		}
@@ -527,8 +528,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 			public void run() {
 				if (round >= 1) {
 					bet.setEnabled(false);
+					if (minimumBet >= currentProcessedBet + money) {
+						allInEnabled = true;
+					} else {
+						allInEnabled = false;
+					}
 				} else {
 					bet.setEnabled(true);
+					allInEnabled = true;
 				}
 				check.setEnabled(true);
 				fold.setEnabled(true);
@@ -564,6 +571,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				bet.setEnabled(false);
 				check.setEnabled(false);
 				fold.setEnabled(false);
+				allInEnabled = false;
 				updateMoneyTitle();
 				updateCheckCallText();
 			}

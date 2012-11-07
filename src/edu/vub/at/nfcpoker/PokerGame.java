@@ -248,7 +248,6 @@ public class PokerGame implements Runnable {
 			return false;
 		case Fold:
 		case AllIn:
-			// TODO Block all-in for round 2 (client side?)
 			return true;
 		case Check:
 		case Bet:
