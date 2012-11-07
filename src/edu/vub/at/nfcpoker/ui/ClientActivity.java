@@ -755,6 +755,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			if (m instanceof SmallBlindMessage) {
 				final SmallBlindMessage sbm = (SmallBlindMessage) m;
 				if (sbm.clientId == myClientID) {
+					currentProcessedBet = sbm.amount;
 					runOnUiThread(new Runnable() {
 						public void run() {
 							toastSmallBlind(sbm.amount);
@@ -773,6 +774,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			if (m instanceof BigBlindMessage) {
 				final BigBlindMessage bbm = (BigBlindMessage) m;
 				if (bbm.clientId == myClientID) {
+					currentProcessedBet = bbm.amount;
 					runOnUiThread(new Runnable() {
 						public void run() {
 							toastBigBlind(bbm.amount);
