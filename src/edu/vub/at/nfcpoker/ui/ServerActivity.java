@@ -247,10 +247,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				Log.d("wePoker - Server", "Adding player name " + player.name);
 				LinearLayout users;
-				// todo make this variable.. now hardcoded 4 and 4 on each side.
+				// TODO make this variable.. now hardcoded 4 and 4 on each side.
 				if (playerAvatars.size() < MAX_NUMBER_AVATARS_SIDE) {
 					users = (LinearLayout) findViewById(R.id.users_bottom);
-				} else{
+				} else if (playerAvatars.size() >= MAX_NUMBER_AVATARS_SIDE*2) {
+					Log.d("wePoker - Server", "More than "+MAX_NUMBER_AVATARS_SIDE+" connected. Not enough display space");
+					return;
+				} else {
 					users = (LinearLayout) findViewById(R.id.users_top);
 				}
 				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
