@@ -319,6 +319,10 @@ public class PokerGame implements Runnable {
 	private void addBet(PlayerState player, int extra) {
 		player.roundMoney += extra;
 		player.money -= extra;
+		if (player.money < 0) {
+			Log.wtf("wePoker - PokerGame", "Player bets more money than he/she owns!");
+			player.money = 0;
+		}
 		gui.updatePlayerStatus(player);
 		addChipsToPool(extra);
 	}
