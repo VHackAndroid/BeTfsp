@@ -66,7 +66,6 @@ import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.GameServer;
-import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
@@ -720,16 +719,13 @@ public class ClientActivity extends Activity implements OnClickListener {
 				final ClientActionMessage newClientActionMessage = (ClientActionMessage) m;
 				final ClientAction action = newClientActionMessage.getClientAction();
 				Log.v("wePoker - Client", "Received client action message" + newClientActionMessage.toString());
-				if (action.actionType == Message.ClientActionType.Bet ||
-					action.actionType == Message.ClientActionType.AllIn) {
-					final int amount = action.roundMoney;
-					if (amount > minimumBet) {
-						runOnUiThread(new Runnable() {
-							public void run() {
-								updateMinBetAmount(amount);
-							}
-						});
-					}
+				final int amount = action.roundMoney;
+				if (amount > minimumBet) {
+					runOnUiThread(new Runnable() {
+						public void run() {
+							updateMinBetAmount(amount);
+						}
+					});
 				}
 			}
 
