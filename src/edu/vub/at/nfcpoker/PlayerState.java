@@ -36,6 +36,9 @@ public class PlayerState implements Comparable<PlayerState> {
 		this.roundActionType = ClientActionType.Unknown;
 		this.roundMoney = 0;
 	}
+
+	// for kryo
+	public PlayerState() {}
 	
 	public String toString() {
 		return "Player ("+clientId+"): "+name+" - "+money+" - "+avatar+" - "+
