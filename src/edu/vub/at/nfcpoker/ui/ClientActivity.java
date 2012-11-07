@@ -1207,15 +1207,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 			break;
 		}
 
-		final TextView textCurrentBet = (TextView) findViewById(R.id.currentBet);
-		textCurrentBet.setText(" " + currentSelectedBet);
 		updateMoneyTitle();
+		updateBetAmount();
 		updateCheckCallText();
 	}
 
 	private void updateBetAmount() {
 		final TextView currentBet = (TextView) findViewById(R.id.currentBet);
-		currentBet.setText(" " + this.currentSelectedBet);
+		currentBet.setText(" $" + currentSelectedBet + " ($"+currentProcessedBet+")");
 		updateCheckCallText();
 	}
 
