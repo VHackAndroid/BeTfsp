@@ -371,10 +371,12 @@ public class PokerGame implements Runnable {
 		for (int tableRound = 0; tableRound < 2 && increasedBet; tableRound++) {
 			int playersRemaining = clientOrder.size();
 			increasedBet = false;
-			
-			// Ask the client actions (in parallel)
-			for (PlayerState player : clientOrder) {
-				askClientActions(player, tableRound);
+
+			// Ask all client actions (in parallel)
+			if (tableRound == 0) {
+				for (PlayerState player : clientOrder) {
+					askClientActions(player, tableRound);
+				}
 			}
 			
 			// Process the client action (one-by-one, in round order)
