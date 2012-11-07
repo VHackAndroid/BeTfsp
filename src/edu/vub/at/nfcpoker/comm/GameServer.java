@@ -109,6 +109,7 @@ public class GameServer extends PokerServer  {
 		new Thread(serverR).start();
 		if (broadcastAddress != null)
 			new Thread(exporterR).start();
+		new Thread(gameLoop).start();
 	}
 
 	public void addClient(Connection c) {
