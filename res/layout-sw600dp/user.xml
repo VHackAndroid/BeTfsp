@@ -12,6 +12,7 @@
 
     <ImageView
         android:id="@+id/avatar_user"
+        android:contentDescription="Avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
