@@ -46,11 +46,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	// Connectivity
-	protected String currentWifiGroupName;
-	protected String currentWifiPassword; 
-	protected String currentIpAddress;
-	protected int currentPort;
-	private boolean isWifiDirect;
+	protected static String currentWifiGroupName;
+	protected static String currentWifiPassword; 
+	protected static String currentIpAddress;
+	protected static int currentPort;
+	private static boolean isWifiDirect;
 
 	// UI
 	private final int MIN_AVATAR_ID = 1;
@@ -64,9 +64,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	private NfcAdapter nfcAdapter;
 
 	// UI
-	int nextToReveal = 0;
-	List<PlayerState> playerState = new ArrayList<PlayerState>();
-	Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
+	private static int nextToReveal = 0;
+	private static int chipsPool = 0;
+	private static PokerGameState gameState;
+	private static List<PlayerState> playerState = new ArrayList<PlayerState>();
+	private static Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -226,27 +228,22 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-		runOnUiThread(new Runnable() {
-			public void run() {
-				String prefix = getResources().getString(R.string.title_activity_server);
-				setTitle(prefix + " \u2014 " + newState.toString());
-				TextView tv = (TextView) findViewById(R.id.current_phase);
-				if (tv == null) return;
-				tv.setText(newState.toString());
-			}
-		});
 	@Override
 	public void updateGameState(final PokerGameState newState) {
+		gameState = newState;
+		updateTitleAndState();
 	}
 
 	@Override
-	public void updatePoolMoney(int chipsPool) {
-		// TODO Auto-generated method stub
+	public void updatePoolMoney(int newChipsPool) {
+		chipsPool = newChipsPool;
+		updateTitleAndState();
 	}
 
 	@Override
 	public void addPlayer(final PlayerState player) {
-		playerState.add(player);runOnUiThread(new Runnable() {
+		playerState.add(player);
+		runOnUiThread(new Runnable() {
 			public void run() {
 				Log.d("wePoker - Server", "Adding player name " + player.name);
 				LinearLayout users;
@@ -281,14 +278,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 
-	public String getNewAvatar(int avatarId) {
-		if (avatarId < MIN_AVATAR_ID || avatarId > MAX_AVATAR_ID) {
-			avatarId = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
-		}
-		Log.d("wePoker - Server", "Avatar for player " + avatarId);
-		return "avatar_" + avatarId;
-	}
-
 	@Override
 	public void updatePlayerStatus(final PlayerState player) {
 		runOnUiThread(new Runnable() {
@@ -296,9 +285,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				View badge = playerAvatars.get(player.clientId);
 				if (badge != null) {
 					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
-					money.setText("\u20AC" + player.gameMoney);
+					money.setText("\u20AC" + player.money);
 					TextView name = (TextView) badge.findViewById(R.id.playerName);
 					name.setText(player.name);
+					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
+					gameMoney.setText(player.gameMoney);
 					ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
 					String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);	
 					int id = getResources().getIdentifier(avatarField, null, null);
@@ -322,5 +313,25 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				}
 			}
 		});
+	}
+
+	private void updateTitleAndState() {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				String prefix = getResources().getString(R.string.title_activity_server);
+				setTitle(prefix + " \u2014 " + gameState.toString() + " ($"+chipsPool+")");
+				TextView tv = (TextView) findViewById(R.id.current_phase);
+				if (tv == null) return;
+				tv.setText(gameState.toString());
+			}
+		});
+	}
+	
+	private String getNewAvatar(int avatarId) {
+		if (avatarId < MIN_AVATAR_ID || avatarId > MAX_AVATAR_ID) {
+			avatarId = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
+		}
+		Log.d("wePoker - Server", "Avatar for player " + avatarId);
+		return "avatar_" + avatarId;
 	}
 }
