@@ -536,7 +536,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 				foldProximity = 0;
 				foldGravity = 0;
 				// Interactivity(Vibrate)
-				vibrate(100);
+				vibrate(VibrationType.Action);
 				updateMoneyTitle();
 				updateCheckCallText();
 			}
@@ -809,14 +809,14 @@ public class ClientActivity extends Activity implements OnClickListener {
 						public void run() {
 							updateMoneyTitle();
 							quickOutputMessage(ClientActivity.this, "Congratulations, you won!!");
-							vibrate(100);
+							vibrate(VibrationType.Win);
 						}});
 				} else {
 					runOnUiThread(new Runnable() {
 						public void run() {
 							quickOutputMessage(ClientActivity.this, "You lost...");
 							quickOutputMessage(ClientActivity.this, rwdm.winMessageString());
-							vibrate(40);
+							vibrate(VibrationType.Lose);
 							if (rwdm.showCards) {
 								if (rwdm.bestPlayers.size() == 1) {
 									// Show the winning cards of the player
@@ -990,10 +990,37 @@ public class ClientActivity extends Activity implements OnClickListener {
 
 		}
 	};
-
-	private void vibrate(int period) {
+	
+	private enum VibrationType {
+		Short, Action, Win, Lose
+	}
+	private static final int dot = 200;        // Length of a Morse Code "dot" in milliseconds
+	private static final int dash = 500;       // Length of a Morse Code "dash" in milliseconds
+	private static final int short_gap = 200;  // Length of Gap Between dots/dashes
+	@SuppressWarnings("unused")
+	private static final int medium_gap = 500; // Length of Gap Between Letters
+	@SuppressWarnings("unused")
+	private static final int long_gap = 1000;  // Length of Gap Between Words
+	private void vibrate(VibrationType buzzType) {
+		long[] pattern;
+		switch (buzzType) {
+		default:
+		case Short:
+			pattern = new long[]{ 0 };
+			break;
+		case Action:
+			pattern = new long[]{ 0, dot, dash };  // Requires action
+			break;
+		case Win:
+			pattern = new long[]{ 0, dot, dash, dot, short_gap, dash }; // Win
+			break;
+		case Lose:
+			pattern = new long[]{ 0, dot, dot, dot }; // Lose
+			break;
+		}
 		Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-		v.vibrate(period);
+		if (v == null) return;
+		v.vibrate(pattern, 0);
 	}
 	
 	private static void quickOutputMessage(ClientActivity ca, String msg) {
