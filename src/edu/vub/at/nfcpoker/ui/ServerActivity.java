@@ -51,6 +51,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	protected static String currentIpAddress;
 	protected static int currentPort;
 	private static boolean isWifiDirect;
+    private WifiManager.WifiLock wifiLock;
 
 	// UI
 	private final int MIN_AVATAR_ID = 1;
@@ -129,6 +130,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				currentWifiPassword  = password;
 				currentIpAddress = ipAddress;
 				currentPort = port;
+				
+				// In the Wifi-Direct case, we need to keep the Wi-Fi awake because it does not transmit
+				// anything until a client connects.
+				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+				wifiLock = wm.createWifiLock("edu.vub.at.nfcpoker");
+				wifiLock.acquire();
+				
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -174,6 +182,15 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		}
 	}
 
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		if (wifiLock != null) {
+			wifiLock.release();
+			wifiLock = null;
+		}
+	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
