@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -52,6 +54,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	protected static int currentPort;
 	private static boolean isWifiDirect;
     private WifiManager.WifiLock wifiLock;
+    private final static int WIFI_LOCK_TIMEOUT = 3600000; // Keep lock for 1 hour
 
 	// UI
 	private final int MIN_AVATAR_ID = 1;
@@ -131,12 +134,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				currentIpAddress = ipAddress;
 				currentPort = port;
 				
-				// In the Wifi-Direct case, we need to keep the Wi-Fi awake because it does not transmit
-				// anything until a client connects.
-				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-				wifiLock = wm.createWifiLock("edu.vub.at.nfcpoker");
-				wifiLock.acquire();
-				
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -146,10 +143,30 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 		};
 
+		// We need to keep the Wi-Fi awake (Maximum of WIFI_LOCK_TIMEOUT)
+		// - Server performs powersaving
+		// - If no players are connected there is no 'keep alive' message
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		wifiLock = wm.createWifiLock("edu.vub.at.nfcpoker");
+		wifiLock.acquire();
+		final Timer wifiLockTimer = new Timer();
+		wifiLockTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				for (PlayerState player : playerState) {
+					if (player.connection != null)
+						return;
+				}
+				wifiLock.release();
+				wifiLock = null;
+				wifiLockTimer.cancel();
+			}
+		}, WIFI_LOCK_TIMEOUT);
+		
+		// Start the Connectivity
 		if (isWifiDirect) {
 			new WifiDirectManager.Creator(this, startServer).run();
 		} else {
-			WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 			String ipAddress = CommLib.getIpAddress(this);
 			String broadcastAddress = CommLib.getBroadcastAddress(this);
 			currentWifiGroupName = wm.getConnectionInfo().getSSID();
