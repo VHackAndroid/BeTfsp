@@ -289,8 +289,13 @@ public class PokerGame implements Runnable {
 			return minBet;
 		}
 
-		broadcast(new ClientActionMessage(ca, player.clientId));
+		if (ca.handled) {
+			return minBet;
+		}
+
+		ca.handled = true;
 		player.roundActionType = ca.actionType;
+		broadcast(new ClientActionMessage(ca, player.clientId));
 		
 		switch (player.roundActionType) {
 		case Fold:

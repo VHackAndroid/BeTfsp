@@ -15,12 +15,14 @@ import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
-	enum ClientActionType { Bet, Fold, Check, AllIn, Unknown };
+	enum ClientActionType { Bet, Fold, Check, AllIn, // From Client
+							Unknown };               // For Server: 'undecided'
 
 	public static final class ClientAction {
 		public ClientActionType actionType;
 		public int roundMoney;
 		public int extraMoney;
+		public transient boolean handled; // 
 
 		public ClientAction(ClientActionType actionType) {
 			this(actionType, 0, 0);
@@ -29,10 +31,13 @@ public interface Message {
 			this.actionType = actionType;
 			this.roundMoney = roundMoney;
 			this.extraMoney = extraMoney;
+			this.handled    = false;
 		}
 
 		// for kryo
-		public ClientAction() {}
+		public ClientAction() {
+			this.handled = false;
+		}
 
 		@Override
 		public String toString() {
