@@ -2,7 +2,7 @@ package edu.vub.at.nfcpoker.comm;
 
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import com.esotericsoftware.minlog.Log;
@@ -177,13 +177,13 @@ public interface Message {
 
 	public class RoundWinnersDeclarationMessage extends TimestampedMessage implements Message {
 
-		public Set<PlayerState> bestPlayers;
-		public Set<String> bestPlayerNames;
+		public List<PlayerState> bestPlayers;
+		public List<String> bestPlayerNames;
 		public boolean showCards;
 		public Hand bestHand;
 		public int chips;
 
-		public RoundWinnersDeclarationMessage(Set<PlayerState> bestPlayers, Set<String> bestNames, boolean showCards, Hand bestHand, int amountOfChips) {
+		public RoundWinnersDeclarationMessage(List<PlayerState> bestPlayers, List<String> bestNames, boolean showCards, Hand bestHand, int amountOfChips) {
 			this.bestPlayers = bestPlayers;
 			this.bestPlayerNames = bestNames;
 			this.showCards = showCards;

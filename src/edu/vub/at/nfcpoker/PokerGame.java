@@ -137,7 +137,7 @@ public class PokerGame implements Runnable {
 			boolean endedPrematurely = gameState != PokerGameState.RIVER;
 			newState(PokerGameState.END_OF_ROUND);
 			
-			Set<PlayerState> remainingPlayers = new HashSet<PlayerState>();
+			List<PlayerState> remainingPlayers = new ArrayList<PlayerState>();
 			for (PlayerState player : currentPlayers) {
 				if (player.roundActionType != ClientActionType.Fold &&
 					player.roundActionType != ClientActionType.Unknown) {
@@ -150,7 +150,7 @@ public class PokerGame implements Runnable {
 				if (remainingPlayers.size() == 1) {
 					addMoney(remainingPlayers.iterator().next(), chipsPool);
 
-					HashSet<String> winnerNames = new HashSet<String>();
+					List<String> winnerNames = new ArrayList<String>();
 					winnerNames.add(remainingPlayers.iterator().next().name);
 					
 					broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, winnerNames, false, null, chipsPool));
@@ -165,7 +165,7 @@ public class PokerGame implements Runnable {
 				}
 				if (!hands.isEmpty()) {
 					Iterator<PlayerState> it = hands.keySet().iterator();
-					Set<PlayerState> bestPlayers = new HashSet<PlayerState>();
+					List<PlayerState> bestPlayers = new ArrayList<PlayerState>();
 					PlayerState firstPlayer = it.next();
 					bestPlayers.add(firstPlayer);
 					Hand bestHand = hands.get(firstPlayer);
@@ -183,7 +183,7 @@ public class PokerGame implements Runnable {
 						}
 					}
 					
-					HashSet<String> winnerNames = new HashSet<String>();
+					List<String> winnerNames = new ArrayList<String>();
 					for (PlayerState player: bestPlayers) {
 						addMoney(player, chipsPool / bestPlayers.size());
 						winnerNames.add(player.name);

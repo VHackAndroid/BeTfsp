@@ -3,8 +3,8 @@ package edu.vub.at.nfcpoker.ui;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -803,7 +803,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 			
 			if (m instanceof RoundWinnersDeclarationMessage) {
 				final RoundWinnersDeclarationMessage rwdm = (RoundWinnersDeclarationMessage) m;
-				final Set<PlayerState> players = rwdm.bestPlayers;
+				final List<PlayerState> players = rwdm.bestPlayers;
 				boolean iWon = false;
 				for (PlayerState player : players) {
 					if (player.clientId == myClientID) {
