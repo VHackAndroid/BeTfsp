@@ -259,7 +259,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
 
 				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
-				String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);
+				String avatarField = "edu.vub.at.nfcpoker:drawable/avatar_" + getSafeAvatarId(player.avatar);
 				Log.d("wePoker - Server", "Avatar for player " + avatarField);			
 				int id = getResources().getIdentifier(avatarField, null, null);
 				avatar.setImageDrawable(getResources().getDrawable(id));
@@ -330,11 +330,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		});
 	}
 	
-	private String getNewAvatar(int avatarId) {
+	private int getSafeAvatarId(int avatarId) {
 		if (avatarId < MIN_AVATAR_ID || avatarId > MAX_AVATAR_ID) {
 			avatarId = random.nextInt(MAX_AVATAR_ID - MIN_AVATAR_ID) + MIN_AVATAR_ID;
 		}
 		Log.d("wePoker - Server", "Avatar for player " + avatarId);
-		return "avatar_" + avatarId;
+		return avatarId;
 	}
 }
