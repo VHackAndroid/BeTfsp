@@ -257,10 +257,10 @@ public class ClientActivity extends Activity implements OnClickListener {
     		// Broadcast NFC Beam
     		try {
     			// SDK API 14
-    			Method setNdefPushMessage = nfcAdapter.getClass().getMethod("setNdefPushMessage", new Class[] { NdefMessage.class, Activity.class });
+    			Method setNdefPushMessage = nfcAdapter.getClass().getMethod("setNdefPushMessage", new Class[] { NdefMessage.class, Activity.class, Activity[].class});
     			setNdefPushMessage.invoke(nfcAdapter, QRNFCFunctions.getServerInfoNdefMessage(
     					serverWifiName, serverWifiPassword,
-    					serverIpAddress, serverPort, isDedicated), this);
+    					serverIpAddress, serverPort, isDedicated), this, null);
     		} catch (Exception e) {
     		    e.printStackTrace();
 			}
