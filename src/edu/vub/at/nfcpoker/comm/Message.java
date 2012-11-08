@@ -200,7 +200,7 @@ public interface Message {
 		}
 
 		public String winMessageString() {
-			String s = "" + chips + "chips won by ";
+			String s = "\u20AC" + chips + " chips won by ";
 			Iterator<String> playersIt = bestPlayerNames.iterator();
 			while (playersIt.hasNext()) {
 				s = s + " - " + playersIt.next();

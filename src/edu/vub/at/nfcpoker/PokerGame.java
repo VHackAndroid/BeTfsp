@@ -322,6 +322,7 @@ public class PokerGame implements Runnable {
 			Log.wtf("wePoker - PokerGame", "Player bets more money than he/she owns!");
 			player.money = 0;
 		}
+		Log.d("wePoker - PokerGame", "Player "+player.name+" bets \u20AC"+extra+" extra");
 		gui.updatePlayerStatus(player);
 		addChipsToPool(extra);
 	}

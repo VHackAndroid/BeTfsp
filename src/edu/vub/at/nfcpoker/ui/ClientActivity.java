@@ -1222,7 +1222,7 @@ public class ClientActivity extends Activity implements OnClickListener {
 
 	private void updateBetAmount() {
 		final TextView currentBet = (TextView) findViewById(R.id.currentBet);
-		currentBet.setText(" $" + currentSelectedBet + " ($"+currentProcessedBet+")");
+		currentBet.setText(" \u20AC" + currentSelectedBet + " (\u20AC"+currentProcessedBet+")");
 		updateCheckCallText();
 	}
 

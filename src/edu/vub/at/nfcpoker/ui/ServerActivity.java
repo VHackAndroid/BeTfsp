@@ -288,13 +288,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				View badge = playerAvatars.get(player.clientId);
 				if (badge != null) {
 					TextView money = (TextView) badge.findViewById(R.id.playerMoney);
-					money.setText("\u20AC" + player.money);
+					money.setText("\u20AC"+player.money);
 					TextView name = (TextView) badge.findViewById(R.id.playerName);
 					name.setText(player.name);
 					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
-					gameMoney.setText(player.gameMoney);
+					gameMoney.setText("\u20AC"+player.gameMoney);
 					ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
-					String avatarField = "edu.vub.at.nfcpoker:drawable/" + getNewAvatar(player.avatar);	
+					String avatarField = "edu.vub.at.nfcpoker:drawable/avatar_" + getSafeAvatarId(player.avatar);	
 					int id = getResources().getIdentifier(avatarField, null, null);
 					avatar.setImageDrawable(getResources().getDrawable(id));
 				}
@@ -322,7 +322,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		runOnUiThread(new Runnable() {
 			public void run() {
 				String prefix = getResources().getString(R.string.title_activity_server);
-				setTitle(prefix + " \u2014 " + gameState.toString() + " ($"+chipsPool+")");
+				setTitle(prefix + " \u2014 " + gameState.toString() + " (\u20AC"+chipsPool+")");
 				TextView tv = (TextView) findViewById(R.id.current_phase);
 				if (tv == null) return;
 				tv.setText(gameState.toString());
