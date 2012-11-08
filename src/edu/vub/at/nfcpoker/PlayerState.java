@@ -6,7 +6,7 @@ import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 
 public class PlayerState implements Comparable<PlayerState> {
 	// Connection
-	public volatile Connection connection;
+	public transient volatile Connection connection;
 	public volatile int clientId;
 	
 	// Player statistics
