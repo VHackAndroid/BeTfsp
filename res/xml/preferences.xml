@@ -23,5 +23,14 @@
             android:switchTextOn="Yes"
             android:title="Prefer Wi-Fi Direct" />
     </PreferenceCategory>
+    <PreferenceCategory
+        android:summary="This section describes the application"
+        android:title="About wePoker" >
+        <Preference android:title="Visit our website" >
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="http://wePoker.info" />
+        </Preference>
+    </PreferenceCategory>
 
 </PreferenceScreen>
