@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory
+        android:summary="General settings"
+        android:title="General" >
+        <EditTextPreference
+            android:defaultValue="&lt;random>"
+            android:key="nickname"
+            android:summary="The name your wePoker application will show to others"
+            android:title="Nickname" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:summary="Settings pertaining to wireless connectivity"
+        android:title="Connectivity" >
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="prefer_wifi_direct"
+            android:summary="Prefer Wi-Fi Direct over regular access points"
+            android:summaryOff="Use regular network if possible"
+            android:summaryOn="Prefer Wi-Fi Direct"
+            android:switchTextOff="No"
+            android:switchTextOn="Yes"
+            android:title="Prefer Wi-Fi Direct" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -10,6 +10,7 @@ import edu.vub.at.nfcpoker.R;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.provider.Settings.Secure;
 
 
@@ -18,18 +19,25 @@ public class Settings {
 	public static volatile String nickname;
 	public static volatile int avatar;
 	public static volatile int gamesPlayed;
+	public static volatile boolean prefer_wifi_direct;
 	
 	private static final int nicknameTxtLength = 10000;
 
 	public static void loadSettings(Context ctx) {
-		SharedPreferences settings = ctx.getSharedPreferences("settings", Activity.MODE_PRIVATE);
+		PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false);
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
 		UUID = Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
-		nickname = settings.getString("nickname", getRandomNickName(ctx));
 		gamesPlayed = settings.getInt("gamesPlayed", 0);
+		prefer_wifi_direct = settings.getBoolean("prefer_wifi_direct", true);
+		nickname = settings.getString("nickname", "<random>");
+		if (nickname.equals("<random>")) {
+			nickname = getRandomNickName(ctx);
+			saveSettings(ctx);
+		}
 	}
 
 	public static void saveSettings(Context ctx) {
-		SharedPreferences settings = ctx.getSharedPreferences("settings", Activity.MODE_PRIVATE);
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString("nickname", nickname);
 		editor.putInt("gamesPlayed", gamesPlayed);

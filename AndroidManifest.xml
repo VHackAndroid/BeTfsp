@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.vub.at.nfcpoker"
     android:versionCode="1011"
@@ -6,7 +7,7 @@
     <uses-sdk
         android:minSdkVersion="10"
         android:targetSdkVersion="15" />
-    
+
     <uses-feature
         android:name="android.hardware.nfc"
         android:required="false" />
@@ -52,41 +53,43 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.sonyericsson.extras.liveware.aef.EXTENSION_PERMISSION"/>
-    
+    <uses-permission android:name="com.sonyericsson.extras.liveware.aef.EXTENSION_PERMISSION" />
+
     <application
+        android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:allowBackup="true">
+        android:theme="@style/AppTheme" >
         <activity
-            android:name=".ui.Splash"
+            android:name="edu.vub.at.nfcpoker.ui.Splash"
             android:label="@string/title_activity_splash" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.ClientActivity"
-            android:label="@string/title_activity_client"
-            android:configChanges="keyboard|keyboardHidden|orientation" >
+            android:name="edu.vub.at.nfcpoker.ui.ClientActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="@string/title_activity_client" >
         </activity>
         <activity
-            android:name=".ui.ServerActivity"
+            android:name="edu.vub.at.nfcpoker.ui.ServerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="@string/title_activity_server"
             android:screenOrientation="landscape" >
         </activity>
         <activity
-            android:name=".ui.QRJoinerActivity"
-            android:label="@string/title_activity_qrjoiner" 
+            android:name="edu.vub.at.nfcpoker.ui.QRJoinerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
-            >
+            android:label="@string/title_activity_qrjoiner" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.BROWSABLE" />
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data
                     android:host="code.google.com"
                     android:pathPrefix="/p/ambienttalk/wiki/WePoker/play/"
@@ -94,11 +97,13 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        
+
         <!--
         <service android:name=".smartwatch.WePokerExtensionService" />
         <receiver android:name=".smartwatch.WePokerExtensionReceiver" >
@@ -128,7 +133,11 @@
                 <action android:name="com.sonyericsson.extras.aef.control.SWIPE_EVENT" />
             </intent-filter>
         </receiver>
-       -->
+        -->
+        <activity
+            android:name="edu.vub.at.nfcpoker.WePokerPreferencesActivity"
+            android:label="@string/title_activity_preferences" >
+        </activity>
     </application>
 
 </manifest>

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
     <string name="app_name">wePoker</string>
@@ -7,7 +8,9 @@
     <string name="title_activity_client">wePoker</string>
     <string name="title_activity_server">wePoker (Table)</string>
     <string name="title_activity_qrjoiner">Join wePoker Game</string>
+    <string name="title_activity_preferences">wePoker Preferences</string>
     <string name="qr_code_join_confirmation">This QR Code wants to connect your device to a wePoker game running on the network "%s".</string>
     <string name="extension_name">wePoker</string>
-	<string name="loading_image">Loading wePoker...</string>
+    <string name="loading_image">Loading wePoker...</string>
+
 </resources>
