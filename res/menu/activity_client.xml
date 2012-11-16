@@ -2,7 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/speech"
         android:title="Speech"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_voice_search" />
     <item android:id="@+id/allIn"
         android:title="All in"
         android:showAsAction="never" />
