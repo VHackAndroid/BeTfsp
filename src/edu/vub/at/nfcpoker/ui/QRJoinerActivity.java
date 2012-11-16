@@ -25,6 +25,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.settings.Settings;
 
 public class QRJoinerActivity extends Activity {
 	
@@ -115,6 +116,7 @@ public class QRJoinerActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		Settings.loadSettings(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_splash);
         

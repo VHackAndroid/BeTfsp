@@ -343,4 +343,21 @@ public interface Message {
 					"money -> " + money;
 		}
 	}
+	
+
+	public static class SetNicknameMessage extends TimestampedMessage {
+		public String nickname;
+
+		public SetNicknameMessage(String nickname) {
+			this.nickname = nickname;
+		}
+		
+		// kryo
+		public SetNicknameMessage() {}
+
+		@Override
+		public String toString() {
+			return super.toString() + ": Set nickname to " + nickname;
+		}
+	}
 }

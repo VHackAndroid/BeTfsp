@@ -18,6 +18,7 @@ import edu.vub.at.nfcpoker.PokerGame;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetNicknameMessage;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
 public class GameServer extends PokerServer  {
@@ -89,6 +90,13 @@ public class GameServer extends PokerServer  {
 							registerClient(c, cm.nickname, cm.avatar, cm.money);
 							gameLoop.broadcast(cm);
 						}
+						
+						if (msg instanceof SetNicknameMessage) {
+							SetNicknameMessage snm = (SetNicknameMessage) msg;
+							Log.d("wePoker - Server", "Got SetNicknameMessage: "+snm.toString());
+							setNickname(c, snm.nickname);
+							gameLoop.broadcast(snm);
+						}
 					}
 					
 					@Override
@@ -123,6 +131,15 @@ public class GameServer extends PokerServer  {
 		for (Integer i : connections.keySet()) {
 			if (connections.get(i) == c) {
 				gameLoop.addPlayer(c, i, nickname, avatar, money);
+				return;
+			}
+		}
+	}
+	
+	public void setNickname(Connection c, String nickname) {
+		for (Integer i : connections.keySet()) {
+			if (connections.get(i) == c) {
+				gameLoop.setNickname(i, nickname);
 				return;
 			}
 		}

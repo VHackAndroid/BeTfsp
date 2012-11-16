@@ -442,6 +442,15 @@ public class PokerGame implements Runnable {
 		this.notify();
 	}
 	
+
+	public synchronized void setNickname(int clientId, String nickname) {
+		PlayerState player = playerState.get(clientId);
+		if (player != null) {
+			player.name = nickname;
+			gui.updatePlayerStatus(player);
+		}
+	}
+	
 	public synchronized void removePlayer(int clientId) {
 		Log.v("wePoker - PokerGame", "Removing player "+clientId);
 		PlayerState player = playerState.get(clientId);
