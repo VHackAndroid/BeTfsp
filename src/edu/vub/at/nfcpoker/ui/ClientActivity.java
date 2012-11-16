@@ -20,6 +20,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -32,6 +33,7 @@ import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.text.InputType;
@@ -65,6 +67,7 @@ import edu.vub.at.nfcpoker.PokerGameState;
 import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.WePokerPreferencesActivity;
 import edu.vub.at.nfcpoker.comm.GameServer;
 import edu.vub.at.nfcpoker.comm.Message.BigBlindMessage;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
@@ -79,6 +82,7 @@ import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
+import edu.vub.at.nfcpoker.comm.Message.SetNicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.SmallBlindMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
@@ -86,7 +90,7 @@ import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
 
-public class ClientActivity extends Activity implements OnClickListener {
+public class ClientActivity extends Activity implements OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
 	public class ConnectAsyncTask extends AsyncTask<Void, Void, Client> {
 
@@ -905,6 +909,8 @@ public class ClientActivity extends Activity implements OnClickListener {
         if (nfcAdapter != null) {
         	nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
         }
+        
+        Settings.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 		super.onResume();
 	}
 
@@ -917,6 +923,7 @@ public class ClientActivity extends Activity implements OnClickListener {
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
         }
+        Settings.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
 	}
 
@@ -961,15 +968,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		case R.id.allIn:
 			performAllIn();
 			return true;
-		case R.id.itemSetName:
-			askNickName();
-			return true;
 		case R.id.itemAddMoney:
 			askAddMoney();
 			return true;
-		case R.id.itemAbout:
-			launchMainWebsite();
-			return true;
+		case R.id.itemSettings:
+			Intent i = new Intent(this, WePokerPreferencesActivity.class);
+			startActivity(i);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -1127,30 +1131,6 @@ public class ClientActivity extends Activity implements OnClickListener {
 		}
 	}
 
-	private void askNickName() {
-		final Context ctx = this;
-		final Dialog moneyDialog;
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		final EditText input = new EditText(this);
-		input.setInputType(InputType.TYPE_CLASS_TEXT);
-		input.setText(Settings.nickname);
-		builder.setView(input);
-		builder.setPositiveButton("Set", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface di, int arg1) {
-				try {
-					Settings.nickname = input.getText().toString();
-					Settings.saveSettings(ctx);
-					SetClientParameterMessage ca = new SetClientParameterMessage(Settings.nickname, Settings.avatar, money);
-					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-				} catch (Exception e) {	}
-			}
-		});
-		builder.setCancelable(true);
-		moneyDialog = builder.create();
-		moneyDialog.show();
-	}
-
 	private void askAddMoney() {
 		final Dialog moneyDialog;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1173,14 +1153,12 @@ public class ClientActivity extends Activity implements OnClickListener {
 		moneyDialog = builder.create();
 		moneyDialog.show();
 	}
-
-	private void launchMainWebsite() {
-		try {
-			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setData(Uri.parse(Splash.WEPOKER_WEBSITE));
-			startActivity(intent);
-		} catch (Exception e) {
-			e.printStackTrace();
+	
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		if ("nickname".equals(key)) {
+			SetNicknameMessage ca = new SetNicknameMessage(Settings.nickname);
+			serverConnection.sendTCP(ca);
 		}
 	}
 

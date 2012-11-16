@@ -19,16 +19,15 @@ public class Settings {
 	public static volatile String nickname;
 	public static volatile int avatar;
 	public static volatile int gamesPlayed;
-	public static volatile boolean prefer_wifi_direct;
 	
 	private static final int nicknameTxtLength = 10000;
+	private static SharedPreferences settings;
 
 	public static void loadSettings(Context ctx) {
 		PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false);
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
+		settings = PreferenceManager.getDefaultSharedPreferences(ctx);
 		UUID = Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
 		gamesPlayed = settings.getInt("gamesPlayed", 0);
-		prefer_wifi_direct = settings.getBoolean("prefer_wifi_direct", true);
 		nickname = settings.getString("nickname", "<random>");
 		if (nickname.equals("<random>")) {
 			nickname = getRandomNickName(ctx);
@@ -37,11 +36,18 @@ public class Settings {
 	}
 
 	public static void saveSettings(Context ctx) {
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(ctx);
 		SharedPreferences.Editor editor = settings.edit();
 		editor.putString("nickname", nickname);
 		editor.putInt("gamesPlayed", gamesPlayed);
 		editor.commit();
+	}
+	
+	public static SharedPreferences getSharedPreferences() {
+		return settings;
+	}
+	
+	public static boolean isWifiDirectPreferred() {
+		return settings.getBoolean("prefer_wifi_direct", true);
 	}
 
 	private static String getRandomNickName(Context ctx) {

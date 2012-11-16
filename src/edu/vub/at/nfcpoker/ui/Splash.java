@@ -56,6 +56,7 @@ public class Splash extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_splash);
 		activity = this;
 
@@ -356,7 +357,7 @@ public class Splash extends Activity {
 		
 		if (isWifiDirectSupported()) {
 			Intent i = new Intent(this, ServerActivity.class);
-			i.putExtra(Constants.INTENT_WIFI_DIRECT, isWifiDirectSupported() && !(enabled && connected));
+			i.putExtra(Constants.INTENT_WIFI_DIRECT, isWifiDirectSupported() && (Settings.isWifiDirectPreferred() || !(enabled && connected)));
 			startActivity(i);
 			finish();
 		} else if (!connected) {
