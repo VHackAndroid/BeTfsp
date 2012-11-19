@@ -2,12 +2,13 @@ package edu.vub.at.nfcpoker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import android.util.Log;
@@ -44,7 +45,7 @@ public class PokerGame implements Runnable {
 	
 	// Rounds
 	public volatile PokerGameState gameState;
-	private Vector<PlayerState> clientsIdsInRoundOrder = new Vector<PlayerState>();
+	private List<PlayerState> clientsIdsInRoundOrder = Collections.synchronizedList(new LinkedList<PlayerState>());
 	private ConcurrentSkipListMap<Integer, PlayerState> playerState  = new ConcurrentSkipListMap<Integer, PlayerState>();
 	private int chipsPool = 0;
 	
@@ -77,8 +78,8 @@ public class PokerGame implements Runnable {
 			List<PlayerState> currentPlayers = new ArrayList<PlayerState>();
 			Set<Card> cardPool = new HashSet<Card>();
 
-			for (PlayerState player : clientsIdsInRoundOrder) {
-				currentPlayers.add(player);
+			synchronized (clientsIdsInRoundOrder) {
+				currentPlayers.addAll(clientsIdsInRoundOrder);
 			}
 			
 			try {
@@ -89,6 +90,16 @@ public class PokerGame implements Runnable {
 					player.gameMoney = 0;
 					player.gameHoleCards = null;
 				}
+				
+				// decide on blinds and dealer.
+				PlayerState dealer = currentPlayers.get(currentPlayers.size() - 1);
+				PlayerState smallBlind = currentPlayers.get(0);
+				PlayerState bigBlind = currentPlayers.get(1);
+				gui.setPlayerButtons(dealer, smallBlind, bigBlind);
+
+				addBet(smallBlind, SMALL_BLIND);
+				addBet(bigBlind, BIG_BLIND);
+				broadcast(new Message.TableButtonsMessage(dealer.clientId, smallBlind.clientId, SMALL_BLIND, bigBlind.clientId, BIG_BLIND));
 				
 				// hole cards
 				for (PlayerState player : currentPlayers) {
@@ -206,8 +217,9 @@ public class PokerGame implements Runnable {
 	
 	private void cycleClientsInGame() {
 		if (clientsIdsInRoundOrder.size() <= 1) return;
-		clientsIdsInRoundOrder.add(clientsIdsInRoundOrder.elementAt(0));
-		clientsIdsInRoundOrder.removeElementAt(0);
+		synchronized (clientsIdsInRoundOrder) {
+			clientsIdsInRoundOrder.add(clientsIdsInRoundOrder.remove(0));
+		}
 	}
 	
 	private void askClientActions(PlayerState player, int round) {
@@ -348,8 +360,10 @@ public class PokerGame implements Runnable {
 		int minBet = 0;
 		boolean increasedBet = true;
 
-		@SuppressWarnings("unchecked")
-		Vector<PlayerState> clientOrder = (Vector<PlayerState>) clientsIdsInRoundOrder.clone();
+		List<PlayerState> clientOrder;
+		synchronized (clientsIdsInRoundOrder) {
+			clientOrder = new LinkedList<PlayerState>(clientsIdsInRoundOrder);
+		}
 
 		if (clientOrder.size() < 2) {
 			throw new RoundEndedException();
@@ -364,18 +378,9 @@ public class PokerGame implements Runnable {
 		
 		// Add blinds
 		if (gameState == PokerGameState.PREFLOP) {
-			// Small and big blind
-			PlayerState smallBlind = clientOrder.get(0);
-			addBet(smallBlind, SMALL_BLIND);
-			broadcast(new Message.SmallBlindMessage(smallBlind.clientId, SMALL_BLIND));
-			PlayerState bigBlind = clientOrder.get(1);
-			addBet(bigBlind, BIG_BLIND);
-			broadcast(new Message.BigBlindMessage(bigBlind.clientId, BIG_BLIND));
-			// Cycle the players that have a small or big blind
-			clientOrder.add(clientOrder.elementAt(0));
-			clientOrder.removeElementAt(0);
-			clientOrder.add(clientOrder.elementAt(0));
-			clientOrder.removeElementAt(0);
+			// Small and big blind bet last in the first round.
+			clientOrder.add(clientOrder.remove(0));
+			clientOrder.add(clientOrder.remove(0));
 		}
 		
 		// Two table rounds if needed

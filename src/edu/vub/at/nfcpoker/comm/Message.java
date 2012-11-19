@@ -15,6 +15,7 @@ import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
+
 	enum ClientActionType { Bet, Fold, Check, AllIn, // From Client
 							Unknown };               // For Server: 'undecided'
 
@@ -248,41 +249,30 @@ public interface Message {
 		}
 	}
 
-	public static class SmallBlindMessage extends TimestampedMessage {
+	public static class TableButtonsMessage extends TimestampedMessage {
 
-		public int clientId;
-		public int amount;
+		public int bigAmount;
+		public int bigId;
+		public int smallAmount;
+		public int smallId;
+		public int dealerId;
 
-		public SmallBlindMessage(int clientId, int amount) {
-			this.clientId = clientId;
-			this.amount = amount;
+		
+		public TableButtonsMessage(int dealerId, int smallId, int smallAmount, int bigId, int bigAmount) {
+			this.dealerId = dealerId;
+			this.smallId = smallId;
+			this.smallAmount = smallAmount;
+			this.bigId = bigId;
+			this.bigAmount = bigAmount;
 		}
 
 		// kryo
-		public SmallBlindMessage() {}
-
+		public TableButtonsMessage() {}
+		
 		@Override
 		public String toString() {
-			return super.toString() + ": Client small blind information message, client -> " + amount;
-		}
-	}
-
-	public static class BigBlindMessage extends TimestampedMessage {
-
-		public int clientId;
-		public int amount;
-
-		public BigBlindMessage(int clientId, int amount) {
-			this.clientId = clientId;
-			this.amount = amount;
-		}
-
-		// kryo
-		public BigBlindMessage() {}
-
-		@Override
-		public String toString() {
-			return super.toString() + ": Client big blind information message, client -> " + amount;
+			return String.format("%s: dealer=%d; small(%d)=%d; big(%d)=%d",
+					super.toString(), dealerId, smallId, smallAmount, bigId, bigAmount);
 		}
 	}
 
