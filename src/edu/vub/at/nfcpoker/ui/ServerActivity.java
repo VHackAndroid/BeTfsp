@@ -2,6 +2,7 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -23,12 +24,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Card;
@@ -72,7 +75,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	private static int chipsPool = 0;
 	private static PokerGameState gameState;
 	private static List<PlayerState> playerState = new ArrayList<PlayerState>();
-	private static Map<Integer, View> playerAvatars = new HashMap<Integer, View>();
+	private static Map<Integer, ViewGroup> playerAvatars = new HashMap<Integer, ViewGroup>();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -175,7 +178,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			currentPort = CommLib.SERVER_PORT;
 			startServer.start(ipAddress, broadcastAddress);
 		}
-
 	}
 
 	@Override
@@ -290,7 +292,8 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				} else {
 					users = (LinearLayout) findViewById(R.id.users_top);
 				}
-				View badge = getLayoutInflater().inflate(R.layout.user, users, false);
+				RelativeLayout badge = (RelativeLayout) getLayoutInflater().inflate(R.layout.user, users, false);
+				badge.setTag(new LinkedList<View>());
 
 				ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
 				String avatarField = "edu.vub.at.nfcpoker:drawable/avatar_" + getSafeAvatarId(player.avatar);
@@ -351,7 +354,52 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			}
 		});
 	}
+	
 
+	@Override
+	public void setPlayerButtons(final PlayerState dealer, final PlayerState smallBlind, final PlayerState bigBlind) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				clearButtons();
+				addButton(playerAvatars.get(dealer.clientId), R.drawable.ic_btn_dealer);
+				addButton(playerAvatars.get(smallBlind.clientId), R.drawable.ic_btn_smallblind);
+				addButton(playerAvatars.get(bigBlind.clientId), R.drawable.ic_btn_bigblind);
+			}
+	});
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void clearButtons() {
+		for (ViewGroup badge : playerAvatars.values()) {
+			LinkedList<View> buttons = (LinkedList<View>) badge.getTag();
+			for (View b : buttons) {
+				badge.removeView(b);
+			}
+			buttons.clear();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void addButton(ViewGroup badge, int resId) {
+		if (badge == null)
+			return;
+		
+		LinkedList<View> buttons = (LinkedList<View>) badge.getTag();
+		RelativeLayout.LayoutParams lp =
+				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
+						                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+		
+		int lastId = buttons.isEmpty() ? R.id.playerName : buttons.getLast().getId();
+		lp.addRule(RelativeLayout.RIGHT_OF, lastId);
+		lp.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.playerName);
+		
+		ImageView iv = new ImageView(this);
+		iv.setImageResource(resId);
+		iv.setId(resId);
+		badge.addView(iv, lp);
+		buttons.add(iv);
+	}
+	
 	private void updateTitleAndState() {
 		runOnUiThread(new Runnable() {
 			public void run() {
@@ -371,4 +419,5 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		Log.d("wePoker - Server", "Avatar for player " + avatarId);
 		return avatarId;
 	}
+
 }

@@ -33,4 +33,7 @@ public class DummServerView implements ServerViewInterface {
 	@Override
 	public void removePlayer(PlayerState i) { }
 
+	@Override
+	public void setPlayerButtons(PlayerState dealer, PlayerState smallBlind, PlayerState bigBlind) { }
+
 }

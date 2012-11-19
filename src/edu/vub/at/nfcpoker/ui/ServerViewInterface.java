@@ -17,6 +17,8 @@ public interface ServerViewInterface {
 
 	public void updatePoolMoney(int chipsPool);
 	
+	public void setPlayerButtons(PlayerState dealer, PlayerState smallBlind, PlayerState bigBlind);
+
 	// Players
 
 	public void addPlayer(PlayerState player);
@@ -28,6 +30,7 @@ public interface ServerViewInterface {
 	// Other
 	
 	public Context getContext();
+
 
 	
 }
