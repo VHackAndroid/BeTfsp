@@ -151,7 +151,6 @@ public class Splash extends Activity {
 		super.onResume();
 		registerWifiWatcher();
 		activity = this;
-		// TODO mWifiDirectManager.registerReceiver();
 	}
 	
 	@Override
@@ -159,7 +158,6 @@ public class Splash extends Activity {
 		super.onPause();
 		unregisterReceiver(wifiWatcher); wifiWatcher = null;
 		activity = null;
-		// TODO mWifiDirectManager.unregisterReceiver();
 	}
 	
 	@Override
