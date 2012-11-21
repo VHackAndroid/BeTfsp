@@ -20,6 +20,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -29,6 +31,7 @@ import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.nfcpoker.Constants;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
+import edu.vub.at.nfcpoker.WePokerPreferencesActivity;
 import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
@@ -163,6 +166,22 @@ public class Splash extends Activity {
 	public void onStop() {
 		super.onStop();
 		Settings.saveSettings(this);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.itemSettings:
+			Intent i = new Intent(this, WePokerPreferencesActivity.class);
+			startActivity(i);
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_splash, menu);
+		return true;
 	}
 	
 	// Connectivity
