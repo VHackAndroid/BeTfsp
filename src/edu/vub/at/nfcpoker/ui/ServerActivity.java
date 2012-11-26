@@ -401,7 +401,21 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				addButton(playerAvatars.get(smallBlind.clientId), R.drawable.ic_btn_smallblind);
 				addButton(playerAvatars.get(bigBlind.clientId), R.drawable.ic_btn_bigblind);
 			}
-	});
+		});
+	}
+	
+
+	@Override
+	public void showWinners(final List<PlayerState> remainingPlayers, int chipsPool) {
+		runOnUiThread(new Runnable() {
+			public void run() {
+				for (PlayerState player : remainingPlayers) {
+					View badge = playerAvatars.get(player.clientId);
+					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
+					gameMoney.setText("Winner!");
+				}
+			}
+		});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -459,5 +473,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		Log.d("wePoker - Server", "Avatar for player " + avatarId);
 		return avatarId;
 	}
+
 
 }

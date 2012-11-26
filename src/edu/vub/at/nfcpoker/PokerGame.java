@@ -185,6 +185,7 @@ public class PokerGame implements Runnable {
 					winnerNames.add(lastPlayer.name);
 					
 					broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, winnerNames, false, null, chipsPool));
+					gui.showWinners(remainingPlayers, chipsPool);
 				} else {
 					Log.wtf("wePoker - PokerGame", "Ended prematurely with more than one player?");
 				}
@@ -208,6 +209,7 @@ public class PokerGame implements Runnable {
 					}
 					
 					broadcast(new RoundWinnersDeclarationMessage(bestPlayers, winnerNames, true, bestHand, chipsPool));
+					gui.showWinners(bestPlayers, chipsPool);
 				}
 			}
 			

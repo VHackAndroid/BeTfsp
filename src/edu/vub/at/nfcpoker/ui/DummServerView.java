@@ -19,6 +19,8 @@
 
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.List;
+
 import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.PokerGameState;
@@ -54,5 +56,8 @@ public class DummServerView implements ServerViewInterface {
 
 	@Override
 	public void setPlayerButtons(PlayerState dealer, PlayerState smallBlind, PlayerState bigBlind) { }
+
+	@Override
+	public void showWinners(List<PlayerState> remainingPlayers, int chipsPool) { }
 
 }

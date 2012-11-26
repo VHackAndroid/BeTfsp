@@ -19,6 +19,9 @@
 
 package edu.vub.at.nfcpoker.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import edu.vub.at.nfcpoker.Card;
 import edu.vub.at.nfcpoker.PokerGameState;
@@ -49,6 +52,8 @@ public interface ServerViewInterface {
 	// Other
 	
 	public Context getContext();
+
+	public void showWinners(List<PlayerState> remainingPlayers, int chipsPool);
 
 
 	
