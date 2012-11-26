@@ -63,11 +63,15 @@ public class QRJoinerActivity extends Activity {
 			if (action.equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)) {
 				NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
 				WifiInfo wifiInfo = wm.getConnectionInfo();
-				if (netInfo == null || wifiInfo == null)
+				if (netInfo == null || wifiInfo == null || !currentlyJoining)
 					return;
-				if (currentlyJoining && netInfo.getState() == State.CONNECTED && wifiName.equals(wifiInfo.getSSID())) {
-					publishProgress("Joining game!");
-					startClientActivity();
+				if (netInfo.getState() == State.CONNECTED) {
+					if (wifiName.equals(wifiInfo.getSSID())) {
+						publishProgress("Joining game!");
+						startClientActivity();
+					} else {
+						attemptToJoin(wm);
+					}
 				}
 			}
 			if (action.equals(WifiManager.WIFI_STATE_CHANGED_ACTION)) {
@@ -77,45 +81,47 @@ public class QRJoinerActivity extends Activity {
 					publishProgress("Enabling Wireless...");
 					wm.setWifiEnabled(true);
 				}
-				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED) {
-					if (currentlyJoining) {
-						publishProgress("Connecting to network...");
-						if ((wifiPassword != null) && (!wifiPassword.equals(""))) {
-							// If we have the password
-							WifiConfiguration config = new WifiConfiguration();
-							config.SSID = '"' + wifiName + '"';
-							config.preSharedKey = '"' + wifiPassword + '"';
-							config.hiddenSSID = true;
-							config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-							config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-							config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-							config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-							config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-							config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-							
-							int id = wm.addNetwork(config);
-							Log.d("wePoker - QRJoiner", "Connecting to network " + wifiName + ": " + id);
-							boolean ret = wm.enableNetwork(id, true);
-							Log.d("wePoker - QRJoiner", "enableNetwork returned " + ret);
-						} else {
-							boolean joined = false;
-							for (WifiConfiguration config : wm.getConfiguredNetworks()) {
-								if (config.SSID.equals(wifiName)) {
-									Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifiName);
-									wm.enableNetwork(config.networkId, true);
-									joined = true;
-									break;
-								}
-							}
-							if (!joined) {
-								Log.d("wePoker - QRJoiner", "Asking user to connect manually");
-								new AlertDialog.Builder(QRJoinerActivity.this)
-								    .setMessage("Please connect to the network '" + wifiName + "' manually and scan the barcode again.")
-								    .setCancelable(false)
-								    .show();
-							}
-						}
+				if (new_wifi_status == WifiManager.WIFI_STATE_ENABLED && currentlyJoining) {
+					attemptToJoin(wm);
+				}
+			}
+		}
+
+		public void attemptToJoin(WifiManager wm) {
+			publishProgress("Connecting to network...");
+			if ((wifiPassword != null) && (!wifiPassword.equals(""))) {
+				// If we have the password
+				WifiConfiguration config = new WifiConfiguration();
+				config.SSID = '"' + wifiName + '"';
+				config.preSharedKey = '"' + wifiPassword + '"';
+				config.hiddenSSID = true;
+				config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
+				config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+				config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+				config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+				config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+				config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+
+				int id = wm.addNetwork(config);
+				Log.d("wePoker - QRJoiner", "Connecting to network " + wifiName + ": " + id);
+				boolean ret = wm.enableNetwork(id, false);
+				Log.d("wePoker - QRJoiner", "enableNetwork returned " + ret);
+			} else {
+				boolean joined = false;
+				for (WifiConfiguration config : wm.getConfiguredNetworks()) {
+					if (config.SSID.equals(wifiName)) {
+						Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifiName);
+						wm.enableNetwork(config.networkId, true);
+						joined = true;
+						break;
 					}
+				}
+				if (!joined) {
+					Log.d("wePoker - QRJoiner", "Asking user to connect manually");
+					new AlertDialog.Builder(QRJoinerActivity.this)
+					    .setMessage("Please connect to the network '" + wifiName + "' manually and scan the barcode again.")
+					    .setCancelable(false)
+					    .show();
 				}
 			}
 		}
