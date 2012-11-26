@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/RelativeLayout1"
-    android:layout_width="wrap_content"
+    android:layout_width="200dp"
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="horizontal"
@@ -12,13 +12,14 @@
 
     <ImageView
         android:id="@+id/avatar_user"
-        android:contentDescription="Avatar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:scaleType="fitCenter"/>
+        android:layout_marginLeft="10dp"
+        android:contentDescription="Avatar"
+        android:scaleType="fitCenter" />
 
     <TextView
         android:id="@+id/playerName"

@@ -408,9 +408,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
 						                        RelativeLayout.LayoutParams.WRAP_CONTENT);
 		
-		int lastId = buttons.isEmpty() ? R.id.playerName : buttons.getLast().getId();
-		lp.addRule(RelativeLayout.RIGHT_OF, lastId);
-		lp.addRule(RelativeLayout.ALIGN_BOTTOM, R.id.playerName);
+		if (buttons.isEmpty()) {
+			lp.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+			lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+		} else {
+			lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+			lp.addRule(RelativeLayout.BELOW, buttons.getLast().getId());
+		}
 		
 		ImageView iv = new ImageView(this);
 		iv.setImageResource(resId);
