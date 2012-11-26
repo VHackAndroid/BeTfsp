@@ -167,7 +167,7 @@ public class PokerGame implements Runnable {
 			boolean endedPrematurely = gameState != PokerGameState.RIVER;
 			newState(PokerGameState.END_OF_ROUND);
 			
-			List<PlayerState> remainingPlayers = new ArrayList<PlayerState>();
+			ArrayList<PlayerState> remainingPlayers = new ArrayList<PlayerState>();
 			for (PlayerState player : currentPlayers) {
 				if (player.roundActionType != ClientActionType.Fold &&
 					player.roundActionType != ClientActionType.Unknown) {
@@ -178,10 +178,11 @@ public class PokerGame implements Runnable {
 			if (endedPrematurely) {
 				// If only one player left
 				if (remainingPlayers.size() == 1) {
-					addMoney(remainingPlayers.iterator().next(), chipsPool);
+					final PlayerState lastPlayer = remainingPlayers.get(0);
+					addMoney(lastPlayer, chipsPool);
 
 					List<String> winnerNames = new ArrayList<String>();
-					winnerNames.add(remainingPlayers.iterator().next().name);
+					winnerNames.add(lastPlayer.name);
 					
 					broadcast(new RoundWinnersDeclarationMessage(remainingPlayers, winnerNames, false, null, chipsPool));
 				} else {
@@ -190,28 +191,15 @@ public class PokerGame implements Runnable {
 			} else {
 				// Calculate who has the best cards
 				TreeMap<PlayerState, Hand> hands = new TreeMap<PlayerState, Hand>();
+				Hand bestHand = null;
 				for (PlayerState player : remainingPlayers) {
-					hands.put(player, Hand.makeBestHand(cardPool, Arrays.asList(player.gameHoleCards)));
+					final Hand playerHand = Hand.makeBestHand(cardPool, Arrays.asList(player.gameHoleCards));
+					if (bestHand == null || bestHand.compareTo(playerHand) < 0)
+						bestHand = playerHand;
+					hands.put(player, playerHand);
 				}
 				if (!hands.isEmpty()) {
-					Iterator<PlayerState> it = hands.keySet().iterator();
-					List<PlayerState> bestPlayers = new ArrayList<PlayerState>();
-					PlayerState firstPlayer = it.next();
-					bestPlayers.add(firstPlayer);
-					Hand bestHand = hands.get(firstPlayer);
-					
-					while (it.hasNext()) {
-						PlayerState nextPlayer = it.next();
-						Hand nextHand = hands.get(nextPlayer);
-						int comparison = nextHand.compareTo(bestHand);
-						if (comparison > 0)  {
-							bestHand = nextHand;
-							bestPlayers.clear();
-							bestPlayers.add(nextPlayer);
-						} else if (comparison == 0) {
-							bestPlayers.add(nextPlayer);
-						}
-					}
+					List<PlayerState> bestPlayers = findWinners(hands, bestHand);
 					
 					List<String> winnerNames = new ArrayList<String>();
 					for (PlayerState player: bestPlayers) {
@@ -232,6 +220,19 @@ public class PokerGame implements Runnable {
 				Log.wtf("wePoker - PokerGame", "Thread.sleep was interrupted", e);
 			}
 		}
+	}
+
+	public List<PlayerState> findWinners(TreeMap<PlayerState, Hand> hands, final Hand bestHand) {
+		List<PlayerState> bestPlayers = new ArrayList<PlayerState>();
+
+		for (PlayerState nextPlayer : hands.keySet()) {
+			Hand nextHand = hands.get(nextPlayer);
+			if (nextHand.compareTo(bestHand) == 0) {
+				bestPlayers.add(nextPlayer);
+			}
+		}
+
+		return bestPlayers;
 	}
 	
 	private void cycleClientsInGame() {
