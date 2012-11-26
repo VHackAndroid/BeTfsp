@@ -60,6 +60,7 @@ import edu.vub.at.nfcpoker.PlayerState;
 import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.GameServer;
+import edu.vub.at.nfcpoker.comm.Message;
 
 @SuppressLint("UseSparseArrays")
 public class ServerActivity extends Activity implements ServerViewInterface {
@@ -285,8 +286,18 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 	@Override
 	public void updateGameState(final PokerGameState newState) {
-		gameState = newState;
-		updateTitleAndState();
+		runOnUiThread(new Runnable() {
+			public void run() {
+				gameState = newState;
+				updateTitleAndState();
+				if (newState.compareTo(PokerGameState.PREFLOP) > 0)
+					return;
+				for (ViewGroup badge : playerAvatars.values()) {
+					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
+					gameMoney.setText("");
+				}
+			}
+		});
 	}
 
 	@Override
@@ -348,7 +359,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					TextView name = (TextView) badge.findViewById(R.id.playerName);
 					name.setText(player.name);
 					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
-					gameMoney.setText("\u20AC"+player.gameMoney);
+					if (player.roundActionType == Message.ClientActionType.Fold) {
+						gameMoney.setText("Folded");
+					} else if (player.gameMoney == 0) {
+						gameMoney.setText("");
+					} else {
+						gameMoney.setText("\u20AC"+player.gameMoney);
+					}
 					ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
 					String avatarField = "edu.vub.at.nfcpoker:drawable/avatar_" + getSafeAvatarId(player.avatar);	
 					int id = getResources().getIdentifier(avatarField, null, null);
