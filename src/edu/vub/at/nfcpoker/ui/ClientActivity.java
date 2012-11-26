@@ -88,6 +88,7 @@ import edu.vub.at.nfcpoker.QRNFCFunctions;
 import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.WePokerPreferencesActivity;
 import edu.vub.at.nfcpoker.comm.GameServer;
+import edu.vub.at.nfcpoker.comm.Message;
 import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
@@ -459,12 +460,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentProcessedBet = currentSelectedBet;
 		money -= diff;
 		totalBet += diff;
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.Bet, currentProcessedBet, diff);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
+		sendActionToServer(new ClientAction(ClientActionType.Bet, currentProcessedBet, diff));
 		quickOutputMessage(this, "Bet "+currentProcessedBet);
 		updateBetAmount();
 		updateMoneyTitle();
@@ -485,12 +481,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentProcessedBet = minimumBet;
 		money -= diffMoney;
 		totalBet += diffMoney;
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.Check, currentProcessedBet, diffMoney);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
+		sendActionToServer(new ClientAction(ClientActionType.Check, currentProcessedBet, diffMoney));
 		quickOutputMessage(this, "Following for "+currentProcessedBet);
 		updateBetAmount();
 		updateMoneyTitle();
@@ -502,18 +493,23 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			quickOutputMessage(this, "Cannot fold");
 			return;
 		}
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.Fold);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
+		sendActionToServer(new ClientAction(ClientActionType.Fold));
 		quickOutputMessage(this, "Fold");
 		updateBetAmount();
 		updateMoneyTitle();
 		disableActions();
 	}
 	
+	private void sendActionToServer(final ClientAction ca) {
+		runOnNotUiThread( new Runnable() {
+			@Override
+			public void run() {
+				final FutureMessage msg = new FutureMessage(pendingFuture, ca);
+				serverConnection.sendTCP(msg);
+			}
+		});
+	}
+
 	// TODO: force all in if not enough money for blind / bet / ...
 	private void performAllIn() {
 		if (!allInEnabled) {
@@ -525,12 +521,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentProcessedBet += diffMoney;
 		money = 0;
 		totalBet += diffMoney;
-		runOnNotUiThread(new Runnable() {
-			public void run() {
-				ClientAction ca = new ClientAction(ClientActionType.AllIn, currentProcessedBet, diffMoney);
-				serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
-			}
-		});
+		sendActionToServer(new ClientAction(ClientActionType.AllIn, currentProcessedBet, diffMoney));
 		quickOutputMessage(this, "All in for "+currentProcessedBet);
 		updateBetAmount();
 		updateMoneyTitle();
