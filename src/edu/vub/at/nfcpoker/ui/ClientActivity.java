@@ -775,9 +775,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 					public void run() {
 						if (tbm.smallId == myClientID) {
 							currentProcessedBet = tbm.smallAmount;
+							money -= currentProcessedBet;
 							toastSmallBlind(tbm.smallAmount);
 						} else if (tbm.bigId == myClientID) {
 							currentProcessedBet = tbm.bigAmount;
+							money -= currentProcessedBet;
 							toastBigBlind(tbm.bigAmount);
 						}
 						if (tbm.bigAmount > minimumBet) {
