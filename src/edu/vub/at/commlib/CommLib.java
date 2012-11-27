@@ -20,6 +20,7 @@
 package edu.vub.at.commlib;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -91,18 +92,26 @@ public class CommLib {
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
 		k.register(UUID.class, new UUIDSerializer());
-//		Log.d("wePoker - CommLib", "Discovering on broadcast: "+InetAddress.getByName(broadcastAddress));
+		
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName(broadcastAddress));
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
+		ds.setSoTimeout(10000);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
-		while (true) {
-			ds.receive(dp);
-			CommLibConnectionInfo clci = k.readObject(new Input(dp.getData()), CommLibConnectionInfo.class);
-			if (clci.serverType_.equals(targetClass)) {
-				ds.close();
-				return clci;
+		try {
+			while (true) {
+				ds.receive(dp);
+				CommLibConnectionInfo clci = k.readObject(new Input(dp.getData()), CommLibConnectionInfo.class);
+				if (clci.serverType_.equals(targetClass)) {
+					ds.close();
+					return clci;
+				}
 			}
+		} catch (InterruptedIOException e) {
+			// blocked for 10 seconds without a result.
+			return null;
+		} finally {
+			ds.close();
 		}
 	}
 	

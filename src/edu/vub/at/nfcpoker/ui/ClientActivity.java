@@ -274,7 +274,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
     			ndef.addDataType("*/*");
     		}
     		catch (MalformedMimeTypeException e) {
-    			throw new RuntimeException("fail", e);
+    			/*ignore*/
     		}
     		intentFiltersArray = new IntentFilter[] { ndef, all };
     		// Broadcast NFC Beam
@@ -285,8 +285,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
     					serverWifiName, serverWifiPassword,
     					serverIpAddress, serverPort, isDedicated), this, null);
     		} catch (Exception e) {
-    		    e.printStackTrace();
-			}
+    			/* ignore */
+    		}
 	    }
     	
 		// Gesture detection

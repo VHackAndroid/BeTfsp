@@ -249,6 +249,8 @@ public class Splash extends Activity {
 	public void startClient(
 			String ip, int port, boolean isDedicated,
 			boolean isServer, String broadcast, String wifiName, String wifiPassword) {
+		if (discoveryTask != null && !discoveryTask.isCancelled())
+			discoveryTask.cancel(true);
 		Intent i = new Intent(this, ClientActivity.class);
 		i.putExtra(Constants.INTENT_SERVER_IP, ip);
 		i.putExtra(Constants.INTENT_PORT, port);
