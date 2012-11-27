@@ -309,10 +309,7 @@ public class Splash extends Activity {
 						new Thread() {
 							@Override
 							public void run() {
-								WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-								boolean isWifiEnabled = wm.isWifiEnabled();
-								boolean isConnected = wm.getConnectionInfo().getNetworkId() != -1;
-								if (!(isWifiEnabled && isConnected)) {
+								if (shouldUseWifiDirect()) {
 						    		ServerStarter startServer = new ServerStarter() {
 						    			private String wifiGroupName;
 						    			private String wifiPassword;
@@ -341,9 +338,9 @@ public class Splash extends Activity {
 						    		};
 						    		new WifiDirectManager.Creator(activity, startServer).run();
 						    	} else {
-
-						    		String ipAddress = CommLib.getIpAddress(Splash.this);
-						    		String broadcastAddress = CommLib.getBroadcastAddress(Splash.this);
+						    		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+						    		String ipAddress = CommLib.getIpAddress(wm);
+						    		String broadcastAddress = CommLib.getBroadcastAddress(wm);
 						    		String password = CommLib.getWifiPassword(wm.getConnectionInfo().getSSID());
 				    				startClient(ipAddress, CommLib.SERVER_PORT, false,
 				    						true, broadcastAddress,
@@ -387,13 +384,13 @@ public class Splash extends Activity {
 		
 		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
 		wm.setWifiEnabled(true);
+		
 		WifiInfo connInfo = wm.getConnectionInfo();
-		boolean enabled = wm.isWifiEnabled();
 		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
 		
 		if (isWifiDirectSupported()) {
 			Intent i = new Intent(this, ServerActivity.class);
-			i.putExtra(Constants.INTENT_WIFI_DIRECT, isWifiDirectSupported() && (Settings.isWifiDirectPreferred() || !(enabled && connected)));
+			i.putExtra(Constants.INTENT_WIFI_DIRECT, shouldUseWifiDirect());
 			startActivity(i);
 			finish();
 		} else if (!connected) {
@@ -403,6 +400,18 @@ public class Splash extends Activity {
 			startActivity(i);
 			finish();
 		}
+	}
+
+	public boolean shouldUseWifiDirect() {
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		
+		WifiInfo connInfo = wm.getConnectionInfo();
+		boolean enabled = wm.isWifiEnabled();
+		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
+		final boolean noWirelessConnected = !(enabled && connected);
+		final boolean preferWifiDirect = Settings.isWifiDirectPreferred();
+		final boolean useWifiDirect = isWifiDirectSupported() && (preferWifiDirect || noWirelessConnected);
+		return useWifiDirect;
 	}
 
 }

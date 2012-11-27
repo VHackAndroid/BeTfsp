@@ -52,7 +52,7 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 		try {
 			while (!isCancelled()) {
 				try {
-					String broadcastAddress = CommLib.getBroadcastAddress(this.act);
+					String broadcastAddress = CommLib.getBroadcastAddress(wm);
 					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
 					return c;
 				} catch (IOException e) {

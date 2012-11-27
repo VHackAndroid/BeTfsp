@@ -191,9 +191,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		if (isWifiDirect) {
 			new WifiDirectManager.Creator(this, startServer).run();
 		} else {
-			String ipAddress = CommLib.getIpAddress(this);
-			String broadcastAddress = CommLib.getBroadcastAddress(this);
-			currentWifiGroupName = wm.getConnectionInfo().getSSID();
+			String ipAddress = CommLib.getIpAddress(wm);
+			String broadcastAddress = CommLib.getBroadcastAddress(wm);
+			currentWifiGroupName = CommLib.getWifiGroupName(wm);
 			currentWifiPassword = CommLib.getWifiPassword(currentWifiGroupName);
 			currentIpAddress = ipAddress;
 			currentPort = CommLib.SERVER_PORT;

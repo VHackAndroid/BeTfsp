@@ -62,17 +62,19 @@ public class CommLib {
 		return buf.toString();
 	}
 
-	public static String getIpAddress(Context ctx) {
-		WifiManager m = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
-		return putAddress(m.getDhcpInfo().ipAddress);
+	public static String getIpAddress(WifiManager wm) {
+		return putAddress(wm.getDhcpInfo().ipAddress);
 	}
 	
-	public static String getBroadcastAddress(Context ctx) {
-		WifiManager m = (WifiManager)ctx.getSystemService(Context.WIFI_SERVICE);
-		DhcpInfo dhcp = m.getDhcpInfo();
+	public static String getBroadcastAddress(WifiManager wm) {
+		DhcpInfo dhcp = wm.getDhcpInfo();
 		if (dhcp == null) return "localhost";
 		int broadcast = (dhcp.ipAddress & dhcp.netmask) | ~dhcp.netmask;
 		return putAddress(broadcast);
+	}
+	
+	public static String getWifiGroupName(WifiManager wm) {
+		return wm.getConnectionInfo().getSSID();
 	}
 
 	public static String getWifiPassword(String ssid) {
