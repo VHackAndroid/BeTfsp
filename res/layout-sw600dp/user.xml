@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/RelativeLayout1"
-    android:layout_width="200dp"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:gravity="center"
     android:orientation="horizontal"
@@ -17,9 +17,10 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="15dp"
         android:contentDescription="Avatar"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:src="@drawable/avatar_1" />
 
     <TextView
         android:id="@+id/playerName"

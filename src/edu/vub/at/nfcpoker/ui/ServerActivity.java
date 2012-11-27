@@ -112,6 +112,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		final boolean isDedicated = tablet_layout != null || server_layout != null || isTV;
 		isWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
 
+		gameState = PokerGameState.STOPPED;
 		final Activity act = this;
 		nfcAdapter = NfcAdapter.getDefaultAdapter(this);
 
@@ -366,10 +367,6 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					} else {
 						gameMoney.setText("\u20AC"+player.gameMoney);
 					}
-					ImageView avatar = (ImageView) badge.findViewById(R.id.avatar_user);
-					String avatarField = "edu.vub.at.nfcpoker:drawable/avatar_" + getSafeAvatarId(player.avatar);	
-					int id = getResources().getIdentifier(avatarField, null, null);
-					avatar.setImageDrawable(getResources().getDrawable(id));
 				}
 			}
 		});
