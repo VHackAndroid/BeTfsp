@@ -276,7 +276,7 @@ public class Splash extends Activity {
 		btnJoinDiscovery.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(activity, Discovery.class));
+				startActivity(new Intent(activity, DiscoveryActivity.class));
 				dialog.dismiss();
 			}
 		});
