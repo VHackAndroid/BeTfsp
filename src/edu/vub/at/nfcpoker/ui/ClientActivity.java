@@ -218,6 +218,21 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private Button fold;
 	private boolean allInEnabled;
 
+	public static void startClient(Activity act,
+			String ip, int port, boolean isDedicated,
+			boolean isServer, String broadcast, String wifiName, String wifiPassword) {
+		Intent i = new Intent(act, ClientActivity.class);
+		i.putExtra(Constants.INTENT_SERVER_IP, ip);
+		i.putExtra(Constants.INTENT_PORT, port);
+		i.putExtra(Constants.INTENT_IS_DEDICATED, isDedicated);
+		i.putExtra(Constants.INTENT_IS_SERVER, isServer);
+		i.putExtra(Constants.INTENT_BROADCAST, broadcast);
+		i.putExtra(Constants.INTENT_WIFI_NAME, wifiName);
+		i.putExtra(Constants.INTENT_WIFI_PASSWORD, wifiPassword);
+		act.startActivity(i);
+		act.finish();
+	}
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

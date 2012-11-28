@@ -42,7 +42,8 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
-import edu.vub.at.nfcpoker.ui.DiscoveryAsyncTask.DiscoveryCompletionListener;
+import edu.vub.at.nfcpoker.comm.DiscoveryAsyncTask;
+import edu.vub.at.nfcpoker.comm.DiscoveryAsyncTask.DiscoveryCompletionListener;
 import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)

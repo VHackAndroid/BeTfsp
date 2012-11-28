@@ -17,7 +17,7 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-package edu.vub.at.nfcpoker.ui;
+package edu.vub.at.nfcpoker.comm;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ import android.util.Log;
 import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
-import edu.vub.at.nfcpoker.comm.PokerServer;
+import edu.vub.at.nfcpoker.ui.Splash;
 
 public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionInfo> {
 	public interface DiscoveryCompletionListener {
