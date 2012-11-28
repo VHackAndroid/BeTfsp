@@ -441,9 +441,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 	private void updateMoneyTitle() {
 		if (totalBet > 0) {
-			setTitle("wePoker (" +money+"\u20AC // "+(totalBet)+"\u20AC)");
+			setTitle("\u20AC" +money+" (Bet: \u20AC"+(totalBet)+")");
 		} else {
-			setTitle("wePoker (" +money+"\u20AC)");
+			setTitle("\u20AC" +money);
 		}
 	}
 	
