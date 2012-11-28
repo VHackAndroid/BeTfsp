@@ -26,7 +26,6 @@ import java.util.Random;
 
 import edu.vub.at.nfcpoker.R;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;

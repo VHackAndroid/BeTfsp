@@ -470,6 +470,4 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		Log.d("wePoker - Server", "Avatar for player " + avatarId);
 		return avatarId;
 	}
-
-
 }
