@@ -148,6 +148,9 @@ public class QRJoinerActivity extends Activity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_splash);
         
+        findViewById(R.id.CreateGame).setVisibility(View.GONE);
+        findViewById(R.id.JoinGame).setVisibility(View.GONE);
+        
         handleIntent(getIntent());
         
         intentFilter = new IntentFilter();
@@ -246,10 +249,4 @@ public class QRJoinerActivity extends Activity {
         return true;
     }
 	
-	public String currentWifiNetwork() {
-		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-		WifiInfo wi = wm.getConnectionInfo();
-		String ssid = wi.getSSID();
-		return ssid;
-	}
 }
