@@ -35,10 +35,13 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.nfcpoker.Constants;
@@ -146,8 +149,7 @@ public class QRJoinerActivity extends Activity {
 		intentFilter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
         String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifiName);
-        TextView progressTxt = (TextView) findViewById(R.id.Discovering);
-        progressTxt.setText(joinText);
+        publishProgress(joinText);
 		
         joinServer();
     }
@@ -159,7 +161,9 @@ public class QRJoinerActivity extends Activity {
     
 
     protected void publishProgress(String string) {
-    	TextView progressTxt = (TextView) findViewById(R.id.Discovering);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.ConnectionInformationProgressBar);
+        progressBar.setVisibility(View.VISIBLE);
+    	TextView progressTxt = (TextView) findViewById(R.id.ConnectionInformation);
     	progressTxt.setText(string);
     	Log.d("WePoker - QRJoiner", "Progress update: " + string);
 	}
