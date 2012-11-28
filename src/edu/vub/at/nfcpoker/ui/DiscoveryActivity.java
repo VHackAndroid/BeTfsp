@@ -48,10 +48,21 @@ public class DiscoveryActivity extends Activity {
 	}
 	
 	@Override
+	public void onResume() {
+		super.onResume();
+		startDiscovery();
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		stopDiscovery();
+	}
+	
+	@Override
 	public void onStop() {
 		super.onStop();
 		this.activity = null;
-		stopDiscovery();
 	}
 	
 	public void startDiscovery() {
