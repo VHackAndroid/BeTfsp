@@ -47,6 +47,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
@@ -105,6 +106,7 @@ import edu.vub.at.nfcpoker.comm.Message.SetNicknameMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.TableButtonsMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
+import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
 import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
@@ -156,16 +158,20 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private static String serverBroadcast;
 	private static String serverWifiName;
 	private static String serverWifiPassword;
+	private static boolean serverWifiDirect;
 
 	// Connectivity
 	private static UUID pendingFuture;
 	private static Connection serverConnection;
 	private static int myClientID;
+    private WifiManager.WifiLock wifiLock;
+    private final static int WIFI_LOCK_TIMEOUT = 3600000; // Keep lock for 1 hour
 
 	// UI
 	public static final int POKER_GREEN = 0xFF2C672E;
 	private static int nextToReveal = 0;
 	private static ReceiveHoleCardsMessage lastReceivedHoleCards;
+	private Activity activity;
 	private CurlView mCardView1;
 	private CurlView mCardView2;
 
@@ -236,6 +242,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		activity = this;
 		
 		// Force portrait mode. Do this in code because Google TV does not like it in the manifest.
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
@@ -248,20 +255,13 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		serverBroadcast = getIntent().getStringExtra(Constants.INTENT_BROADCAST);
 		serverWifiName = getIntent().getStringExtra(Constants.INTENT_WIFI_NAME);
 		serverWifiPassword = getIntent().getStringExtra(Constants.INTENT_WIFI_PASSWORD);
+		serverWifiDirect = getIntent().getBooleanExtra(Constants.INTENT_WIFI_DIRECT, false);
 		
 		// Configure the Client Interface
 		if (isDedicated && !audioFeedback) {
 			setContentView(R.layout.activity_client_is_dedicated);
 		} else {
 			setContentView(R.layout.activity_client);
-		}
-		
-		// Start server on a client if required
-		if (isServer) {
-			GameServer cps = new GameServer(
-					new DummServerView(), false,
-					serverIpAddress, serverBroadcast);
-			cps.start();
 		}
 
 		// Interactivity
@@ -396,11 +396,17 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentChipSwiped = 0;
 		nextToReveal = 0;
 		lastReceivedHoleCards = null;
-
-		// Connect to the server
-		new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 		
-		showBarrier("Registering to server...");
+		if (isServer) {
+			// Start server on a client if required
+			startClientServer();
+			showBarrier("Creating server...");
+		} else {
+			// Connect to the server
+			new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
+			showBarrier("Registering to server...");
+		}
+		
 		// adding the hallo wePoker to the watch
 		// clientGameState = ClientGameState.PLAYING;
 		
@@ -417,8 +423,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 
 	private void showBarrier(String cause) {
+		if (activity == null) return;
 		if (barrier == null) {
-			barrier = new ProgressDialog(ClientActivity.this);
+			barrier = new ProgressDialog(activity);
 			barrier.setTitle(cause);
 			barrier.setCancelable(false);
 			barrier.setMessage("Please wait");
@@ -936,6 +943,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	@Override
 	public void onStop() {
 		super.onStop();
+		activity = null;
+		if (wifiLock != null) {
+			wifiLock.release();
+			wifiLock = null;
+		}
 		Settings.saveSettings(this);
 	}
 	
@@ -1449,6 +1461,60 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			String vMsg = c.toString().replace("_", " ");
 			ib.setContentDescription(vMsg);
 			speakMessage(this, vMsg);
+		}
+	}
+	
+	private void startClientServer() {
+		ServerStarter startServer = new ServerStarter() {
+			@Override
+			public void start(String ipAddress, String broadcastAddress) {
+				GameServer cps = new GameServer(new DummServerView(), isDedicated, ipAddress, broadcastAddress);
+				cps.start();
+				new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
+			}
+
+			@Override
+			public void setWifiDirect(final String groupName, final String password, final String ipAddress, final int port) {
+				serverWifiName = groupName;
+				serverWifiPassword  = password;
+				serverIpAddress = ipAddress;
+				serverPort = port;
+				
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						QRNFCFunctions.showWifiConnectionDialog(activity, groupName, password, ipAddress, port, true);
+					}
+				});
+			}
+		};
+		
+		// We need to keep the Wi-Fi awake (Maximum of WIFI_LOCK_TIMEOUT)
+		// - Server performs powersaving
+		// - If no players are connected there is no 'keep alive' message
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		wifiLock = wm.createWifiLock("edu.vub.at.nfcpoker");
+		wifiLock.acquire();
+		final Timer wifiLockTimer = new Timer();
+		wifiLockTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				wifiLock.release();
+				wifiLock = null;
+				wifiLockTimer.cancel();
+			}
+		}, WIFI_LOCK_TIMEOUT);
+		// Start the Connectivity
+		if (serverWifiDirect) {
+			new WifiDirectManager.Creator(this, startServer).run();
+		} else {
+			String ipAddress = CommLib.getIpAddress(wm);
+			String broadcastAddress = CommLib.getBroadcastAddress(wm);
+			serverWifiName = CommLib.getWifiGroupName(wm);
+			serverWifiPassword = CommLib.getWifiPassword(serverWifiName);
+			serverIpAddress = ipAddress;
+			serverPort = CommLib.SERVER_PORT;
+			startServer.start(ipAddress, broadcastAddress);
 		}
 	}
 }
