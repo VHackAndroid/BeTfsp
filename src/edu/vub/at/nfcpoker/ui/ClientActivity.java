@@ -693,6 +693,12 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			setServerConnection(arg0);
 			Log.d("wePoker - Client","Connected to server!");
 		}
+		
+		@Override
+		public void disconnected(Connection arg0) {
+			super.disconnected(arg0);
+			showDisconnectionDialog();
+		}
 
 
 		@Override
@@ -1215,6 +1221,35 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		textCurrentBet.setText(" " + minimumBet);
 		updateMoneyTitle();
 		updateCheckCallText();
+	}
+	
+	public void showDisconnectionDialog() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				DialogInterface.OnClickListener reconnectOCL = new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface arg0, int arg1) {
+						Intent i = new Intent(ClientActivity.this, ClientActivity.class);
+						i.setData(getIntent().getData());
+						finish();
+						startActivity(i);
+					}
+				};
+				
+				DialogInterface.OnClickListener quitOCL = new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface arg0, int arg1) {
+						finish();
+					}
+				};
+				new AlertDialog.Builder(ClientActivity.this)
+					.setTitle("Disconnected from server")
+					.setMessage("Your device has been disconnected from the server. Try to reconnect?")
+					.setPositiveButton("Reconnect", reconnectOCL)
+					.setNegativeButton("Quit", quitOCL)
+					.setCancelable(false)
+					.show();
+			}
+		});
 	}
 
 	// Interactivity
