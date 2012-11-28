@@ -59,6 +59,8 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 				} catch (IOException e) {
 					Log.d("wePoker - Discovery", "Could not start discovery", e);
 				}
+				try { Thread.sleep(1000);
+				} catch (InterruptedException e) { }
 			}
 		} finally {
 			ml.release();
