@@ -20,7 +20,8 @@
         android:id="@+id/JoinDialogOnline"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search online game" />
+        android:text="Search online game"
+        android:visibility="gone" />
     
     <Button
         android:id="@+id/JoinDialogDiscovery"
