@@ -1,27 +1,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tablet_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/CreateGame"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create game" />
-
-    <Button
-        android:id="@+id/JoinGame"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Join game" />
-
     <ImageView
         android:id="@+id/splash1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:contentDescription="wePoker Logo"
         android:src="@drawable/splash" />
 
@@ -48,5 +38,17 @@
             android:text="Discovering ..."
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/CreateGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Create game" />
+
+    <Button
+        android:id="@+id/JoinGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Join game" />
 
 </LinearLayout>
