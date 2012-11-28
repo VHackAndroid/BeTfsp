@@ -10,7 +10,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 
-public class Discovery extends Activity {
+public class DiscoveryActivity extends Activity {
 
 	// Local settings
 	private Activity activity;
@@ -23,6 +23,7 @@ public class Discovery extends Activity {
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_discovery);
 		this.activity = this;
 		this.dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
@@ -48,6 +49,7 @@ public class Discovery extends Activity {
 	
 	@Override
 	public void onStop() {
+		super.onStop();
 		this.activity = null;
 		stopDiscovery();
 	}
