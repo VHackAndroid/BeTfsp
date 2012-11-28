@@ -616,7 +616,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			public void run() {
 				disableActions();
 				updateBetAmount();
-				updateMinBetAmount(0);
 				checkHeadset();
 			}});
 		String toastToShow = null;
