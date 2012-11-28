@@ -18,7 +18,7 @@
             android:key="prefer_wifi_direct"
             android:summary="Ad hoc server"
             android:summaryOff="Use regular Wi-Fi"
-            android:summaryOn="Prefer ad hoc Wi-Fi Direct"
+            android:summaryOn="Prefer Wi-Fi Direct"
             android:switchTextOn="Yes"
             android:switchTextOff="No"
             android:title="Prefer ad hoc" />
