@@ -327,6 +327,9 @@ public class Splash extends Activity {
 	}
 	
 	public void stopDiscovery() {
+		if (discoveryTask == null)
+			return;
+		
 		discoveryTask.cancel(true);
 		discoveryTask = null;
 	}
