@@ -1007,6 +1007,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	TextToSpeech.OnInitListener txtToSpeechListener = new TextToSpeech.OnInitListener() {
 		@Override
 		public void onInit(int status) {
+			if (tts == null) return;
             ttsInitialised = true;
 			if (status == TextToSpeech.SUCCESS) {
 	            int result = tts.setLanguage(Locale.US);
