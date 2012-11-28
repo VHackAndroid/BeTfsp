@@ -99,14 +99,13 @@ public class CommLib {
 		ds.setSoTimeout(DISCOVERY_TIMEOUT);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
 		try {
-			while (true) {
-				ds.receive(dp);
-				CommLibConnectionInfo clci = k.readObject(new Input(dp.getData()), CommLibConnectionInfo.class);
-				if (clci.serverType_.equals(targetClass)) {
-					ds.close();
-					return clci;
-				}
+			ds.receive(dp);
+			CommLibConnectionInfo clci = k.readObject(new Input(dp.getData()), CommLibConnectionInfo.class);
+			if (clci.serverType_.equals(targetClass)) {
+				ds.close();
+				return clci;
 			}
+			return null;
 		} catch (InterruptedIOException e) {
 			// blocked for 10 seconds without a result.
 			return null;

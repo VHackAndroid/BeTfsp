@@ -50,7 +50,8 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 		MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 		ml.acquire();
 		try {
-			while (!isCancelled()) {
+			int triesLeft = 3;
+			while (!isCancelled() && --triesLeft > 0) {
 				try {
 					String broadcastAddress = CommLib.getBroadcastAddress(wm);
 					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
@@ -58,9 +59,7 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 				} catch (IOException e) {
 					Log.d("wePoker - Discovery", "Could not start discovery", e);
 				}
-				Thread.sleep(2000);
 			}
-		} catch (InterruptedException e) {
 		} finally {
 			ml.release();
 		}
