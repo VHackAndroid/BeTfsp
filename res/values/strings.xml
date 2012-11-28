@@ -8,6 +8,7 @@
     <string name="title_activity_client">wePoker</string>
     <string name="title_activity_server">wePoker (Table)</string>
     <string name="title_activity_qrjoiner">Join wePoker Game</string>
+    <string name="title_activity_discovery">wePoker - Discover local games!</string>
     <string name="title_activity_preferences">wePoker Preferences</string>
     <string name="qr_code_join_confirmation">This QR Code wants to connect your device to a wePoker game running on the network "%s".</string>
     <string name="extension_name">wePoker</string>

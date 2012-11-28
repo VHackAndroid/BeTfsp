@@ -75,6 +75,11 @@
             android:label="@string/title_activity_client" >
         </activity>
         <activity
+            android:name="edu.vub.at.nfcpoker.ui.DiscoveryActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="@string/title_activity_discovery" >
+        </activity>
+        <activity
             android:name="edu.vub.at.nfcpoker.ui.ServerActivity"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="@string/title_activity_server"
