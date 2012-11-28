@@ -13,7 +13,7 @@
     <PreferenceCategory
         android:summary="Settings pertaining to wireless connectivity"
         android:title="Connectivity" >
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="prefer_wifi_direct"
             android:summary="Prefer Wi-Fi Direct over regular access points"
