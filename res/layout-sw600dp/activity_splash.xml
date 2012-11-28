@@ -24,16 +24,16 @@
         android:orientation="vertical" >
 
         <Button
-            android:id="@+id/discover_button"
+            android:id="@+id/JoinGame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Join running game" />
+            android:text="Join game" />
         
         <Button
-            android:id="@+id/server"
+            android:id="@+id/CreateGame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Start server" />
+            android:text="Create game" />
     </LinearLayout>
 
 </RelativeLayout>

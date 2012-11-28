@@ -1,38 +1,28 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tablet_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/CreateGame"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Create game" />
-
-    <Button
-        android:id="@+id/JoinGame"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Join game" />
-
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="#FFFFFF" >
+ 
     <ImageView
-        android:id="@+id/splash1"
+        android:id="@+id/splash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:contentDescription="wePoker Logo"
         android:src="@drawable/splash" />
-
+ 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:visibility="visible" >
-
+        android:gravity="center_vertical" >
+ 
         <ProgressBar
-            android:id="@+id/ConnectionInformationProgressBar"
+            android:id="@+id/progressBar1"
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -40,13 +30,13 @@
             android:maxWidth="40dip"
             android:minHeight="40dip"
             android:minWidth="40dip" />
-
+ 
         <TextView
-            android:id="@+id/ConnectionInformation"
+            android:id="@+id/Discovering"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Discovering ..."
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
-
+ 
 </LinearLayout>
