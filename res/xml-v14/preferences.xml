@@ -16,12 +16,12 @@
         <SwitchPreference
             android:defaultValue="true"
             android:key="prefer_wifi_direct"
-            android:summary="Prefer Wi-Fi Direct over regular access points"
-            android:summaryOff="Use regular network if possible"
-            android:summaryOn="Prefer Wi-Fi Direct"
-            android:switchTextOff="No"
+            android:summary="Ad hoc server"
+            android:summaryOff="Use regular Wi-Fi"
+            android:summaryOn="Prefer ad hoc Wi-Fi Direct"
             android:switchTextOn="Yes"
-            android:title="Prefer Wi-Fi Direct" />
+            android:switchTextOff="No"
+            android:title="Prefer ad hoc" />
     </PreferenceCategory>
     <PreferenceCategory
         android:summary="This section describes the application"
