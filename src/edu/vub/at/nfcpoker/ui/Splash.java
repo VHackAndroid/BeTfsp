@@ -21,6 +21,9 @@ package edu.vub.at.nfcpoker.ui;
 
 import java.lang.ref.WeakReference;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -31,6 +34,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -78,6 +82,7 @@ public class Splash extends Activity {
 		// Settings
 		Settings.loadSettings(this);
 		
+		
 		View tablet_layout = findViewById(R.id.tablet_layout);
 		if (tablet_layout != null)
 			isTablet = true;
@@ -88,6 +93,7 @@ public class Splash extends Activity {
 		// UI
 		messageHandler = new IncomingHandler(this);
 		
+		View jG = findViewById(R.id.JoinGame);
 		final Button joinGame = (Button) findViewById(R.id.JoinGame);
 		if (joinGame != null) {
 			joinGame.setOnClickListener(new OnClickListener() {
@@ -189,6 +195,21 @@ public class Splash extends Activity {
 		return true;
 	}
 	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		IntentResult scanResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+		if (scanResult != null) {	
+			Intent i = new Intent(this, QRJoinerActivity.class);
+			final String scannedUri = scanResult.getContents();
+			if (!scannedUri.startsWith("http://wepoker.info/play")) {
+				Toast.makeText(this, "Please scan a QR code that belongs to a wePoker game", Toast.LENGTH_SHORT).show();
+			} else {
+				i.setData(Uri.parse(scannedUri));
+				startActivity(i);
+			}
+		}
+	}
+
 	// Connectivity
 	private class ConnectionChangeReceiver extends BroadcastReceiver {
 		public void onReceive(Context context, Intent intent ) {
@@ -247,10 +268,8 @@ public class Splash extends Activity {
 		btnJoinQRCode.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-		        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-		        intent.setPackage("com.google.zxing.client.android");
-		        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-		        startActivity(intent);
+				IntentIntegrator integrator = new IntentIntegrator(Splash.this);
+				integrator.initiateScan();
 			}
 		});
 

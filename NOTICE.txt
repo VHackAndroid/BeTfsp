@@ -1,3 +1,4 @@
 This work is under the GPLv2 license (see 'LICENSE.txt'), except where stated otherwise.
 Portions of this work use public-domain code by 'crazyjugglerdrummer', see http://www.dreamincode.net/forums/topic/116864-how-to-make-a-poker-game-in-java/
 Portions of this work use Apache 2.0-licensed code by Harri Smatt, available at https://github.com/harism/android_page_curl.
+Portions of this work use Apache 2.0-licensed code by ZXing authors, available at http://code.google.com/p/zxing
