@@ -247,8 +247,10 @@ public class Splash extends Activity {
 		btnJoinQRCode.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// TODO Launch Scanner or Market if not installed
-				dialog.dismiss();
+		        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+		        intent.setPackage("com.google.zxing.client.android");
+		        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+		        startActivity(intent);
 			}
 		});
 
