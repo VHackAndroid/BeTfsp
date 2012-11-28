@@ -1543,12 +1543,12 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			new WifiDirectManager.Creator(this, startServer).run();
 		} else {
 			String ipAddress = CommLib.getIpAddress(wm);
-			String broadcastAddress = CommLib.getBroadcastAddress(wm);
+			serverBroadcast = CommLib.getBroadcastAddress(wm);
 			serverWifiName = CommLib.getWifiGroupName(wm);
 			serverWifiPassword = CommLib.getWifiPassword(serverWifiName);
 			serverIpAddress = ipAddress;
 			serverPort = CommLib.SERVER_PORT;
-			startServer.start(ipAddress, broadcastAddress);
+			startServer.start(ipAddress, serverBroadcast);
 		}
 	}
 }
