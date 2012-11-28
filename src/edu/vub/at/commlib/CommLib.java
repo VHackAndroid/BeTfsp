@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import android.content.Context;
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
 
@@ -44,7 +43,8 @@ public class CommLib {
 	public static final int DISCOVERY_PORT = 54333;
 	public static final int SERVER_PORT = 54334;
 	
-	private static final int TIMEOUT_EXPORT = 10000;
+	private static final int DISCOVERY_TIMEOUT = 10000;
+	private static final int EXPORT_INTERVAL = 10000;
 	
 	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();
@@ -96,7 +96,7 @@ public class CommLib {
 		DatagramSocket ds = new DatagramSocket(DISCOVERY_PORT, InetAddress.getByName(broadcastAddress));
 		ds.setBroadcast(true);
 		ds.setReuseAddress(true);
-		ds.setSoTimeout(10000);
+		ds.setSoTimeout(DISCOVERY_TIMEOUT);
 		DatagramPacket dp = new DatagramPacket(new byte[1024], 1024);
 		try {
 			while (true) {
@@ -133,7 +133,7 @@ public class CommLib {
 		while (true) {
 			ds.send(dp);
 			try {
-				Thread.sleep(TIMEOUT_EXPORT);
+				Thread.sleep(EXPORT_INTERVAL);
 			} catch (InterruptedException e) { }
 		}
 	}
