@@ -293,12 +293,19 @@ public class Splash extends Activity {
 		WifiInfo connInfo = wm.getConnectionInfo();
 		boolean enabled = wm.isWifiEnabled();
 		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
-
-		Intent i = new Intent(this, ServerActivity.class);
+		boolean isDedicated = isTV || isTablet;
 		boolean preferWifiDirect = Settings.isWifiDirectPreferred();
 		boolean currentlyConnected = enabled && connected;
 		boolean shouldUseWifiDirect = isWifiDirectSupported() && (forceWifiDirect || preferWifiDirect || !currentlyConnected);
+		Intent i;
+		if (isDedicated) {
+			i = new Intent(this, ServerActivity.class);
+		} else {
+			i = new Intent(this, ClientActivity.class);
+		}
 		i.putExtra(Constants.INTENT_WIFI_DIRECT, shouldUseWifiDirect);
+		i.putExtra(Constants.INTENT_IS_DEDICATED, isDedicated);
+		i.putExtra(Constants.INTENT_IS_SERVER, true);
 		if (!isWifiDirectSupported() && !currentlyConnected) {
 			Toast.makeText(this, "Wifi disconnected and Wifi-Direct is not supported on this device. Please connect to the nearest Wifi hotspot and try again!", Toast.LENGTH_SHORT).show();
 			return;
