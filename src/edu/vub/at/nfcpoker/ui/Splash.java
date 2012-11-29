@@ -46,6 +46,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
@@ -338,6 +341,20 @@ public class Splash extends Activity {
 		if (discoveryTask != null)
 			discoveryTask.cancel(true);
 
+		WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+		WifiInfo connInfo = wm.getConnectionInfo();
+		boolean enabled = wm.isWifiEnabled();
+		boolean connected = connInfo != null && connInfo.getNetworkId() != -1;
+		if (!enabled || !connected) {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					hideDiscoveryInformation();
+				}
+			});
+			return;
+		}
+
 		final DiscoveryAsyncTask.DiscoveryCompletionListener dcl = new DiscoveryAsyncTask.DiscoveryCompletionListener() {
 			@Override
 			public void onDiscovered(CommLibConnectionInfo result) {
@@ -352,14 +369,46 @@ public class Splash extends Activity {
 		
 		discoveryTask = new DiscoveryAsyncTask(act, dcl);
 		discoveryTask.execute();
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				showDiscoveryInformation();
+			}
+		});
+	}
+	
+	private void showDiscoveryInformation() {
+		final ProgressBar pb = (ProgressBar) findViewById(R.id.ConnectionInformationProgressBar);
+		if (pb != null) {
+			pb.setVisibility(View.VISIBLE);
+		}
+		final TextView tv = (TextView) findViewById(R.id.ConnectionInformation);
+		if (tv != null) {
+			tv.setVisibility(View.VISIBLE);
+		}
+	}
+	
+	private void hideDiscoveryInformation() {
+		final ProgressBar pb = (ProgressBar) findViewById(R.id.ConnectionInformationProgressBar);
+		if (pb != null) {
+			pb.setVisibility(View.INVISIBLE);
+		}
+		final TextView tv = (TextView) findViewById(R.id.ConnectionInformation);
+		if (tv != null) {
+			tv.setVisibility(View.INVISIBLE);
+		}
 	}
 	
 	public void stopDiscovery() {
-		if (discoveryTask == null)
-			return;
-		
+		if (discoveryTask == null) return;
 		discoveryTask.cancel(true);
 		discoveryTask = null;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				hideDiscoveryInformation();
+			}
+		});
 	}
 	
 	private void askJoinDiscoveredServer(
