@@ -35,7 +35,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.opengl.Visibility;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;

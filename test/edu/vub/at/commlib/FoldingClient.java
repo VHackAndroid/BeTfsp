@@ -2,8 +2,6 @@ package edu.vub.at.commlib;
 
 import java.io.IOException;
 
-import android.util.Log;
-
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 
