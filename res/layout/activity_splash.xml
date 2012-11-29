@@ -1,19 +1,9 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
     android:orientation="vertical" >
-
-    <ImageView
-        android:id="@+id/splash1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:contentDescription="wePoker Logo"
-        android:src="@drawable/splash" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,6 +16,7 @@
             style="?android:attr/progressBarStyleLarge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:maxHeight="40dip"
             android:maxWidth="40dip"
             android:minHeight="40dip"
@@ -35,20 +26,43 @@
             android:id="@+id/ConnectionInformation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:text="Discovering ..."
             android:textAppearance="?android:attr/textAppearanceLarge" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/CreateGame"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/splash1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create game" />
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:contentDescription="wePoker Logo"
+        android:paddingBottom="60dp"
+        android:src="@drawable/splash" />
 
-    <Button
-        android:id="@+id/JoinGame"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="Join game" />
+        android:layout_alignBottom="@+id/splash1"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <Button
+            android:id="@+id/JoinGame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Join game" />
+
+        <Button
+            android:id="@+id/CreateGame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create game" />
+
+    </LinearLayout>
+
+</RelativeLayout>
