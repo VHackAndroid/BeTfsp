@@ -204,6 +204,7 @@ public class Splash extends Activity {
 		if (scanResult != null) {	
 			Intent i = new Intent(this, QRJoinerActivity.class);
 			final String scannedUri = scanResult.getContents();
+			if (scannedUri == null) return;
 			if (!scannedUri.startsWith("http://wepoker.info/play")) {
 				Toast.makeText(this, "Please scan a QR code that belongs to a wePoker game", Toast.LENGTH_SHORT).show();
 			} else {
