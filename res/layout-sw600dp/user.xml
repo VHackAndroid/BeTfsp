@@ -51,5 +51,14 @@
         android:text="Player Game Money"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#CFB52B" />
+    
+    <TextView 
+        android:id="@+id/overlay"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignRight="@+id/playerName"
+        android:paddingRight="10dp"
+        android:background="#30dddddd"
+         />
 
 </RelativeLayout>
