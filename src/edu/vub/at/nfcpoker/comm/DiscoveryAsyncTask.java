@@ -46,7 +46,8 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 	
 	@Override
 	protected CommLibConnectionInfo doInBackground(Void... arg0) {
-		WifiManager wm = (WifiManager) this.act.getSystemService(Splash.WIFI_SERVICE);
+		if (act == null) return null;
+		WifiManager wm = (WifiManager) act.getSystemService(Splash.WIFI_SERVICE);
 		MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 		ml.acquire();
 		try {
