@@ -44,7 +44,7 @@ public class CommLib {
 	public static final int SERVER_PORT = 54334;
 	
 	private static final int DISCOVERY_TIMEOUT = 10000;
-	private static final int EXPORT_INTERVAL = 10000;
+	private static final int EXPORT_INTERVAL = 2000;
 	
 	@SuppressWarnings("rawtypes")
 	public static Map<UUID, Future> futures = new HashMap<UUID, Future>();

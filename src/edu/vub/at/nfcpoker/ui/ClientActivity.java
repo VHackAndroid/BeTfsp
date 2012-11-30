@@ -1238,23 +1238,16 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				DialogInterface.OnClickListener reconnectOCL = new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface arg0, int arg1) {
-						Intent i = new Intent(activity, ClientActivity.class);
-						i.setData(getIntent().getData());
-						finish();
-						startActivity(i);
-					}
-				};
 				DialogInterface.OnClickListener quitOCL = new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface arg0, int arg1) {
 						finish();
+						Intent i = new Intent(ClientActivity.this, Splash.class);
+						startActivity(i);
 					}
 				};
 				new AlertDialog.Builder(activity)
 					.setTitle("Disconnected from server")
-					.setMessage("Your device has been disconnected from the server. Try to reconnect?")
-					.setPositiveButton("Reconnect", reconnectOCL)
+					.setMessage("Your device has been disconnected from the server.")
 					.setNegativeButton("Quit", quitOCL)
 					.setCancelable(false)
 					.show();
