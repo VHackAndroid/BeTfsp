@@ -408,7 +408,9 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void run() {
 				for (PlayerState player : remainingPlayers) {
 					View badge = playerAvatars.get(player.clientId);
+					if (badge == null) return;
 					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
+					if (gameMoney == null) return;
 					gameMoney.setText("Winner!");
 				}
 			}
