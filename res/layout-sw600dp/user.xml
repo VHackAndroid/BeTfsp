@@ -62,6 +62,11 @@
         android:layout_alignParentRight="true"
         android:background="#a0555555"
         android:paddingRight="10dp"
-        android:visibility="gone" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:visibility="gone"
+        android:textSize="50sp"
+        android:gravity="center"
+        android:textColor="#CFB52B"
+        />
 
 </RelativeLayout>

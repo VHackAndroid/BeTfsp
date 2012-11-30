@@ -38,6 +38,7 @@ import android.content.IntentFilter.MalformedMimeTypeException;
 import android.net.wifi.WifiManager;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
+import android.telephony.gsm.SmsMessage.MessageClass;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -360,12 +361,17 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					TextView name = (TextView) badge.findViewById(R.id.playerName);
 					name.setText(player.name);
 					TextView gameMoney = (TextView) badge.findViewById(R.id.playerGameMoney);
+					TextView overlay = (TextView) badge.findViewById(R.id.overlay);
 					if (player.roundActionType == Message.ClientActionType.Fold) {
-						gameMoney.setText("Folded");
+						overlay.setText("Folded");
+						overlay.setVisibility(View.VISIBLE);
+					} else if (player.roundActionType == Message.ClientActionType.AllIn) {
+						overlay.setText("All In");
+						overlay.setVisibility(View.VISIBLE);
 					} else if (player.gameMoney == 0) {
 						gameMoney.setText("");
 					} else {
-						gameMoney.setText("\u20AC"+player.gameMoney);
+						gameMoney.setText("+\u20AC"+player.gameMoney);
 					}
 				}
 			}
@@ -425,6 +431,13 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				badge.removeView(b);
 			}
 			buttons.clear();
+		}
+	}
+	
+	protected void clearOverlays() {
+		for (ViewGroup badge : playerAvatars.values()) {
+			View overlay = badge.findViewById(R.id.overlay);
+			overlay.setVisibility(View.GONE);
 		}
 	}
 
