@@ -340,6 +340,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 				name.setText(player.name);
 				TextView money = (TextView) badge.findViewById(R.id.playerMoney);
 				money.setText("\u20AC" + player.money);
+				
+				TextView overlay = (TextView) badge.findViewById(R.id.overlay);
+				overlay.setVisibility(View.VISIBLE);
+				overlay.setText("Waiting");
 
 				playerAvatars.put(player.clientId, badge);
 
