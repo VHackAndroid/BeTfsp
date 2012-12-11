@@ -392,7 +392,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 					users_bottom.removeView(badge);
 					LinearLayout users_top = (LinearLayout) findViewById(R.id.users_top);
 					users_top.removeView(badge);
-					playerAvatars.remove(player);
+					playerAvatars.remove(player.clientId);
 				}
 			}
 		});
