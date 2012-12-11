@@ -374,8 +374,10 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 						overlay.setVisibility(View.VISIBLE);
 					} else if (player.gameMoney == 0) {
 						gameMoney.setText("");
+						overlay.setText("");
 					} else {
 						gameMoney.setText("+\u20AC"+player.gameMoney);
+						overlay.setText("");
 					}
 				}
 			}
