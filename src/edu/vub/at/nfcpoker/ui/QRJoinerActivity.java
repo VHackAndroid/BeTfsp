@@ -170,11 +170,14 @@ public class QRJoinerActivity extends Activity {
     
 
     protected void publishProgress(String string) {
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.ConnectionInformationProgressBar);
-        progressBar.setVisibility(View.VISIBLE);
-    	TextView progressTxt = (TextView) findViewById(R.id.ConnectionInformation);
-    	progressTxt.setText(string);
     	Log.d("WePoker - QRJoiner", "Progress update: " + string);
+
+    	ProgressBar progressBar = (ProgressBar) findViewById(R.id.ConnectionInformationProgressBar);
+    	TextView progressTxt = (TextView) findViewById(R.id.ConnectionInformation);
+    	if (progressBar == null || progressTxt == null)
+    		return;
+    	progressBar.setVisibility(View.VISIBLE);
+    	progressTxt.setText(string);
 	}
 
 	protected void startClientActivity() {
