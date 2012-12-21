@@ -92,6 +92,7 @@ import edu.vub.at.nfcpoker.comm.Message.ClientAction;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionMessage;
 import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.ResetMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
 import edu.vub.at.nfcpoker.comm.Message.PoolMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
@@ -848,6 +849,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 							vibrate(VibrationType.Lose);
 					}});
 				}
+			}
+			
+			if (m instanceof ResetMessage) {
+				money = 2000;
+				processStateChangeMessage(null, new StateChangeMessage(PokerGameState.END_OF_ROUND));
 			}
 		}
 	};
