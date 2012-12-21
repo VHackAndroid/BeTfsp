@@ -814,6 +814,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 						if (tbm.bigAmount > minimumBet) {
 							updateMinBetAmount(tbm.bigAmount);
 						}
+						updateBetAmount();
 					}
 				});
 			}
