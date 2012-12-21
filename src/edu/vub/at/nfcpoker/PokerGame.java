@@ -290,6 +290,10 @@ public class PokerGame extends Thread {
 		case Check:
 		case Bet:
 			// Client sends diffMoney
+			if (ca.handled) {
+				boolean underMinimum = player.roundMoney < minBet;
+				return !underMinimum;
+			}
 			if (player.roundMoney + ca.extraMoney < minBet) {
 				// Can happen when a player checks before another player bets
 				// We should ask a new action to the player
