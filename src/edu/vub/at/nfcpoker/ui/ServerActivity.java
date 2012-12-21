@@ -38,7 +38,6 @@ import android.content.IntentFilter.MalformedMimeTypeException;
 import android.net.wifi.WifiManager;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
-import android.telephony.gsm.SmsMessage.MessageClass;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -90,6 +89,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	private PendingIntent pendingIntent;
 	private IntentFilter[] intentFiltersArray;
 	private NfcAdapter nfcAdapter;
+	protected GameServer currentServer;
 
 	// UI
 	private static int nextToReveal = 0;
@@ -150,6 +150,7 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 			public void start(String ipAddress, String broadcastAddress) {
 				GameServer cps = new GameServer(ServerActivity.this, isDedicated, ipAddress, broadcastAddress);
 				cps.start();
+				currentServer = cps;
 			}
 
 			@Override
@@ -235,11 +236,17 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == R.id.show_wifi_settings) {
-			QRNFCFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
-			return true;
+		switch (item.getItemId()) {
+			case R.id.show_wifi_settings:
+				QRNFCFunctions.showWifiConnectionDialog(this, currentWifiGroupName, currentWifiPassword, currentIpAddress, currentPort, true);
+				return true;
+			case R.id.reset:
+				if (currentServer != null)
+					currentServer.reset();
+				return true;
+			default:
+				return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
 	}
 
 	@Override

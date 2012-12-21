@@ -21,6 +21,8 @@ package edu.vub.at.commlib;
 
 import java.util.UUID;
 
+import android.util.Log;
+
 public class Future<T> {
 	public interface FutureListener<T> {
 		void resolve(T value);
@@ -50,7 +52,7 @@ public class Future<T> {
 		return value != null;
 	}
 	
-	public synchronized T get() {
+	public synchronized T get() throws InterruptedException {
 		if (value != null)
 			return value;
 		setFutureListener(new FutureListener<T>() {
@@ -64,7 +66,8 @@ public class Future<T> {
 		try {
 			this.wait();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			Log.d("wePoker - Future", "Future was interrupted in get()");
+			throw e;
 		}
 		return value;
 	}

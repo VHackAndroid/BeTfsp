@@ -34,7 +34,6 @@ import edu.vub.at.nfcpoker.Hand;
 
 public interface Message {
 
-
 	enum ClientActionType { Bet, Fold, Check, AllIn, // From Client
 							Unknown };               // For Server: 'undecided'
 
@@ -369,4 +368,15 @@ public interface Message {
 			return super.toString() + ": Set nickname to " + nickname;
 		}
 	}
+	
+	public class ResetMessage extends TimestampedMessage implements Message {
+		// kryo
+		public ResetMessage() {}
+		
+		@Override
+		public String toString() {
+			return super.toString() + ": Reset game";
+		}
+	}
+
 }

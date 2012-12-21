@@ -42,11 +42,12 @@ import edu.vub.at.nfcpoker.comm.Message.ClientActionType;
 import edu.vub.at.nfcpoker.comm.Message.ReceiveHoleCardsMessage;
 import edu.vub.at.nfcpoker.comm.Message.ReceivePublicCards;
 import edu.vub.at.nfcpoker.comm.Message.RequestClientActionFutureMessage;
+import edu.vub.at.nfcpoker.comm.Message.ResetMessage;
 import edu.vub.at.nfcpoker.comm.Message.RoundWinnersDeclarationMessage;
 import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
-public class PokerGame implements Runnable {
+public class PokerGame extends Thread {
 	
 	@SuppressWarnings("serial")
 	public class RoundEndedException extends Exception {}
@@ -77,20 +78,22 @@ public class PokerGame implements Runnable {
 	
 	public void run() {
 		while (true) {
+			try {
 			chipsPool = 0;
 			gui.resetCards();
 			updatePoolMoney();
 			actionFutures.clear();
 			while (clientsIdsInRoundOrder.size() < 2) {
-				try {
 					Log.d("wePoker - PokerGame", "# of clients < 2, changing state to stopped");
 					newState(PokerGameState.WAITING_FOR_PLAYERS);
 					synchronized(this) {
-						this.wait();
+						try {
+							this.wait();
+						} catch (InterruptedException e) {
+							Log.d("wePoker - PokerGame", "Thread interrupted while waiting for more players");
+							resetInternalState();
+						}
 					}
-				} catch (InterruptedException e) {
-					Log.wtf("wePoker - PokerGame", "Thread was interrupted");
-				}
 			}
 
 			List<PlayerState> currentPlayers = new ArrayList<PlayerState>();
@@ -215,12 +218,18 @@ public class PokerGame implements Runnable {
 			cycleClientsInGame();
 			
 			// finally, sleep
-			try {
-				Thread.sleep(10000);
+			Thread.sleep(10000);
+
 			} catch (InterruptedException e) {
-				Log.wtf("wePoker - PokerGame", "Thread.sleep was interrupted", e);
+				Log.d("wePoker - PokerGame", "interrupted, resetting state.");
+				resetInternalState();
 			}
 		}
+	}
+
+	private void resetInternalState() {
+		broadcast(new ResetMessage());
+		chipsPool = 0;
 	}
 
 	public List<PlayerState> findWinners(TreeMap<PlayerState, Hand> hands, final Hand bestHand) {
@@ -265,7 +274,7 @@ public class PokerGame implements Runnable {
 		}
 	}
 	
-	private boolean verifyClientActions(PlayerState player, int round, int minBet) {
+	private boolean verifyClientActions(PlayerState player, int round, int minBet) throws InterruptedException {
 		if ((player.roundActionType == ClientActionType.Fold) ||
 			(player.roundActionType == ClientActionType.AllIn)) {
 			return true;
@@ -303,7 +312,7 @@ public class PokerGame implements Runnable {
 	// - Updates money
 	// - Broadcasts actions
 	// Returns minimum bet
-	private int processClientActions(PlayerState player, int round, int minBet) {
+	private int processClientActions(PlayerState player, int round, int minBet) throws InterruptedException {
 		if (player.roundActionType == ClientActionType.Fold ||
 			player.roundActionType == ClientActionType.AllIn) {
 			return minBet;
@@ -377,7 +386,7 @@ public class PokerGame implements Runnable {
 	//   Handle cases where player 1 bets (100) and player 2 raises (200)
 	//     -> Should be handled by the second tableRound (1) && increasedBet
 	//   Stop early if not enough players
-	private void roundTable() throws RoundEndedException {
+	private void roundTable() throws RoundEndedException, InterruptedException {
 		int minBet = 0;
 		boolean increasedBet = true;
 
@@ -499,5 +508,9 @@ public class PokerGame implements Runnable {
 			if (c != null)
 				c.sendTCP(m);
 		}
+	}
+
+	public void reset() {
+		this.interrupt();
 	}
 }
