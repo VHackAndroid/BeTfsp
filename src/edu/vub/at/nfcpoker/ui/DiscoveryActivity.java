@@ -8,6 +8,7 @@ import edu.vub.at.nfcpoker.R;
 import edu.vub.at.nfcpoker.comm.DiscoveryAsyncTask;
 import android.app.Activity;
 import android.app.Dialog;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 
 public class DiscoveryActivity extends Activity {
@@ -41,7 +42,10 @@ public class DiscoveryActivity extends Activity {
 				try {
 					Integer.parseInt(result.getPort());
 				} catch (Exception e) { }
-				ClientActivity.startClient(activity, result.getAddress(), port, result.isDedicated(), false, null, null, null);
+				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+				String wifiName = CommLib.getWifiGroupName(wm);
+				String wifiPass = CommLib.getWifiPassword(wifiName);
+				ClientActivity.startClient(activity, result.getAddress(), port, result.isDedicated(), false, null, wifiName, wifiPass);
 			}
 		};
 		startDiscovery();

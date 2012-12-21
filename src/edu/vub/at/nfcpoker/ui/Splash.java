@@ -362,7 +362,10 @@ public class Splash extends Activity {
 				try {
 					Integer.parseInt(result.getPort());
 				} catch (Exception e) { }
-				askJoinDiscoveredServer(result.getAddress(), port, result.isDedicated(), false, null, null, null);
+				WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+				String wifiName = CommLib.getWifiGroupName(wm);
+				String wifiPass = CommLib.getWifiPassword(wifiName);
+				askJoinDiscoveredServer(result.getAddress(), port, result.isDedicated(), false, null, wifiName, wifiPass);
 			}
 		};
 		
