@@ -240,9 +240,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		activity = this;
-		
+
 		// Force portrait mode. Do this in code because Google TV does not like it in the manifest.
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); 
+		if (getResources().getConfiguration().orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		}
 
 		// Connectivity
 		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);

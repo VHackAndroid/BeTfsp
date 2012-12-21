@@ -71,7 +71,7 @@
         </activity>
         <activity
             android:name="edu.vub.at.nfcpoker.ui.ClientActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_client" >
         </activity>
         <activity
