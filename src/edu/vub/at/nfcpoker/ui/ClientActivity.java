@@ -846,15 +846,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 							quickOutputMessage(ClientActivity.this, "You lost...");
 							quickOutputMessage(ClientActivity.this, rwdm.winMessageString());
 							vibrate(VibrationType.Lose);
-							if (rwdm.showCards) {
-								if (rwdm.bestPlayers.size() == 1) {
-									// Show the winning cards of the player
-									showWinningCards(rwdm.bestPlayers.iterator().next().gameHoleCards, rwdm.winMessageString());
-								} else {
-									// Show the best hand
-									showWinningCards(rwdm.bestHand.cards, rwdm.winMessageString());
-								}
-							}
 					}});
 				}
 			}
@@ -1369,22 +1360,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private void showCards() {
 		mCardView1.setCurrentIndex(1);
 		mCardView2.setCurrentIndex(1);
-	}
-	
-	private void showWinningCards(Card[] cards, String winMessage) {
-		if (cards == null) return;
-		
-		int id1 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[0].toString(), null, null);
-		int[] bitmapIds1 = new int[] { R.drawable.backside, id1 };
-		mCardView1.setPageProvider(new PageProvider(this, bitmapIds1));
-		mCardView1.setContentDescription(cards[0].toString().replace("_", " "));
-
-		int id2 = getResources().getIdentifier("edu.vub.at.nfcpoker:drawable/" + cards[1].toString(), null, null);
-		int[] bitmapIds2 = new int[] { R.drawable.backside, id2 };
-		mCardView2.setPageProvider(new PageProvider(this, bitmapIds2));
-		mCardView2.setContentDescription(cards[1].toString().replace("_", " "));
-		
-		showCards();
 	}
 
 	private void hideCards() {
