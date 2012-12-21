@@ -117,10 +117,6 @@ public class PokerGame extends Thread {
 				PlayerState smallBlind = currentPlayers.get(0);
 				PlayerState bigBlind = currentPlayers.get(1);
 				gui.setPlayerButtons(dealer, smallBlind, bigBlind);
-
-				addBet(smallBlind, SMALL_BLIND);
-				addBet(bigBlind, BIG_BLIND);
-				broadcast(new Message.TableButtonsMessage(dealer.clientId, smallBlind.clientId, SMALL_BLIND, bigBlind.clientId, BIG_BLIND));
 				
 				// hole cards
 				for (PlayerState player : currentPlayers) {
@@ -409,8 +405,17 @@ public class PokerGame extends Thread {
 		// Add blinds
 		if (gameState == PokerGameState.PREFLOP) {
 			// Small and big blind bet last in the first round.
-			clientOrder.add(clientOrder.remove(0));
-			clientOrder.add(clientOrder.remove(0));
+			PlayerState dealer = clientOrder.get(clientOrder.size() - 1);
+			PlayerState smallBlind = clientOrder.remove(0);
+			PlayerState bigBlind = clientOrder.remove(0);
+			clientOrder.add(smallBlind);
+			clientOrder.add(bigBlind);
+
+			addBet(smallBlind, SMALL_BLIND);
+			addBet(bigBlind, BIG_BLIND);
+			minBet = BIG_BLIND;
+			
+			broadcast(new Message.TableButtonsMessage(dealer.clientId, smallBlind.clientId, SMALL_BLIND, bigBlind.clientId, BIG_BLIND));			
 		}
 		
 		// Two table rounds if needed

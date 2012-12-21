@@ -619,11 +619,13 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentSelectedBet = 0;
 		currentProcessedBet = 0;
 		currentChipSwiped = 0;
+		minimumBet = 0;
 		runOnUiThread(new Runnable() {
 			public void run() {
 				disableActions();
 				updateBetAmount();
 				checkHeadset();
+				updateMinBetAmount(0);
 			}});
 		String toastToShow = null;
 		switch (newGameState) {
