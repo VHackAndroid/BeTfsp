@@ -75,7 +75,10 @@ public class CommLib {
 	}
 	
 	public static String getWifiGroupName(WifiManager wm) {
-		return wm.getConnectionInfo().getSSID();
+		String toReturn = wm.getConnectionInfo().getSSID();
+		if (toReturn.startsWith("\""))
+			return toReturn.substring(1, toReturn.length() - 1);
+		return toReturn;
 	}
 
 	public static String getWifiPassword(String ssid) {

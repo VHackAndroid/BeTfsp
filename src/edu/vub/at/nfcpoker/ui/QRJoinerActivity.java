@@ -92,18 +92,21 @@ public class QRJoinerActivity extends Activity {
 		public void attemptToJoin(WifiManager wm) {
 			publishProgress("Connecting to network...");
 			
+			// SSIDs are stored as "\"Network Name\""
+			String mangledName = '"' + wifiName + '"';
+			
 			for (WifiConfiguration config : wm.getConfiguredNetworks()) {
-				if (config.SSID.equals(wifiName)) {
+				if (config.SSID.equals(mangledName)) {
 					Log.d("wePoker - QRJoiner", "Found preconfigured network " + wifiName);
 					wm.enableNetwork(config.networkId, true);
 					return;
 				}
 			}
 			
-			if ((wifiPassword != null) && (!wifiPassword.equals(""))) {
+			if (wifiPassword != null && (!wifiPassword.isEmpty())) {
 				// If we have the password
 				WifiConfiguration config = new WifiConfiguration();
-				config.SSID = '"' + wifiName + '"';
+				config.SSID = mangledName;
 				config.preSharedKey = '"' + wifiPassword + '"';
 				config.hiddenSSID = true;
 				config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
