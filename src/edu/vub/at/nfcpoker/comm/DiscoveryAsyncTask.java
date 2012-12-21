@@ -51,8 +51,7 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 		MulticastLock ml = wm.createMulticastLock("edu.vub.at.nfcpoker");
 		ml.acquire();
 		try {
-			int triesLeft = 3;
-			while (!isCancelled() && --triesLeft > 0) {
+			while (!isCancelled()) {
 				try {
 					String broadcastAddress = CommLib.getBroadcastAddress(wm);
 					CommLibConnectionInfo c = CommLib.discover(PokerServer.class, broadcastAddress);
@@ -72,6 +71,9 @@ public class DiscoveryAsyncTask extends AsyncTask<Void, Void, CommLibConnectionI
 	@Override
 	protected void onPostExecute(CommLibConnectionInfo result) {
 		super.onPostExecute(result);
+		if (isCancelled())
+			return;
+		
 		if (result != null) {
 			dcl.onDiscovered(result);
 		} else {

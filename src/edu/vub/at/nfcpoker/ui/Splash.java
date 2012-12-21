@@ -100,6 +100,7 @@ public class Splash extends Activity {
 			joinGame.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					stopDiscovery();
 					askJoinGame();
 				}
 			});
@@ -110,6 +111,7 @@ public class Splash extends Activity {
 			createGame.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					stopDiscovery();
 					startServer(false);
 				}
 			});
@@ -120,6 +122,7 @@ public class Splash extends Activity {
 			createAdHocGame.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					stopDiscovery();
 					startServer(true);
 				}
 			});
