@@ -103,7 +103,7 @@ public class QRJoinerActivity extends Activity {
 				}
 			}
 			
-			if (wifiPassword != null && (!wifiPassword.isEmpty())) {
+			if (wifiPassword != null && (!wifiPassword.isEmpty()) && !wifiPassword.equals("********")) {
 				// If we have the password
 				WifiConfiguration config = new WifiConfiguration();
 				config.SSID = mangledName;
