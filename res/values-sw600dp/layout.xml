@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="activity_client_is_dedicated" type="layout">@layout/activity_client</item>
+</resources>
