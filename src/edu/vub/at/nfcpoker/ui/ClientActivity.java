@@ -952,6 +952,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
             tts = null;
             ttsInitialised = false;
         }
+        if (serverConnection != null)
+        	serverConnection.close();
+        finish();
         super.onDestroy();
 	}
 
