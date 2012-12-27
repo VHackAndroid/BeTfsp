@@ -225,7 +225,12 @@ public class PokerGame extends Thread {
 
 	private void resetInternalState() {
 		broadcast(new ResetMessage());
+		gui.resetGame();
 		chipsPool = 0;
+		
+		for (PlayerState ps : playerState.values()) {
+			ps.money = 2000;
+		}
 	}
 
 	public List<PlayerState> findWinners(TreeMap<PlayerState, Hand> hands, final Hand bestHand) {

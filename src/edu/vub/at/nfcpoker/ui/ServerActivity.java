@@ -498,4 +498,11 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 		Log.d("wePoker - Server", "Avatar for player " + avatarId);
 		return avatarId;
 	}
+
+	@Override
+	public void resetGame() {
+		for (PlayerState ps : playerState) {
+			ps.money = 2000;
+		}
+	}
 }

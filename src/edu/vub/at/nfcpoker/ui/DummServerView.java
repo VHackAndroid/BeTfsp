@@ -60,4 +60,10 @@ public class DummServerView implements ServerViewInterface {
 	@Override
 	public void showWinners(List<PlayerState> remainingPlayers, int chipsPool) { }
 
+	@Override
+	public void resetGame() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

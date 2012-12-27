@@ -40,6 +40,8 @@ public interface ServerViewInterface {
 	
 	public void setPlayerButtons(PlayerState dealer, PlayerState smallBlind, PlayerState bigBlind);
 
+	public void resetGame();
+	
 	// Players
 
 	public void addPlayer(PlayerState player);
@@ -54,6 +56,4 @@ public interface ServerViewInterface {
 
 	public void showWinners(List<PlayerState> remainingPlayers, int chipsPool);
 
-
-	
 }
