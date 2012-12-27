@@ -476,7 +476,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			quickOutputMessage(this, "At least bet "+minimumBet);
 			return;
 		}
-		// TODO mimumbet en money check if setting currentSelectedBet
+		// TODO minimum bet and money check if setting currentSelectedBet
 		if (money < currentSelectedBet) {
 			quickOutputMessage(this, "Not enough money to place bet");
 			return;
@@ -498,6 +498,10 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			return;
 		}
 		if (minimumBet >= currentProcessedBet + money) {
+			if (money < currentProcessedBet) {
+				showOutOfMoneyDialog();
+				return;
+			}
 			performAllIn();
 			return;
 		}
@@ -541,7 +545,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			quickOutputMessage(this, "Cannot perform all in");
 			return;
 		}
-		final int diffMoney = money - currentProcessedBet;
+		int diffMoney = money - currentProcessedBet;
+		diffMoney = Math.max(diffMoney, 0);
 		currentSelectedBet = diffMoney;
 		currentProcessedBet += diffMoney;
 		money = 0;
@@ -794,10 +799,18 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 						if (tbm.smallId == myClientID) {
 							currentProcessedBet = tbm.smallAmount;
 							money -= currentProcessedBet;
+							if (money <= 0) {
+								showOutOfMoneyDialog();
+								return;
+							}
 							toastSmallBlind(tbm.smallAmount);
 						} else if (tbm.bigId == myClientID) {
 							currentProcessedBet = tbm.bigAmount;
 							money -= currentProcessedBet;
+							if (money <= 0) {
+								showOutOfMoneyDialog();
+								return;
+							}
 							toastBigBlind(tbm.bigAmount);
 						}
 						if (tbm.bigAmount > minimumBet) {
@@ -840,6 +853,10 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 							quickOutputMessage(ClientActivity.this, rwdm.winMessageString());
 							vibrate(VibrationType.Lose);
 					}});
+				}
+				if (money <= 0) {
+					showOutOfMoneyDialog();
+					return;
 				}
 			}
 			
@@ -1242,6 +1259,32 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				new AlertDialog.Builder(activity)
 					.setTitle("Disconnected from server")
 					.setMessage("Your device has been disconnected from the server.")
+					.setNegativeButton("Quit", quitOCL)
+					.setCancelable(false)
+					.show();
+			}
+		});
+	}
+
+	public void showOutOfMoneyDialog() {
+		if (serverConnection != null) {
+			serverConnection.close();
+			serverConnection = null;
+		}
+		if (activity == null) return;
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				DialogInterface.OnClickListener quitOCL = new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface arg0, int arg1) {
+						finish();
+						Intent i = new Intent(ClientActivity.this, Splash.class);
+						startActivity(i);
+					}
+				};
+				new AlertDialog.Builder(activity)
+					.setTitle("Out of money")
+					.setMessage("You are out of the game.")
 					.setNegativeButton("Quit", quitOCL)
 					.setCancelable(false)
 					.show();
