@@ -653,6 +653,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			runOnUiThread(new Runnable() {
 				public void run() {
 					hideBarrier();
+					serverHideCards();
 					if (lastReceivedHoleCards == null) {
 						showBarrier("Waiting for next round");
 					}
@@ -723,35 +724,20 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				// Client view
 				Log.v("wePoker - Client", "Procesing state message " + m.toString());
 				processStateChangeMessage(c, m);
-				if (!isDedicated) {
-					// Server view
-					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
-					final StateChangeMessage sm = (StateChangeMessage) m;
-					if (sm.newState == PokerGameState.PREFLOP) {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								serverHideCards();
-							}});
-					}
-				}
 			}
 
 			if (m instanceof ReceivePublicCards) {
 				ReceivePublicCards newPublicCards = (ReceivePublicCards) m;
 				Log.v("wePoker - Client", "Received public cards: ");
-				Card[] cards = newPublicCards.cards;
+				final Card[] cards = newPublicCards.cards;
 				for (int i = 0; i < cards.length; i++) {
 					Log.v("wePoker - Client", cards[i].toString() + ", ");
 				}
-				if (!isDedicated) {
-					// Server view
-					Log.v("wePoker - Client-Server", "Procesing state message " + m.toString());
-					final ReceivePublicCards rc = (ReceivePublicCards) m;
+				if (showLocalCards()) {
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							serverRevealCards(rc.cards);
+							serverRevealCards(cards);
 						}});
 				}
 			}
@@ -1432,10 +1418,14 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 
 	private void serverUpdatePoolMoney(int poolMoney) {
-		if (isDedicated) return;
+		if (!showLocalCards()) return;
 		final TextView textPool = (TextView) findViewById(R.id.pool);
 		if (textPool == null) return;
 		textPool.setText(" " + poolMoney);
+	}
+
+	private boolean showLocalCards() {
+		return !isDedicated || null != findViewById(R.id.cards);
 	}
 
 	private int cardToResourceID(Card c) {
@@ -1443,7 +1433,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 
 	public void serverHideCards() {
-		if (isDedicated) return;
+		if (!showLocalCards()) return;
 		final ImageView card1 = (ImageView) findViewById(R.id.card1);
 		card1.setImageResource(R.drawable.backside);
 		card1.setContentDescription("No card yet");
