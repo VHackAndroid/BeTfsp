@@ -369,7 +369,7 @@ public class PokerGame extends Thread {
 		case AllIn:
 			// Client sends diffMoney
 			addBet(player, ca.extraMoney);
-			return minBet;
+			return minBet + ca.extraMoney;
 		default:
 			Log.d("wePoker - PokerGame", "Unknown client action message");
 			return minBet;
