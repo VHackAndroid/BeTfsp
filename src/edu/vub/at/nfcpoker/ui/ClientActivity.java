@@ -246,6 +246,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		if (getResources().getConfiguration().orientation != ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
 			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		}
+		
+		// Settings
+		Settings.loadSettings(this);
 
 		// Connectivity
 		serverIpAddress = getIntent().getStringExtra(Constants.INTENT_SERVER_IP);

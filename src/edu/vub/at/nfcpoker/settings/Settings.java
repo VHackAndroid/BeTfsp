@@ -42,6 +42,8 @@ public class Settings {
 	private static SharedPreferences settings;
 
 	public static void loadSettings(Context ctx) {
+		if (settings != null)
+			return;
 		PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false);
 		settings = PreferenceManager.getDefaultSharedPreferences(ctx);
 		UUID = Secure.getString(ctx.getContentResolver(), Secure.ANDROID_ID);
