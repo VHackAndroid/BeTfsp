@@ -117,7 +117,7 @@ public class CommLib {
 		}
 	}
 	
-	public static void export(CommLibConnectionInfo clci, String broadcastAddress) throws IOException {
+	public static void export(CommLibConnectionInfo clci, String broadcastAddress) throws IOException, InterruptedException {
 		Kryo k = new Kryo();
 		k.setRegistrationRequired(false);
 		k.register(CommLibConnectionInfo.class);
@@ -136,7 +136,7 @@ public class CommLib {
 			ds.send(dp);
 			try {
 				Thread.sleep(EXPORT_INTERVAL);
-			} catch (InterruptedException e) { }
+			} catch (InterruptedException e) { throw e; }
 		}
 	}
 	

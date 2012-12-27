@@ -45,6 +45,7 @@ public class GameServer extends PokerServer  {
 	int nextClientID = 0;
 	private boolean isDedicated = true;
 	private PokerGame gameLoop;
+	protected Server currentServer;
 	private String broadcastAddress;
 	private String serverAddress;
 	private ConcurrentSkipListMap<Integer, Connection> connections = new ConcurrentSkipListMap<Integer, Connection>();
@@ -56,7 +57,7 @@ public class GameServer extends PokerServer  {
     	this.broadcastAddress = broadcastAddress;
 	}
 	
-	Runnable exporterR = new Runnable() {	
+	Thread exporterThread = new Thread() {	
 		@Override
 		public void run() {
 			while (true) {
@@ -67,21 +68,27 @@ public class GameServer extends PokerServer  {
 						PokerServer.class.getCanonicalName(),
 						new String[] {serverAddress, port, dedicated});
 				try {
-					CommLib.export(clci, broadcastAddress);
-				} catch (IOException e) {
-					Log.e("wePoker - Server", "Export failed", e);
+					try {
+						CommLib.export(clci, broadcastAddress);
+					} catch (IOException e) {
+						Log.e("wePoker - Server", "Export failed", e);
+					}
+
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					Log.e("wePoker - Server", "Interrupted - stopping", e);
+					return;
 				}
-				try { Thread.sleep(2000);
-				} catch (InterruptedException e) { }
 			}
 		}
 	};
 	
-	Runnable serverR = new Runnable() {
+	Thread serverThread = new Thread() {
 		public void run() {
 			try {
 				Log.d("wePoker - Server", "Starting server thread");
 				Server s = new Server();
+				currentServer = s;
 				Kryo k = s.getKryo();
 				k.setRegistrationRequired(false);
 				k.register(UUID.class, new UUIDSerializer());
@@ -131,12 +138,22 @@ public class GameServer extends PokerServer  {
 		};
 	};
 	
+
 	public void start() {		
 		Log.d("wePoker - Server", "Starting server and exporter threads...");
-		new Thread(serverR).start();
-		if (broadcastAddress != null)
-			new Thread(exporterR).start();
+		serverThread.start();
 		gameLoop.start();
+		if (broadcastAddress != null)
+			exporterThread.start();
+	}
+	
+	public void stop() {
+		if (gameLoop.isFinished())
+			return;
+		currentServer.stop();
+		gameLoop.finish();
+		if (exporterThread.isAlive())
+			exporterThread.interrupt();
 	}
 
 	public void addClient(Connection c) {

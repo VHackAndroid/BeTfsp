@@ -70,6 +70,9 @@ public class PokerGame extends Thread {
 	
 	// GUI
 	private ServerViewInterface gui;
+
+	// Terminator
+	private boolean finished;
 	
 	public PokerGame(ServerViewInterface gui) {
 		this.gameState = PokerGameState.STOPPED;
@@ -217,8 +220,14 @@ public class PokerGame extends Thread {
 			Thread.sleep(10000);
 
 			} catch (InterruptedException e) {
-				Log.d("wePoker - PokerGame", "interrupted, resetting state.");
-				resetInternalState();
+				if (isFinished()) {
+					Log.d("wePoker - PokerGame", "interrupted, quitting");
+					resetInternalState();
+					return;
+				} else {
+					Log.d("wePoker - PokerGame", "interrupted, resetting state.");
+					resetInternalState();
+				}
 			}
 		}
 	}
@@ -525,6 +534,15 @@ public class PokerGame extends Thread {
 	}
 
 	public void reset() {
+		this.interrupt();
+	}
+
+	public boolean isFinished() {
+		return finished;
+	}
+
+	public void finish() {
+		finished = true;
 		this.interrupt();
 	}
 }

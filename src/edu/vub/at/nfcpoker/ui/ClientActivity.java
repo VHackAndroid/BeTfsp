@@ -402,8 +402,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		
 		if (isServer) {
 			// Start server on a client if required
-			startClientServer();
 			showBarrier("Creating server...");
+			startClientServer();
 		} else {
 			// Connect to the server
 			new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();

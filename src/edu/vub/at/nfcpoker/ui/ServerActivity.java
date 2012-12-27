@@ -235,6 +235,12 @@ public class ServerActivity extends Activity implements ServerViewInterface {
 	}
 
 	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		currentServer.stop();
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.show_wifi_settings:

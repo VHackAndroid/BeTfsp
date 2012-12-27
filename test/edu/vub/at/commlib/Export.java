@@ -20,6 +20,8 @@ public class Export {
 			CommLib.export(clci, ipAddress);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
