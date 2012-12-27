@@ -114,6 +114,16 @@ public class PokerGame extends Thread {
 					player.gameMoney = 0;
 					player.gameHoleCards = null;
 				}
+
+				// remove broke players
+//				Iterator<PlayerState> player = currentPlayers.iterator();
+//				while (player.hasNext()) {
+//				    if ((player.next().money <= 0) || // Broke
+//			    		(player == currentPlayers.get(0) && player.next().money <= SMALL_BLIND) || // Small Blind
+//			    		(player == currentPlayers.get(1) && player.next().money <= BIG_BLIND)) {   // Big Blind
+//				    	player.remove();
+//				    }
+//				}
 				
 				// decide on blinds and dealer.
 				PlayerState dealer = currentPlayers.get(currentPlayers.size() - 1);
