@@ -1179,11 +1179,17 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			@Override
 			public void onClick(DialogInterface di, int arg1) {
 				try {
-					int extra = Integer.parseInt(input.getText().toString());
+					final int extra = Integer.parseInt(input.getText().toString());
 					money += extra;
-					// TODO Server: User X added #{extra}
-					CheatMessage ca = new CheatMessage(extra);
-					serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+					updateMoneyTitle();
+					runOnNotUiThread(new Runnable() {
+						@Override
+						public void run() {
+							// TODO Server: User X added #{extra}
+							CheatMessage ca = new CheatMessage(extra);
+							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+						}
+					});
 				} catch (Exception e) {	}
 			}
 		});
