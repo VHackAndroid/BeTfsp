@@ -150,6 +150,9 @@ public class QRJoinerActivity extends Activity {
         
         findViewById(R.id.CreateGame).setVisibility(View.GONE);
         findViewById(R.id.JoinGame).setVisibility(View.GONE);
+        View adHocButton = findViewById(R.id.CreateAdHocGame);
+        if (adHocButton != null)
+        	adHocButton.setVisibility(View.GONE);
         
         handleIntent(getIntent());
         
