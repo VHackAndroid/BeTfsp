@@ -175,6 +175,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 	// Interactivity (Process dialog)
 	private ProgressDialog barrier;
+	private String barrierCause = null;
 	
 	// Interactivity (Incognito)
 	public static boolean incognitoMode;
@@ -426,10 +427,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 
 	private void showBarrier(String cause) {
+		barrierCause = cause;
 		if (activity == null) return;
 		if (barrier == null) {
 			barrier = new ProgressDialog(activity);
-			barrier.setTitle(cause);
+			barrier.setTitle(barrierCause);
 			barrier.setCancelable(false);
 			barrier.setMessage("Please wait");
 			barrier.show();
@@ -439,6 +441,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 
 	private void hideBarrier() {
+		barrierCause = null;
 		if (barrier != null) {
 			barrier.dismiss();
 			barrier = null;
@@ -932,7 +935,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
         if (nfcAdapter != null) {
         	nfcAdapter.enableForegroundDispatch(this, pendingIntent, intentFiltersArray, null);
         }
-        
+        if (barrierCause != null) {
+        	showBarrier(barrierCause);
+        }
         Settings.getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 		super.onResume();
 	}
@@ -946,6 +951,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
         }
+        barrier = null;
         Settings.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
 	}
