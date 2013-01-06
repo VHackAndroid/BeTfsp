@@ -1005,9 +1005,10 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		case R.id.allIn:
 			performAllIn();
 			return true;
-		case R.id.itemAddMoney:
-			askAddMoney();
-			return true;
+		// TODO: Bug: fills in the future that will be casted to ClientAction
+		//case R.id.itemAddMoney:
+			// askAddMoney();
+			//	return true;
 		case R.id.itemSettings:
 			Intent i = new Intent(this, WePokerPreferencesActivity.class);
 			startActivity(i);
