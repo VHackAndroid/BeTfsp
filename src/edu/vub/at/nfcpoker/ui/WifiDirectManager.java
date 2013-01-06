@@ -89,6 +89,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 
 	private static WifiDirectManager instance;
 	private boolean isRunning;
+	private boolean isRegistered = false;
 	private WifiP2pManager manager;
 	private Channel channel;
 	private Activity act;
@@ -262,11 +263,15 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	}
 	
 	public void registerReceiver() {
+		if (isRegistered) return;
 		act.registerReceiver(this, mWifiDirectIntentFilter);
+		isRegistered = true;
 	}
 	
 	public void unregisterReceiver() {
+		if (!isRegistered) return;
 		act.unregisterReceiver(this);
+		isRegistered = false;
 	}
 
 }
