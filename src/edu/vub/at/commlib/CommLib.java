@@ -31,6 +31,7 @@ import java.util.UUID;
 
 import android.net.DhcpInfo;
 import android.net.wifi.WifiManager;
+import android.util.Log;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -76,6 +77,10 @@ public class CommLib {
 	
 	public static String getWifiGroupName(WifiManager wm) {
 		String toReturn = wm.getConnectionInfo().getSSID();
+		if (toReturn == null) {
+			Log.d("wePoker - CommLib", "Wifi not connected! Invalid SSID name (null).");
+			return "";
+		}
 		if (toReturn.startsWith("\""))
 			return toReturn.substring(1, toReturn.length() - 1);
 		return toReturn;
