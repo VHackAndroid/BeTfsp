@@ -159,16 +159,11 @@ public class QRJoinerActivity extends Activity {
 
         String joinText = getResources().getString(R.string.qr_code_join_confirmation, wifiName);
         publishProgress(joinText);
-		
-        joinServer();
-    }
-    
-    private void joinServer() {
+
 		currentlyJoining = true;
 		registerReceiver(wifiChangeReceiver, intentFilter);
     }
     
-
     protected void publishProgress(String string) {
     	Log.d("WePoker - QRJoiner", "Progress update: " + string);
 
@@ -197,7 +192,7 @@ public class QRJoinerActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		unregisterReceiver(wifiChangeReceiver );
+		unregisterReceiver(wifiChangeReceiver);
 	}
 	
 	private void handleIntent(Intent intent) {
