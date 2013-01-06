@@ -65,7 +65,7 @@ public class PokerGame extends Thread {
 	// Rounds
 	public volatile PokerGameState gameState;
 	private List<PlayerState> clientsIdsInRoundOrder = Collections.synchronizedList(new LinkedList<PlayerState>());
-	private ConcurrentSkipListMap<Integer, PlayerState> playerState  = new ConcurrentSkipListMap<Integer, PlayerState>();
+	private ConcurrentSkipListMap<Integer, PlayerState> playerStates  = new ConcurrentSkipListMap<Integer, PlayerState>();
 	private int chipsPool = 0;
 	
 	// GUI
@@ -143,7 +143,7 @@ public class PokerGame extends Thread {
 					c.sendTCP(new ReceiveHoleCardsMessage(preflop[0], preflop[1]));
 				}
 				newState(PokerGameState.PREFLOP);
-				roundTable();
+				roundTable(currentPlayers);
 				
 				
 				// flop cards
@@ -152,7 +152,7 @@ public class PokerGame extends Thread {
 				gui.revealCards(flop);
 				broadcast(new ReceivePublicCards(flop));
 				newState(PokerGameState.FLOP);
-				roundTable();
+				roundTable(currentPlayers);
 
 				// turn cards
 				Card[] turn = deck.drawCards(1);
@@ -160,7 +160,7 @@ public class PokerGame extends Thread {
 				gui.revealCards(turn);
 				broadcast(new ReceivePublicCards(turn));
 				newState(PokerGameState.TURN);
-				roundTable();
+				roundTable(currentPlayers);
 				
 				// river cards
 				Card[] river = deck.drawCards(1);
@@ -168,7 +168,7 @@ public class PokerGame extends Thread {
 				gui.revealCards(river);
 				broadcast(new ReceivePublicCards(river));
 				newState(PokerGameState.RIVER);
-				roundTable();					
+				roundTable(currentPlayers);					
 			} catch (RoundEndedException e1) {
 				/* ignore */
 				Log.d("wePoker - PokerGame", "Everybody folded at round " + gameState);
@@ -247,7 +247,7 @@ public class PokerGame extends Thread {
 		gui.resetGame();
 		chipsPool = 0;
 		
-		for (PlayerState ps : playerState.values()) {
+		for (PlayerState ps : playerStates.values()) {
 			ps.money = 2000;
 		}
 	}
@@ -410,21 +410,16 @@ public class PokerGame extends Thread {
 	//   Handle cases where player 1 bets (100) and player 2 raises (200)
 	//     -> Should be handled by the second tableRound (1) && increasedBet
 	//   Stop early if not enough players
-	private void roundTable() throws RoundEndedException, InterruptedException {
+	private void roundTable(List<PlayerState> clientOrder) throws RoundEndedException, InterruptedException {
 		int minBet = 0;
 		boolean increasedBet = true;
-
-		List<PlayerState> clientOrder;
-		synchronized (clientsIdsInRoundOrder) {
-			clientOrder = new LinkedList<PlayerState>(clientsIdsInRoundOrder);
-		}
 
 		if (clientOrder.size() < 2) {
 			throw new RoundEndedException();
 		}
 		
 		// Reset player actions
-		for (PlayerState player : playerState.values()) {
+		for (PlayerState player : clientOrder) {
 			player.roundActionType = ClientActionType.Unknown;
 			player.roundMoney = 0;
 			actionFutures.remove(player.clientId);
@@ -503,7 +498,7 @@ public class PokerGame extends Thread {
 	public synchronized void addPlayer(Connection c, int clientId, String nickname, int avatar, int money) {
 		Log.v("wePoker - PokerGame", "Adding player "+clientId);
 		PlayerState player = new PlayerState(c, clientId, money, nickname, avatar);
-		playerState.put(clientId, player);
+		playerStates.put(clientId, player);
 		clientsIdsInRoundOrder.add(player);
 		gui.addPlayer(player);
 		c.sendTCP(new StateChangeMessage(gameState));
@@ -512,7 +507,7 @@ public class PokerGame extends Thread {
 	
 
 	public synchronized void setNickname(int clientId, String nickname) {
-		PlayerState player = playerState.get(clientId);
+		PlayerState player = playerStates.get(clientId);
 		if (player != null) {
 			player.name = nickname;
 			gui.updatePlayerStatus(player);
@@ -521,13 +516,13 @@ public class PokerGame extends Thread {
 	
 	public synchronized void removePlayer(int clientId) {
 		Log.v("wePoker - PokerGame", "Removing player "+clientId);
-		PlayerState player = playerState.get(clientId);
+		PlayerState player = playerStates.get(clientId);
 		if (player != null) {
 			player.connection = null;
 			player.roundActionType = ClientActionType.Fold;
 			gui.removePlayer(player);
 			clientsIdsInRoundOrder.remove(player);
-			playerState.remove(player.clientId);
+			playerStates.remove(player.clientId);
 		}
 		Future<ClientAction> fut = actionFutures.get(clientId);
 		if (fut != null && ! fut.isResolved()) {
@@ -536,7 +531,7 @@ public class PokerGame extends Thread {
 	}
 	
 	public synchronized void broadcast(Message m) {
-		for (PlayerState p : playerState.values()) {
+		for (PlayerState p : playerStates.values()) {
 			Connection c = p.connection;
 			if (c != null)
 				c.sendTCP(m);
