@@ -62,7 +62,7 @@
         android:id="@+id/nfcwrite_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Write connection info on NFC tag" />
+        android:text="Write invitation to NFC tag" />
 
     <Button
         android:id="@+id/dismiss_btn"

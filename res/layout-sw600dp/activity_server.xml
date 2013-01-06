@@ -105,7 +105,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:contentDescription="Connection information"
+            android:contentDescription="Invite"
             android:src="@drawable/stat_sys_tether_wifi" />
 
         <LinearLayout

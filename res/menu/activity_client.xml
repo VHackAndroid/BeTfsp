@@ -9,7 +9,7 @@
         android:showAsAction="never" />
     <item android:id="@+id/show_wifi_settings"
         android:showAsAction="never"
-        android:title="Connect" />
+        android:title="Invite" />
     <item android:id="@+id/itemAddMoney"
         android:title="Add Chips"
         android:showAsAction="never" />
