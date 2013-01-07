@@ -1531,7 +1531,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
-				GameServer cps = new GameServer(new DummServerView(), isDedicated, ipAddress, broadcastAddress);
+				GameServer cps = new GameServer(ServerViewInterface.ignore, isDedicated, ipAddress, broadcastAddress);
 				cps.start();
 				new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 			}

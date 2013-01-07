@@ -19,6 +19,9 @@
 
 package edu.vub.at.nfcpoker.ui;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.List;
 
 import android.content.Context;
@@ -30,6 +33,17 @@ public interface ServerViewInterface {
 
 	// Table
 	
+	final static ServerViewInterface ignore =
+			(ServerViewInterface) Proxy.newProxyInstance(ServerViewInterface.class.getClassLoader(),
+					                                     new Class[] { ServerViewInterface.class },
+					                                     new InvocationHandler() {		
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args)
+				throws Throwable {
+			return null;
+		}
+	});
+
 	public void revealCards(final Card[] cards);
 
 	public void resetCards();
