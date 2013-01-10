@@ -19,6 +19,7 @@
 
 package edu.vub.at.nfcpoker;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -237,19 +238,11 @@ public class Hand implements Comparable<Hand> {
 	}
 	
 	public static Hand makeBestHand(Set<Card> base, Collection<Card> holeCards) {
-		Vector<Card> pool = new Vector<Card>(base);
+		Vector<Card> pool = new Vector<Card>();
+		pool.addAll(base);
 		pool.addAll(holeCards);
-		
-		Set<Hand> hands = new HashSet<Hand>();
-		
-		for (int i = 0; i < 7; i++) {
-			for (int j = i+1; j < 7; j++) {
-				Vector<Card> newHand = new Vector<Card>(pool);
-				newHand.remove(j);
-				newHand.remove(i);
-				hands.add(new Hand(newHand.toArray(new Card[5])));
-			}
-		}
+				
+		Set<Hand> hands = makeHands(pool);
 		
 		Iterator<Hand> it = hands.iterator();
 		Hand bestHand = it.next();
@@ -261,6 +254,39 @@ public class Hand implements Comparable<Hand> {
 		}
 			
 		return bestHand;
+	}
+
+	private static Set<Hand> makeHands(Vector<Card> pool) {
+		Set<Card[]> s = new HashSet<Card[]>();
+		s.add(pool.toArray(new Card[pool.size()]));
+		return makeHands(s, pool.size());
+	}
+
+	private static Set<Hand> makeHands(Set<Card[]> hands, int size) {
+		if (size == 5) {
+			Set<Hand> ret = new HashSet<Hand>();
+			for (Card[] cards : hands) 
+				ret.add(new Hand(cards));
+			return ret;
+		} else {
+			Set<Card[]> next = new HashSet<Card[]>();
+			for (Card[] cards : hands) {
+				Vector<Card> baseCards = new Vector<Card>();
+				for (Card c : cards)
+					baseCards.add(c);
+				
+				for (int skip = 0; skip < size; skip++) {
+					Vector<Card> newCards = (Vector<Card>) baseCards.clone();
+					newCards.remove(skip);
+					next.add(newCards.toArray(new Card[size - 1]));
+				}
+			}
+			return makeHands(next, size - 1);
+		}
+	}
+
+	public int getValue() {
+		return value[0];
 	}
 }
 

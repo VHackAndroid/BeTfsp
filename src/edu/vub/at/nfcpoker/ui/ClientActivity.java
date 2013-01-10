@@ -22,8 +22,11 @@ package edu.vub.at.nfcpoker.ui;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -105,6 +108,7 @@ import edu.vub.at.nfcpoker.comm.Message.StateChangeMessage;
 import edu.vub.at.nfcpoker.comm.Message.TableButtonsMessage;
 import edu.vub.at.nfcpoker.settings.Settings;
 import edu.vub.at.nfcpoker.ui.ServerActivity.ServerStarter;
+import edu.vub.at.nfcpoker.ui.tools.CardScoreUtility;
 import edu.vub.at.nfcpoker.ui.tools.Levenshtein;
 import edu.vub.at.nfcpoker.ui.tools.PageProvider;
 import fi.harism.curl.CurlView;
@@ -147,6 +151,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private int currentProcessedBet = 0; // Bet's forwarded to server
 	private int minimumBet = 0;          // Minimum bet
 	private int totalBet = 0;            // Total bet for this game
+	private Set<Card> tableCards = new HashSet<Card>();
 
 	// Server
 	private static boolean isDedicated = false;
@@ -652,6 +657,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				}});
 			break;
 		case PREFLOP:
+			tableCards.clear();
 			toastToShow = "Any preflop bet?";
 			Log.v("wePoker - Client", "Game state changed to PREFLOP");
 			runOnUiThread(new Runnable() {
@@ -736,7 +742,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				final Card[] cards = newPublicCards.cards;
 				for (int i = 0; i < cards.length; i++) {
 					Log.v("wePoker - Client", cards[i].toString() + ", ");
+					tableCards.add(cards[i]);
 				}
+				updatePrediction();
 				if (showLocalCards()) {
 					runOnUiThread(new Runnable() {
 						@Override
@@ -750,6 +758,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				final ReceiveHoleCardsMessage newHoleCards = (ReceiveHoleCardsMessage) m;
 				Log.v("wePoker - Client", "Received hand cards: " + newHoleCards.toString());
 				lastReceivedHoleCards = newHoleCards;
+				updatePrediction();
 				ClientActivity.this.runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
@@ -883,6 +892,15 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		speakMessage(this, vMsg2);
 
 		updateMoneyTitle();
+	}
+
+	private void updatePrediction() {
+		List<Card> holeCards = Arrays.asList(lastReceivedHoleCards.card1, lastReceivedHoleCards.card2);
+		double prob = CardScoreUtility.evaluateHand(tableCards, holeCards, 3);
+		
+		Intent i = new Intent("edu.vub.at.nfcpoker.smartwatch.UPDATE");
+		i.putExtra("probability", prob / 100.0);
+		sendBroadcast(i);
 	}
 
 	@Override
@@ -1526,7 +1544,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		ServerStarter startServer = new ServerStarter() {
 			@Override
 			public void start(String ipAddress, String broadcastAddress) {
-				GameServer cps = new GameServer(new DummServerView(), isDedicated, ipAddress, broadcastAddress);
+				GameServer cps = new GameServer(ServerViewInterface.ignore, isDedicated, ipAddress, broadcastAddress);
 				cps.start();
 				new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 			}
