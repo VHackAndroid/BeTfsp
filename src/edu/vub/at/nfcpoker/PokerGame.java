@@ -59,9 +59,6 @@ public class PokerGame extends Thread {
 	// Communication
 	private ConcurrentSkipListMap<Integer, Future<ClientAction>> actionFutures = new ConcurrentSkipListMap<Integer, Future<ClientAction>>();  
 
-	// Connections
-	// private ConcurrentSkipListMap<Integer, Connection> clientsInGame = new ConcurrentSkipListMap<Integer, Connection>();
-	
 	// Rounds
 	public volatile PokerGameState gameState;
 	private List<PlayerState> clientsIdsInRoundOrder = Collections.synchronizedList(new LinkedList<PlayerState>());
@@ -115,16 +112,6 @@ public class PokerGame extends Thread {
 					player.gameHoleCards = null;
 				}
 
-				// remove broke players
-//				Iterator<PlayerState> player = currentPlayers.iterator();
-//				while (player.hasNext()) {
-//				    if ((player.next().money <= 0) || // Broke
-//			    		(player == currentPlayers.get(0) && player.next().money <= SMALL_BLIND) || // Small Blind
-//			    		(player == currentPlayers.get(1) && player.next().money <= BIG_BLIND)) {   // Big Blind
-//				    	player.remove();
-//				    }
-//				}
-				
 				// decide on blinds and dealer.
 				PlayerState dealer = currentPlayers.get(currentPlayers.size() - 1);
 				PlayerState smallBlind = currentPlayers.get(0);
