@@ -410,16 +410,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			new ConnectAsyncTask(serverIpAddress, serverPort, listener).execute();
 			showBarrier("Registering to server...");
 		}
-		
-		// adding the hallo wePoker to the watch
-		// clientGameState = ClientGameState.PLAYING;
-		
-//		Intent intent = new Intent(Control.Intents.CONTROL_START_REQUEST_INTENT);
-//		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, this.getPackageName());
-//		intent.setPackage("com.sonyericsson.extras.smartwatch");
-//		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
-		
-//		
 	}
 	
 	protected void runOnNotUiThread(Runnable runnable) {
