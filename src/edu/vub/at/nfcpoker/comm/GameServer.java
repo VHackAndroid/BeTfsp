@@ -42,14 +42,15 @@ import edu.vub.at.nfcpoker.ui.ServerViewInterface;
 
 public class GameServer extends PokerServer  {
 
-	int nextClientID = 0;
-	private boolean isDedicated = true;
-	private PokerGame gameLoop;
 	protected Server currentServer;
-	private String broadcastAddress;
+	private int nextClientID = 0;
+	
+	private PokerGame gameLoop;
+	private boolean isDedicated;
 	private String serverAddress;
+	private String broadcastAddress;
 	private ConcurrentSkipListMap<Integer, Connection> connections = new ConcurrentSkipListMap<Integer, Connection>();
-
+	
 	public GameServer(ServerViewInterface gui, boolean isDedicated, String serverAddress, String broadcastAddress) {
 		this.gameLoop = new PokerGame(gui);
 		this.isDedicated = isDedicated;
