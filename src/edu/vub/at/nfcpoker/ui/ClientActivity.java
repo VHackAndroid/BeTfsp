@@ -172,10 +172,14 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private Activity activity;
 	private CurlView mCardView1;
 	private CurlView mCardView2;
+	private Button bet;
+	private Button check;
+	private Button fold;
+	private boolean allInEnabled;
 
 	// Interactivity (Process dialog)
 	private ProgressDialog barrier;
-	private String barrierCause = null;
+	private static String barrierCause = null;
 	
 	// Interactivity (Incognito)
 	public static boolean incognitoMode;
@@ -217,11 +221,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 	// Help
 	private static boolean firstSwipe = true;
-
-	private Button bet;
-	private Button check;
-	private Button fold;
-	private boolean allInEnabled;
+	
+	// Debug
+	private static boolean debugGUI = false;
 
 	public static void startClient(Activity act,
 			String ip, int port, boolean isDedicated,
@@ -400,6 +402,10 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		currentChipSwiped = 0;
 		nextToReveal = 0;
 		lastReceivedHoleCards = null;
+
+		if (debugGUI) {
+			return;
+		}
 		
 		if (isServer) {
 			// Start server on a client if required
@@ -941,7 +947,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
         }
-        barrier = null;
         Settings.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
 	}

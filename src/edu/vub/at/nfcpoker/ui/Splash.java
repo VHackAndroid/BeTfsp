@@ -73,6 +73,9 @@ public class Splash extends Activity {
 	public static Handler messageHandler;
 	private boolean isTablet = false;
 	private boolean isTV = false;
+	
+	// Debug
+	private final boolean debugGUI = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -141,16 +144,14 @@ public class Splash extends Activity {
 			this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 		}
 		
-//		Log.d("wePoker - Splash", "Before sending intent to Sony");
-//		Intent intent = new Intent(Control.Intents.CONTROL_START_REQUEST_INTENT);
-//		intent.putExtra(Control.Intents.EXTRA_AEA_PACKAGE_NAME, "edu.vub.at.nfcpoker.smartwatch");
-//		intent.setPackage("com.sonyericsson.extras.smartwatch");
-//		sendBroadcast(intent, Registration.HOSTAPP_PERMISSION);
-//		Log.d("wePoker - Splash", "After sending intent to Sony");
 		
-	//	Intent serviceIntent = new Intent(this, WePokerExtensionService.class);
-	//	serviceIntent.setAction(WePokerExtensionService.INTENT_ACTION_START);
-	//	startService(serviceIntent);
+		// Debug
+		if (debugGUI) {
+			Intent i = new Intent(this, ClientActivity.class);
+			i.putExtra(Constants.INTENT_IS_SERVER, true);
+			i.putExtra(Constants.INTENT_IS_DEDICATED, false);
+			startActivity(i);
+		}
 	}
 	
 	public boolean isWifiDirectSupported() {
