@@ -61,8 +61,9 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 
 		@Override
 		public void run() {
+			Log.d("wePoker - Wifi-Direct", "Creating WifiDirect network");
 			WifiDirectManager wdm = WifiDirectManager.create(act, act.getMainLooper(), true);
-    		wdm.createGroup(serverStarter);			
+    		wdm.createGroup(serverStarter);
 		}
 
 	}
@@ -109,8 +110,10 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 		this.type = type;
 		this.manager = (WifiP2pManager) act.getSystemService(Activity.WIFI_P2P_SERVICE);
 		if (manager == null) {
+			Log.d("wePoker - Wifi-Direct", "WifiDirectManager not running");
 			this.isRunning = false;
 		} else {
+			Log.d("wePoker - Wifi-Direct", "Initialising manager");
 			this.channel = manager.initialize(act, l, null);
 			mWifiDirectIntentFilter = new IntentFilter();
 		    mWifiDirectIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -169,6 +172,7 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	}
 
 	public void createGroup(final ServerStarter startServer) {
+		Log.d("wePoker - Wifi-Direct", "Creating group...");
 		serverStarter = startServer;
 		registerReceiver();
 	}
@@ -209,10 +213,12 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		if (!isRunning)
-			return;
 		String action = intent.getAction();
 		Log.d("wePoker - Wifi-Direct", "Received intent: " + action);
+		if (!isRunning) {
+			Log.d("wePoker - Wifi-Direct", "Not running!");
+			return;
+		}
 		if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             // Check to see if Wi-Fi is enabled and notify appropriate activity
 			int enabled = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, 0);
@@ -263,13 +269,21 @@ public class WifiDirectManager extends BroadcastReceiver implements GroupInfoLis
 	}
 	
 	public void registerReceiver() {
-		if (isRegistered) return;
+		Log.d("wePoker - Wifi-Direct", "Registering Receiver");
+		if (isRegistered) {
+			Log.d("wePoker - Wifi-Direct", "Already registered receiver");
+			return;
+		}
 		act.registerReceiver(this, mWifiDirectIntentFilter);
 		isRegistered = true;
 	}
 	
 	public void unregisterReceiver() {
-		if (!isRegistered) return;
+		Log.d("wePoker - Wifi-Direct", "Unregistering Receiver");
+		if (!isRegistered) {
+			Log.d("wePoker - Wifi-Direct", "Receiver not registered");
+			return;
+		}
 		act.unregisterReceiver(this);
 		isRegistered = false;
 	}
