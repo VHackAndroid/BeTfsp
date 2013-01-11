@@ -121,7 +121,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		private String address;
 		private Listener listener;
 
-
 		public ConnectAsyncTask(String address, int port, Listener listener) {
 			this.address = address;
 			this.port = port;
@@ -970,6 +969,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		mCardView2.onPause();
         if (nfcAdapter != null) {
         	nfcAdapter.disableForegroundDispatch(this);
+        	nfcAdapter = null;
+        }
         }
         Settings.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
