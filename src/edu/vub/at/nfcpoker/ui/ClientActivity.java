@@ -839,7 +839,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				final SetIDMessage sidm = (SetIDMessage) m;
 				myClientID = sidm.id;
 				SetClientParameterMessage pm = new SetClientParameterMessage(Settings.nickname, Settings.avatar, money);
-				serverConnection.sendTCP(pm);
+				c.sendTCP(pm);
 			}
 			
 			if (m instanceof RoundWinnersDeclarationMessage) {
