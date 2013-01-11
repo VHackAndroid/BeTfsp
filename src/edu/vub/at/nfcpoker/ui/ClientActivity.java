@@ -39,6 +39,7 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
@@ -142,6 +143,43 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 			}
 			return null;
 		}
+		
+		@Override
+		protected void onPostExecute(Client result) {
+			clientConnection = result;
+		}
+	}
+
+	public class ReconnectAsyncTask extends AsyncTask<Void, Void, Void> {
+
+		private Client client;
+
+		public ReconnectAsyncTask(Client client) { }
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			Log.v("wePoker - Client", "Reconnecting client");
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			while (true) {
+				try {
+					client.reconnect(1000);
+					return null;
+				} catch (IOException e) {
+					Log.d("wePoker - Client", "Could not connect to server", e);
+					try { Thread.sleep(1000); } catch (InterruptedException e1) { }
+				}
+			}
+		}
+		
+		@Override
+		protected void onPostExecute(Void v) {
+			reconnectTask = null;
+			hideBarrier();
+		}
 	}
 
 	// Game state
@@ -165,6 +203,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	// Connectivity
 	private static UUID pendingFuture;
 	private static Connection serverConnection;
+	private static Client clientConnection;
+	private ReconnectAsyncTask reconnectTask;
 	private static int myClientID;
     private WifiManager.WifiLock wifiLock;
     private final static int WIFI_LOCK_TIMEOUT = 3600000; // Keep lock for 1 hour
@@ -716,16 +756,22 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	Listener listener = new Listener() {
 		
 		@Override
-		public void connected(Connection arg0) {
-			super.connected(arg0);
-			setServerConnection(arg0);
+		public void connected(Connection c) {
+			super.connected(c);
+			setServerConnection(c);
 			Log.d("wePoker - Client","Connected to server!");
 		}
 		
 		@Override
-		public void disconnected(Connection arg0) {
-			super.disconnected(arg0);
-			showDisconnectionDialog();
+		public void disconnected(Connection c) {
+			super.disconnected(c);
+			try {
+				clientConnection.reconnect(2000);
+				return;
+			} catch (IOException ignore) { }
+			reconnectTask = new ReconnectAsyncTask(clientConnection);
+			reconnectTask.execute();
+			showBarrier("Your device has been disconnected from the server. Reconnecting...");
 		}
 
 
@@ -971,6 +1017,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
         	nfcAdapter.disableForegroundDispatch(this);
         	nfcAdapter = null;
         }
+        if (reconnectTask != null) {
+        	reconnectTask.cancel(true);
+        	reconnectTask = null;
         }
         Settings.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 		super.onPause();
@@ -1275,28 +1324,6 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		textCurrentBet.setText(" " + minimumBet);
 		updateMoneyTitle();
 		updateCheckCallText();
-	}
-	
-	public void showDisconnectionDialog() {
-		if (activity == null) return;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				DialogInterface.OnClickListener quitOCL = new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface arg0, int arg1) {
-						finish();
-						Intent i = new Intent(ClientActivity.this, Splash.class);
-						startActivity(i);
-					}
-				};
-				new AlertDialog.Builder(activity)
-					.setTitle("Disconnected from server")
-					.setMessage("Your device has been disconnected from the server.")
-					.setNegativeButton("Quit", quitOCL)
-					.setCancelable(false)
-					.show();
-			}
-		});
 	}
 
 	public void showOutOfMoneyDialog() {
