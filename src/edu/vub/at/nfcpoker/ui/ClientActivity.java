@@ -1113,7 +1113,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	}
 	
 	private void showQrCode() {
-    	QRNFCFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, serverPort, true);
+    	QRNFCFunctions.showWifiConnectionDialog(this, serverWifiName, serverWifiPassword, serverIpAddress, serverPort, isDedicated);
 	}
 	
 	private int txtToInteger(String msg) {
