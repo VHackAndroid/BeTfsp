@@ -433,8 +433,14 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		if (barrier == null) {
 			barrier = new ProgressDialog(activity);
 			barrier.setTitle(barrierCause);
-			barrier.setCancelable(false);
+			barrier.setCancelable(true);
 			barrier.setMessage("Please wait");
+			barrier.setOnCancelListener(new OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    finish();
+                }
+            });
 			barrier.show();
 		} else {
 			barrier.setTitle(cause);
