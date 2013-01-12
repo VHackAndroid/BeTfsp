@@ -205,7 +205,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 	private static Connection serverConnection;
 	private static Client clientConnection;
 	private ReconnectAsyncTask reconnectTask;
-	private static int myClientID;
+	private static int myClientID = -1;
     private WifiManager.WifiLock wifiLock;
     private final static int WIFI_LOCK_TIMEOUT = 3600000; // Keep lock for 1 hour
 
@@ -878,8 +878,10 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 			if (m instanceof SetIDMessage) {
 				final SetIDMessage sidm = (SetIDMessage) m;
-				myClientID = sidm.id;
-				SetClientParameterMessage pm = new SetClientParameterMessage(Settings.nickname, Settings.avatar, money);
+				if (myClientID == -1) {
+					myClientID = sidm.id;
+				}
+				SetClientParameterMessage pm = new SetClientParameterMessage(myClientID, Settings.nickname, Settings.avatar, money);
 				c.sendTCP(pm);
 			}
 			

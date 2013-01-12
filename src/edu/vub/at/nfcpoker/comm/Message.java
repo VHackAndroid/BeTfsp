@@ -330,11 +330,15 @@ public interface Message {
 
 	public static class SetClientParameterMessage extends TimestampedMessage {
 
+		public int clientId;
+		public boolean reconnect;
 		public String nickname;
 		public int avatar;
 		public int money;
 
-		public SetClientParameterMessage(String nickname, int avatar, int money) {
+		public SetClientParameterMessage(int clientId, boolean reconnect, String nickname, int avatar, int money) {
+			this.clientId = clientId;
+			this.reconnect = reconnect;
 			this.nickname = nickname;
 			this.avatar = avatar;
 			this.money = money;
@@ -346,7 +350,8 @@ public interface Message {
 		@Override
 		public String toString() {
 			return super.toString() + ": Client parameter information message, "+
-					"nickname -> " + nickname+ ", "+
+					"reconnect -> " + reconnect + ", "+
+					"nickname -> " + nickname + ", "+
 					"avatar -> " + avatar + ", "+
 					"money -> " + money;
 		}

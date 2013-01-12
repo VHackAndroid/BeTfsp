@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -211,6 +212,7 @@ public class PokerGame extends Thread {
 				}
 			}
 			
+			GCPlayers();
 			cycleClientsInGame();
 			
 			// finally, sleep
@@ -491,7 +493,18 @@ public class PokerGame extends Thread {
 		c.sendTCP(new StateChangeMessage(gameState));
 		this.notify();
 	}
-	
+
+	public synchronized void reAddPlayer(Connection c, int clientId, String nickname, int avatar, int money) {
+		Log.v("wePoker - PokerGame", "Re-adding player "+clientId);
+	    PlayerState player = playerStates.get(clientId);
+		if (player == null) {
+			addPlayer(c, clientId, nickname, avatar, money);
+			return;
+		}
+		player.connection = c;
+		gui.addPlayer(player);
+		this.notify();
+	}
 
 	public synchronized void setNickname(int clientId, String nickname) {
 		PlayerState player = playerStates.get(clientId);
@@ -508,12 +521,20 @@ public class PokerGame extends Thread {
 			player.connection = null;
 			player.roundActionType = ClientActionType.Fold;
 			gui.removePlayer(player);
-			clientsIdsInRoundOrder.remove(player);
-			playerStates.remove(player.clientId);
 		}
 		Future<ClientAction> fut = actionFutures.get(clientId);
 		if (fut != null && ! fut.isResolved()) {
 			fut.resolve(new ClientAction(Message.ClientActionType.Fold, 0, 0));
+		}
+	}
+
+	// Removes players that are disconnected and did not return before the next round started
+	public synchronized void GCPlayers() {
+		Iterator<PlayerState> playerIt = playerStates.values().iterator();
+		while (playerIt.hasNext()) {
+			PlayerState player = playerIt.next();
+			clientsIdsInRoundOrder.remove(player);
+			playerIt.remove();
 		}
 	}
 	

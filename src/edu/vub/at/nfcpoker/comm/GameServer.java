@@ -114,10 +114,13 @@ public class GameServer extends PokerServer  {
 						if (msg instanceof SetClientParameterMessage) {
 							SetClientParameterMessage cm = (SetClientParameterMessage) msg;
 							Log.d("wePoker - Server", "Got SetIDReplyMessage: "+cm.toString());
-							registerClient(c, cm.nickname, cm.avatar, cm.money);
+							if (cm.reconnect) {
+								reregisterClient(c, cm.clientId, cm.nickname, cm.avatar, cm.money);
+							} else {
+								registerClient(c, cm.nickname, cm.avatar, cm.money);
+							}
 							gameLoop.broadcast(cm);
 						}
-						
 						if (msg instanceof SetNicknameMessage) {
 							SetNicknameMessage snm = (SetNicknameMessage) msg;
 							Log.d("wePoker - Server", "Got SetNicknameMessage: "+snm.toString());
@@ -168,6 +171,17 @@ public class GameServer extends PokerServer  {
 		for (Integer i : connections.keySet()) {
 			if (connections.get(i) == c) {
 				gameLoop.addPlayer(c, i, nickname, avatar, money);
+				return;
+			}
+		}
+	}
+	
+	public void reregisterClient(Connection c, int clientId, String nickname, int avatar, int money) {
+		for (Integer i : connections.keySet()) {
+			if (connections.get(i) == c) {
+				connections.put(clientId, c);
+				connections.remove(i);
+				gameLoop.reAddPlayer(c, clientId, nickname, avatar, money);
 				return;
 			}
 		}
