@@ -42,7 +42,7 @@ public class FoldingClient {
 					if (m instanceof SetIDMessage) {
 						final SetIDMessage sidm = (SetIDMessage) m;
 						clientId = sidm.id;
-						SetClientParameterMessage pm = new SetClientParameterMessage(Settings.nickname, Settings.avatar, 2000);
+						SetClientParameterMessage pm = new SetClientParameterMessage(clientId, false, Settings.nickname, Settings.avatar, 2000);
 						serverConnection.sendTCP(pm);
 					}
 					

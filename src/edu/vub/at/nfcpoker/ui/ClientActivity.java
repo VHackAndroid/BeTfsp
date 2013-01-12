@@ -878,10 +878,12 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 			if (m instanceof SetIDMessage) {
 				final SetIDMessage sidm = (SetIDMessage) m;
+				boolean reconnect = true;
 				if (myClientID == -1) {
 					myClientID = sidm.id;
+					reconnect = false;
 				}
-				SetClientParameterMessage pm = new SetClientParameterMessage(myClientID, Settings.nickname, Settings.avatar, money);
+				SetClientParameterMessage pm = new SetClientParameterMessage(myClientID, reconnect, Settings.nickname, Settings.avatar, money);
 				c.sendTCP(pm);
 			}
 			
