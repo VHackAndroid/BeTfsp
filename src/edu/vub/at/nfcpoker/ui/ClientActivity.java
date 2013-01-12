@@ -765,13 +765,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		@Override
 		public void disconnected(Connection c) {
 			super.disconnected(c);
-			try {
-				clientConnection.reconnect(2000);
-				return;
-			} catch (IOException ignore) { }
+			showBarrier("Your device has been disconnected from the server. Reconnecting...");
 			reconnectTask = new ReconnectAsyncTask(clientConnection);
 			reconnectTask.execute();
-			showBarrier("Your device has been disconnected from the server. Reconnecting...");
 		}
 
 
