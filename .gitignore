@@ -22,3 +22,5 @@ ext/pr
 
 /res/raw/.DS_Store
 .DS_Store
+
+/release/
