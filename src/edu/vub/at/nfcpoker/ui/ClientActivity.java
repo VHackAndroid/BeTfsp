@@ -150,7 +150,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		}
 	}
 
-	public class ReconnectAsyncTask extends AsyncTask<Void, Void, Void> {
+	public class ReconnectAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 		private Client client;
 
@@ -163,22 +163,29 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		}
 
 		@Override
-		protected Void doInBackground(Void... params) {
-			while (true) {
+		protected Boolean doInBackground(Void... params) {
+			while (!isCancelled()) {
 				try {
 					client.reconnect(1000);
-					return null;
+					return true;
 				} catch (IOException e) {
 					Log.d("wePoker - Client", "Could not connect to server", e);
 					try { Thread.sleep(1000); } catch (InterruptedException e1) { }
 				}
 			}
+			return false;
 		}
 		
 		@Override
-		protected void onPostExecute(Void v) {
+		protected void onPostExecute(Boolean succeeded) {
 			reconnectTask = null;
-			hideBarrier();
+			if (succeeded) {
+				hideBarrier();
+			} else {
+				if (activity != null) {
+					Toast.makeText(activity, "Failed to reconnect.", Toast.LENGTH_LONG).show();
+				}
+			}
 		}
 	}
 
