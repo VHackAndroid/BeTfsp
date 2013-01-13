@@ -533,8 +533,10 @@ public class PokerGame extends Thread {
 		Iterator<PlayerState> playerIt = playerStates.values().iterator();
 		while (playerIt.hasNext()) {
 			PlayerState player = playerIt.next();
-			clientsIdsInRoundOrder.remove(player);
-			playerIt.remove();
+			if (player.connection == null) {
+				clientsIdsInRoundOrder.remove(player);
+				playerIt.remove();
+			}
 		}
 	}
 	
