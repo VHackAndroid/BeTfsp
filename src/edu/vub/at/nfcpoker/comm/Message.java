@@ -350,6 +350,7 @@ public interface Message {
 		@Override
 		public String toString() {
 			return super.toString() + ": Client parameter information message, "+
+					"clientId -> " + clientId + ", " +
 					"reconnect -> " + reconnect + ", "+
 					"nickname -> " + nickname + ", "+
 					"avatar -> " + avatar + ", "+
