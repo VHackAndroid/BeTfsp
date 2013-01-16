@@ -930,6 +930,13 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 				money = 2000;
 				processStateChangeMessage(null, new StateChangeMessage(PokerGameState.END_OF_ROUND));
 			}
+			
+			if (m instanceof CheatMessage) {
+				CheatMessage cm = (CheatMessage) m;
+				if (!c.equals(clientConnection)) {
+					quickOutputMessage(ClientActivity.this,  "Player "+cm.nickname+" added "+cm.amount+"\u20AC.");
+				}
+			}
 		}
 	};
 
