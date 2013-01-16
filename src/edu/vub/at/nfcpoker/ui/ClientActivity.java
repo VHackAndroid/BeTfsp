@@ -1263,8 +1263,8 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 						@Override
 						public void run() {
 							// TODO Server: User X added #{extra}
-							CheatMessage ca = new CheatMessage(extra);
-							serverConnection.sendTCP(new FutureMessage(pendingFuture, ca));
+							CheatMessage ca = new CheatMessage(Settings.nickname, extra);
+							serverConnection.sendTCP(ca);
 						}
 					});
 				} catch (Exception e) {	}
