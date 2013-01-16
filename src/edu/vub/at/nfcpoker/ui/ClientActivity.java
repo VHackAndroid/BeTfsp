@@ -1087,6 +1087,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 		case R.id.itemSettings:
 			Intent i = new Intent(this, WePokerPreferencesActivity.class);
 			startActivity(i);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
