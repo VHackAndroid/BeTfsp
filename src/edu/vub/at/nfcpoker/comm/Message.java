@@ -252,9 +252,11 @@ public interface Message {
 
 	public static class CheatMessage extends TimestampedMessage {
 
+		public String nickname;
 		public int amount;
 
-		public CheatMessage(int amount) {
+		public CheatMessage(String nickname, int amount) {
+			this.nickname = nickname;
 			this.amount = amount;
 		}
 
@@ -263,7 +265,9 @@ public interface Message {
 
 		@Override
 		public String toString() {
-			return super.toString() + ": Client cheat information message, client -> " + amount;
+			return super.toString() + ": Client cheat information message," +
+					"nickname -> " + nickname +
+					"amount -> " + amount;
 		}
 	}
 

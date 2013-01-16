@@ -386,6 +386,16 @@ public class PokerGame extends Thread {
 		gui.updatePlayerStatus(player);
 		addChipsToPool(extra);
 	}
+
+	public void cheatMoney(int clientId, int amount) {
+		PlayerState player = playerStates.get(clientId);
+		if (player == null) {
+			Log.d("wePoker - PokerGame", "Player "+clientId+" does not exist anymore. Cannot add cheat money.");
+			return;
+		}
+		Log.d("wePoker - PokerGame", "Player "+clientId+" cheats for "+amount+".");
+		addMoney(player, amount);
+	}
 	
 	private void addMoney(PlayerState player, int extra) {
 		player.money += extra;

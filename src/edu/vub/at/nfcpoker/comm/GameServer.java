@@ -34,6 +34,7 @@ import edu.vub.at.commlib.CommLib;
 import edu.vub.at.commlib.CommLibConnectionInfo;
 import edu.vub.at.commlib.UUIDSerializer;
 import edu.vub.at.nfcpoker.PokerGame;
+import edu.vub.at.nfcpoker.comm.Message.CheatMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetIDMessage;
 import edu.vub.at.nfcpoker.comm.Message.FutureMessage;
 import edu.vub.at.nfcpoker.comm.Message.SetClientParameterMessage;
@@ -127,8 +128,14 @@ public class GameServer extends PokerServer  {
 							setNickname(c, snm.nickname);
 							gameLoop.broadcast(snm);
 						}
+						if (msg instanceof CheatMessage) {
+							CheatMessage cm = (CheatMessage) msg;
+							Log.d("wePoker - Server", "Got CheatMessage: "+cm.toString());
+							cheatMoney(c, cm.amount);
+							gameLoop.broadcast(cm);
+						}
 					}
-					
+
 					@Override
 					public void disconnected(Connection c) {
 						super.disconnected(c);
@@ -191,6 +198,15 @@ public class GameServer extends PokerServer  {
 		for (Integer i : connections.keySet()) {
 			if (connections.get(i) == c) {
 				gameLoop.setNickname(i, nickname);
+				return;
+			}
+		}
+	}
+	
+	private void cheatMoney(Connection c, int amount) {
+		for (Integer i : connections.keySet()) {
+			if (connections.get(i) == c) {
+				gameLoop.cheatMoney(i, amount);
 				return;
 			}
 		}
