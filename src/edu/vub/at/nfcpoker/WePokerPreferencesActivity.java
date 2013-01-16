@@ -24,6 +24,7 @@ import android.preference.PreferenceActivity;
 
 public class WePokerPreferencesActivity extends PreferenceActivity{
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);

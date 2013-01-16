@@ -19,7 +19,6 @@
 
 package edu.vub.at.nfcpoker;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -276,6 +275,7 @@ public class Hand implements Comparable<Hand> {
 					baseCards.add(c);
 				
 				for (int skip = 0; skip < size; skip++) {
+					@SuppressWarnings("unchecked")
 					Vector<Card> newCards = (Vector<Card>) baseCards.clone();
 					newCards.remove(skip);
 					next.add(newCards.toArray(new Card[size - 1]));
