@@ -46,6 +46,9 @@ import android.widget.TextView;
 
 public class QRNFCFunctions {
 
+	// Mime types
+	public static final String MONEY_MIMETYPE = "application/x-wepoker-money";
+	
 	// Last RFID Tag
 	public static Tag lastSeenNFCTag;
 	

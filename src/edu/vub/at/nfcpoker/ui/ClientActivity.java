@@ -53,6 +53,9 @@ import android.media.AudioManager;
 import android.net.wifi.WifiManager;
 import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -343,6 +346,7 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
     		IntentFilter all = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
     		try {
     			// Handles all MIME based dispatches. You should specify only the ones that you need.
+    			ndef.addDataType(QRNFCFunctions.MONEY_MIMETYPE);
     			ndef.addDataType("*/*");
     		}
     		catch (MalformedMimeTypeException e) {
@@ -1102,7 +1106,11 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
     @Override
     public void onNewIntent(Intent intent) {
+    	Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         QRNFCFunctions.lastSeenNFCTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        if (intent.getType().equals(QRNFCFunctions.MONEY_MIMETYPE)) {
+        	// TODO: get money and call cheat money functionality.
+        }
     }
 	
 	TextToSpeech.OnInitListener txtToSpeechListener = new TextToSpeech.OnInitListener() {
