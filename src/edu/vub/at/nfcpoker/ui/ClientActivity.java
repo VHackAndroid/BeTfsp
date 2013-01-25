@@ -157,7 +157,9 @@ public class ClientActivity extends Activity implements OnClickListener, SharedP
 
 		private Client client;
 
-		public ReconnectAsyncTask(Client client) { }
+		public ReconnectAsyncTask(Client client) {
+			this.client = client;
+		}
 
 		@Override
 		protected void onPreExecute() {
